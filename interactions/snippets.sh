@@ -14,7 +14,6 @@ deploy() {
     mxpy --verbose contract deploy --project=${PROJECT} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments str:${TOKEN_ID} \
     --send --outfile="deploy-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
@@ -24,9 +23,17 @@ upgrade() {
     --project=${PROJECT} \
     --recall-nonce --pem=${USER_PEM} \
     --gas-limit=20000000 \
-    --arguments str:${TOKEN_ID} \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+setTokenId() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=2000000 \
+    --arguments str:${TOKEN_ID} \
+    --function="setTokenId"
 }
 
 getTokenId() {
@@ -42,17 +49,3 @@ getNonceList() {
     --function="getNonceList"
 }
 
-setTokenId() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=2000000 \
-    --arguments str:${TOKEN_ID} \
-    --function="setTokenId"
-}
-
-getMyTokenId() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getMyTokenId"
-}

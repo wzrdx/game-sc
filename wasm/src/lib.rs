@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                            6
+// Endpoints:                            5
 // Async Callback (empty):               1
-// Total number of exported functions:   8
+// Total number of exported functions:   7
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -22,7 +22,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         stake
         unstake
         getTokenId
-        getMyTokenId
         getNonceList
     )
 }
