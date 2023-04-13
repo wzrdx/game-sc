@@ -23,7 +23,7 @@ upgrade() {
     mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --project=${PROJECT} \
     --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=10000000 \
+    --gas-limit=20000000 \
     --arguments str:${TOKEN_ID} \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
@@ -35,9 +35,24 @@ getTokenId() {
     --function="getTokenId"
 }
 
-getStakedNFTs() {
+getNonceList() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --arguments ${USER} \
-    --function="getStakedNFTs"
+    --function="getNonceList"
+}
+
+setTokenId() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=2000000 \
+    --arguments str:${TOKEN_ID} \
+    --function="setTokenId"
+}
+
+getMyTokenId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getMyTokenId"
 }
