@@ -49,3 +49,9 @@ getNonceList() {
     --function="getNonceList"
 }
 
+getStakedAmount() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${USER} \
+    --function="getStakedAmount"
+}

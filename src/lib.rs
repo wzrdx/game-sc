@@ -41,6 +41,11 @@ pub trait GameScContract {
         self.nonce_list(&caller).clear();
     }
 
+    #[view(getStakedAmount)]
+    fn get_staked_amount(&self, address: &ManagedAddress) -> usize {
+        self.nonce_list(&address).len()
+    }
+
     #[view(getTokenId)]
     #[storage_mapper("nonFungibleTokenMapper")]
     fn nft_mapper(&self) -> NonFungibleTokenMapper;
