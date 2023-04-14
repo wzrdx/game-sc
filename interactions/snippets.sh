@@ -9,6 +9,9 @@ USER=erd1jvr26kvxs3xtdzapafrkupnphpzexn4zezr5lwvamam7wxqyasusjntmzr
 
 TOKEN_ID="HOLYCOWS-90e467"
 
+STAMINA_TOKEN_NAME="Stamina"
+STAMINA_TICKER="STAMINA"
+
 
 deploy() {
     mxpy --verbose contract deploy --project=${PROJECT} --metadata-payable --metadata-payable-by-sc \
@@ -22,9 +25,25 @@ upgrade() {
     mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --project=${PROJECT} \
     --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=20000000 \
+    --gas-limit=60000000 \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+issueStaminaToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=60000000 \
+    --value 50000000000000000 \
+    --arguments str:${STAMINA_TOKEN_NAME} str:${STAMINA_TICKER} \
+    --function="issueStaminaToken"
+}
+
+getStaminaTokenId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getStaminaTokenId"
 }
 
 setTokenId() {
@@ -55,3 +74,4 @@ getStakedAmount() {
     --arguments ${USER} \
     --function="getStakedAmount"
 }
+

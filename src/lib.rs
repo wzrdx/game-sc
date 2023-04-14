@@ -3,7 +3,7 @@
 multiversx_sc::imports!();
 
 #[multiversx_sc::contract]
-pub trait GameScContract {
+pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
     fn init(&self) {}
 
@@ -11,6 +11,16 @@ pub trait GameScContract {
     #[endpoint(setTokenId)]
     fn set_token_id(&self, token_id: TokenIdentifier) {
         self.nft_mapper().set_token_id(token_id);
+    }
+
+    #[only_owner]
+    #[payable("EGLD")]
+    #[endpoint(issueStaminaToken)]
+    fn issue_stamina_token(&self, token_display_name: ManagedBuffer, token_ticker: ManagedBuffer) {
+        let issue_cost = self.call_value().egld_value();
+
+        self.stamina_mapper()
+            .issue_and_set_all_roles(issue_cost, token_display_name, token_ticker, 6 as usize, None);
     }
 
     #[payable("*")]
@@ -41,16 +51,40 @@ pub trait GameScContract {
         self.nonce_list(&caller).clear();
     }
 
+    #[payable("*")]
+    #[endpoint(exchange)]
+    fn exchange(&self) {
+        let caller = self.blockchain().get_caller();
+        self.stamina_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
+    }
+
+    #[payable("*")]
+    #[endpoint(receive)]
+    fn receive(&self) {
+        let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
+        require!(payments.len() == 1, "Received incorrect number of payments");
+
+        let payment: EsdtTokenPayment = payments.get(0);
+
+        self.stamina_mapper().require_same_token(&payment.token_identifier);
+
+        self.stamina_mapper().burn(&payment.amount);
+    }
+
     #[view(getStakedAmount)]
     fn get_staked_amount(&self, address: &ManagedAddress) -> usize {
         self.nonce_list(&address).len()
     }
 
+    #[view(getNonceList)]
+    #[storage_mapper("nonceList")]
+    fn nonce_list(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
+
     #[view(getTokenId)]
     #[storage_mapper("nonFungibleTokenMapper")]
     fn nft_mapper(&self) -> NonFungibleTokenMapper;
 
-    #[view(getNonceList)]
-    #[storage_mapper("nonceList")]
-    fn nonce_list(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
+    #[view(getStaminaTokenId)]
+    #[storage_mapper("staminaMapper")]
+    fn stamina_mapper(&self) -> FungibleTokenMapper;
 }

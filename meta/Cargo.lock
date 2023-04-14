@@ -257,6 +257,7 @@ name = "game-sc"
 version = "0.0.0"
 dependencies = [
  "multiversx-sc",
+ "multiversx-sc-modules",
 ]
 
 [[package]]
@@ -492,6 +493,15 @@ dependencies = [
  "serde",
  "serde_json",
  "toml",
+]
+
+[[package]]
+name = "multiversx-sc-modules"
+version = "0.39.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dbcb0b06f37396484f01d89295091db401b8b515ab781e3580a6bb333e912591"
+dependencies = [
+ "multiversx-sc",
 ]
 
 [[package]]
