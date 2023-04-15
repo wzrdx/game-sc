@@ -25,7 +25,7 @@ upgrade() {
     mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --project=${PROJECT} \
     --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=60000000 \
+    --gas-limit=90000000 \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
@@ -61,17 +61,16 @@ getTokenId() {
     --function="getTokenId"
 }
 
-getNonceList() {
+getStakedNonces() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --arguments ${USER} \
-    --function="getNonceList"
+    --function="getStakedNonces"
 }
 
-getStakedAmount() {
+getStakingRewards() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --arguments ${USER} \
-    --function="getStakedAmount"
+    --function="getStakingRewards"
 }
-
