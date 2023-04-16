@@ -3,73 +3,30 @@
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
-// #[derive(TypeAbi, TopEncode, TopDecode, PartialEq, Debug)]
-// pub struct StakingPosition<M: ManagedTypeApi> {
-//     pub nonces: ManagedVec<M, u64>,
-//     pub last_timestamp: u64,
-// }
-
-// #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
-// pub struct Resources {
-//     pub energy: u64,
-//     pub herbs: u64,
-//     pub gems: u64,
-//     pub essence: u64,
-// }
-
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
 pub struct Quest {
     pub id: u8,
     pub duration: u16,
     pub is_final: bool,
-    pub requirements: [u64; 4],
-    pub rewards: [u64; 4],
+    pub requirements: [u64; 2],
+    pub rewards: [u64; 2],
 }
 
 #[multiversx_sc::contract]
 pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
     fn init(&self) {
-        self.my_vec().clear();
+        self.quests().clear();
 
-        // let quests = [
-        //     Quest {
-        //         id: 1,
-        //         duration: 2,
-        //         is_final: false,
-        //         requirements: Resources {
-        //             energy: 2000000,
-        //             herbs: 0,
-        //             gems: 0,
-        //             essence: 0,
-        //         },
-        //         rewards: Resources {
-        //             energy: 5000000,
-        //             herbs: 0,
-        //             gems: 0,
-        //             essence: 0,
-        //         },
-        //     },
-        //     Quest {
-        //         id: 2,
-        //         duration: 4,
-        //         is_final: true,
-        //         requirements: Resources {
-        //             energy: 2000000,
-        //             herbs: 2000000,
-        //             gems: 2000000,
-        //             essence: 2000000,
-        //         },
-        //         rewards: Resources {
-        //             energy: 0,
-        //             herbs: 0,
-        //             gems: 0,
-        //             essence: 0,
-        //         },
-        //     },
-        // ];
+        let quests = [Quest {
+            id: 1,
+            duration: 2,
+            is_final: false,
+            requirements: [0, 1000000],
+            rewards: [2500000, 0],
+        }];
 
-        // self.my_vec().extend_from_slice(&quests);
+        self.quests().extend_from_slice(&quests);
     }
 
     #[only_owner]
@@ -155,8 +112,13 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn start_quest(&self, id: usize) {
         let caller = self.blockchain().get_caller();
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
-        let requirements: [usize; 2] = [0, 1000000];
-        let rewards: [usize; 2] = [2500000, 0];
+        let quest = self.quests().get(id);
+
+        let requirements: [u64; 2] = quest.requirements;
+        let rewards: [u64; 2] = quest.rewards;
+
+        // let requirements: [usize; 2] = [0, 1000000];
+        // let rewards: [usize; 2] = [2500000, 0];
 
         require!(
             payments.len() == requirements.iter().filter(|&x| *x > 0).count(),
@@ -171,7 +133,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
                 let mapper = self.get_token_mapper(i);
 
                 mapper.require_same_token(&payment.token_identifier);
-                require!(payment.amount == BigUint::from(*requirement as u32), "Incorrect payment");
+                require!(payment.amount == BigUint::from(*requirement), "Incorrect payment");
                 mapper.burn(&payment.amount);
 
                 payment_index += 1;
@@ -181,7 +143,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         for (i, reward) in rewards.iter().enumerate() {
             if *reward > 0 {
                 let mapper = self.get_token_mapper(i);
-                mapper.mint_and_send(&caller, BigUint::from(*reward as u32));
+                mapper.mint_and_send(&caller, BigUint::from(*reward));
             }
         }
     }
@@ -262,6 +224,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("herbsMapper")]
     fn herbs_mapper(&self) -> FungibleTokenMapper;
 
-    #[storage_mapper("myVec")]
-    fn my_vec(&self) -> VecMapper<Quest>;
+    #[storage_mapper("quests")]
+    fn quests(&self) -> VecMapper<Quest>;
 }
