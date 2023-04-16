@@ -131,7 +131,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         });
     }
 
-    #[payable("*")]
     #[endpoint(completeQuest)]
     fn complete_quest(&self, id: u8) {
         let caller = self.blockchain().get_caller();
@@ -211,15 +210,14 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     #[payable("*")]
-    #[endpoint(receive)]
-    fn receive(&self) {
-        let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
-        require!(payments.len() == 1, "Received incorrect number of payments");
+    #[endpoint(joinRaffle)]
+    fn join_raffle(&self) {
+        let payment: (TokenIdentifier, BigUint) = self.call_value().single_fungible_esdt();
+        let caller = self.blockchain().get_caller();
 
-        let payment: EsdtTokenPayment = payments.get(0);
-
-        self.energy_mapper().require_same_token(&payment.token_identifier);
-        self.energy_mapper().burn(&payment.amount);
+        // TODO: Assign participant id if empty
+        // TODO: Join raffle vector with the number of paid tickets
+        // TODO: Burn SFT
     }
 
     fn claim_staking_rewards_for_user(&self, user: &ManagedAddress) {
@@ -247,6 +245,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         BigUint::from(block_diff * 84 * nft_count)
     }
 
+    // Staking
     #[view(getStakedNonces)]
     #[storage_mapper("stakedNonces")]
     fn staked_nonces(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
@@ -255,6 +254,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("lastStakingTimestamp")]
     fn last_staking_timestamp(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
+    // Tokens
     #[view(getTokenId)]
     #[storage_mapper("nonFungibleTokenMapper")]
     fn nft_mapper(&self) -> NonFungibleTokenMapper;
@@ -267,10 +267,20 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("herbsMapper")]
     fn herbs_mapper(&self) -> FungibleTokenMapper;
 
+    // Quests
     #[storage_mapper("quests")]
     fn quests(&self) -> VecMapper<Quest>;
 
     #[view(getOngoingQuests)]
     #[storage_mapper("ongoingQuests")]
     fn ongoing_quests(&self, user: &ManagedAddress) -> VecMapper<OngoingQuest>;
+
+    //Rewards
+    #[view(getRaffleParticipantId)]
+    #[storage_mapper("raffleParticipantId")]
+    fn raffle_participant_id(&self, user: &ManagedAddress) -> SingleValueMapper<u16>;
+
+    #[view(getRaffleVector)]
+    #[storage_mapper("raffleVector")]
+    fn raffle_vector(&self) -> VecMapper<u16>;
 }
