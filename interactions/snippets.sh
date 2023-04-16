@@ -94,8 +94,9 @@ getStakingRewards() {
     --function="getStakingRewards"
 }
 
-getFirstQuest() {
+getOngoingQuests() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getFirstQuest"
+    --arguments ${USER} \
+    --function="getOngoingQuests"
 }

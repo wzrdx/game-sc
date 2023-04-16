@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           15
+// Endpoints:                           18
 // Async Callback:                       1
-// Total number of exported functions:  17
+// Total number of exported functions:  20
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -25,6 +25,8 @@ multiversx_sc_wasm_adapter::endpoints! {
         unstake
         claimStakingRewards
         startQuest
+        completeQuest
+        exchange
         faucet
         receive
         getStakingRewards
@@ -33,6 +35,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getTokenId
         getEnergyTokenId
         getHerbsTokenId
+        getOngoingQuests
         callBack
     )
 }

@@ -6,10 +6,16 @@ multiversx_sc::derive_imports!();
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
 pub struct Quest {
     pub id: u8,
-    pub duration: u16,
+    pub duration: usize,
     pub is_final: bool,
     pub requirements: [u64; 2],
     pub rewards: [u64; 2],
+}
+
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
+pub struct OngoingQuest {
+    pub id: u8,
+    pub end_timestamp: u64,
 }
 
 #[multiversx_sc::contract]
@@ -20,7 +26,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         let quests = [Quest {
             id: 1,
-            duration: 2,
+            duration: 240,
             is_final: false,
             requirements: [0, 1000000],
             rewards: [2500000, 0],
@@ -109,16 +115,53 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[payable("*")]
     #[endpoint(startQuest)]
-    fn start_quest(&self, id: usize) {
+    fn start_quest(&self, id: u8) {
+        let caller = self.blockchain().get_caller();
+
+        for ongoing_quest in self.ongoing_quests(&caller).iter() {
+            require!(id != ongoing_quest.id, "Cannot start an already ongoing quest");
+        }
+
+        let quest = self.quests().get(id as usize);
+        let current_timestamp = self.blockchain().get_block_timestamp();
+
+        self.ongoing_quests(&caller).push(&OngoingQuest {
+            id,
+            end_timestamp: current_timestamp + (quest.duration as u64),
+        });
+    }
+
+    #[payable("*")]
+    #[endpoint(completeQuest)]
+    fn complete_quest(&self, id: u8) {
+        let caller = self.blockchain().get_caller();
+
+        let search_result = self.ongoing_quests(&caller).iter().find(|q| (*q).id == id);
+
+        let ongoing_quest = match search_result {
+            Some(q) => q,
+            None => sc_panic!("Ongoing quest not found"),
+        };
+
+        let current_timestamp = self.blockchain().get_block_timestamp();
+
+        require!(
+            current_timestamp >= ongoing_quest.end_timestamp,
+            "Quest cannot be completed yet"
+        );
+
+        self.ongoing_quests(&caller).swap_remove(ongoing_quest.id as usize);
+    }
+
+    #[payable("*")]
+    #[endpoint(exchange)]
+    fn exchange(&self, id: u8) {
         let caller = self.blockchain().get_caller();
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
-        let quest = self.quests().get(id);
+        let quest = self.quests().get(id as usize);
 
         let requirements: [u64; 2] = quest.requirements;
         let rewards: [u64; 2] = quest.rewards;
-
-        // let requirements: [usize; 2] = [0, 1000000];
-        // let rewards: [usize; 2] = [2500000, 0];
 
         require!(
             payments.len() == requirements.iter().filter(|&x| *x > 0).count(),
@@ -226,4 +269,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[storage_mapper("quests")]
     fn quests(&self) -> VecMapper<Quest>;
+
+    #[view(getOngoingQuests)]
+    #[storage_mapper("ongoingQuests")]
+    fn ongoing_quests(&self, user: &ManagedAddress) -> VecMapper<OngoingQuest>;
 }
