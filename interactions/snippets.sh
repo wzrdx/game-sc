@@ -9,8 +9,11 @@ USER=erd1jvr26kvxs3xtdzapafrkupnphpzexn4zezr5lwvamam7wxqyasusjntmzr
 
 TOKEN_ID="HOLYCOWS-90e467"
 
-STAMINA_TOKEN_NAME="Stamina"
-STAMINA_TICKER="STAMINA"
+ENERGY_TOKEN_NAME="Energy"
+ENERGY_TICKER="ENERGY"
+
+HERBS_TOKEN_NAME="Herbs"
+HERBS_TICKER="HERBS"
 
 
 deploy() {
@@ -30,20 +33,36 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
-issueStaminaToken() {
+issueEnergyToken() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=60000000 \
     --value 50000000000000000 \
-    --arguments str:${STAMINA_TOKEN_NAME} str:${STAMINA_TICKER} \
-    --function="issueStaminaToken"
+    --arguments str:${ENERGY_TOKEN_NAME} str:${ENERGY_TICKER} \
+    --function="issueEnergyToken"
 }
 
-getStaminaTokenId() {
+issueHerbsToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=60000000 \
+    --value 50000000000000000 \
+    --arguments str:${HERBS_TOKEN_NAME} str:${HERBS_TICKER} \
+    --function="issueHerbsToken"
+}
+
+getEnergyTokenId() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getStaminaTokenId"
+    --function="getEnergyTokenId"
+}
+
+getHerbsTokenId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getHerbsTokenId"
 }
 
 setTokenId() {
@@ -73,4 +92,10 @@ getStakingRewards() {
     --proxy=${PROXY} \
     --arguments ${USER} \
     --function="getStakingRewards"
+}
+
+getFirstQuest() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getFirstQuest"
 }
