@@ -31,7 +31,7 @@ upgrade() {
     mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --project=${PROJECT} \
     --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=90000000 \
+    --gas-limit=190000000 \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
@@ -148,4 +148,13 @@ drawRaffleWinner() {
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=10000000 \
     --function="drawRaffleWinner"
+}
+
+getESDTBalance() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=6000000 \
+    --arguments ${USER} \
+    --function="getESDTBalance"
 }

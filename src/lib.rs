@@ -228,18 +228,19 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[endpoint(faucet)]
     fn faucet(&self) {
         let caller = self.blockchain().get_caller();
-        self.energy_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
-        self.herbs_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
+        self.energy_mapper().mint_and_send(&caller, BigUint::from(1000000 as u32));
+        self.herbs_mapper().mint_and_send(&caller, BigUint::from(1000000 as u32));
+        self.tickets_mapper()
+            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(1 as u32));
     }
 
     #[payable("*")]
     #[endpoint(joinRaffle)]
     fn join_raffle(&self) {
-        // let payment: (TokenIdentifier, BigUint) = self.call_value().single_fungible_esdt();
-        let payment = (0, BigUint::from(2 as u32));
-        let caller = self.blockchain().get_caller();
+        let payment: EsdtTokenPayment = self.call_value().single_esdt();
+        self.tickets_mapper().require_same_token(&payment.token_identifier);
 
-        // TODO: Check SFT
+        let caller = self.blockchain().get_caller();
 
         if self.raffle_participant_id(&caller).is_empty() {
             let id: u16 = self.raffle_index().update(|i| {
@@ -253,11 +254,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         let participant_id = self.raffle_participant_id(&caller).get();
 
-        for _ in 0..(payment.1).to_u64().unwrap_or_default() {
+        for _ in 0..payment.amount.to_u64().unwrap_or_default() {
             self.raffle_vector().push(&participant_id);
         }
 
-        // TODO: Burn SFT
+        self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
     }
 
     #[only_owner]
@@ -269,17 +270,10 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         let winner_id: u16 = self.raffle_vector().get(index);
         let winner_address = self.raffle_id_participant(winner_id).get();
 
-        self.herbs_mapper()
-            .mint_and_send(&winner_address, BigUint::from(1000000 as u32));
+        self.send()
+            .direct_egld(&winner_address, &BigUint::from(50000000000000000 as u64));
 
         self.raffle_vector().clear();
-    }
-
-    #[payable("*")]
-    #[endpoint(join)]
-    fn join(&self, id: u16) {
-        let caller = self.blockchain().get_caller();
-        self.raffle_id_participant(id).set(&caller);
     }
 
     #[view(getStakingRewards)]
