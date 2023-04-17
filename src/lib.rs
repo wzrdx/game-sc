@@ -212,12 +212,51 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[payable("*")]
     #[endpoint(joinRaffle)]
     fn join_raffle(&self) {
-        let payment: (TokenIdentifier, BigUint) = self.call_value().single_fungible_esdt();
+        // let payment: (TokenIdentifier, BigUint) = self.call_value().single_fungible_esdt();
+        let payment = (0, BigUint::from(2 as u32));
         let caller = self.blockchain().get_caller();
 
-        // TODO: Assign participant id if empty
-        // TODO: Join raffle vector with the number of paid tickets
+        // TODO: Check SFT
+
+        if self.raffle_participant_id(&caller).is_empty() {
+            let id: u16 = self.raffle_index().update(|i| {
+                *i += 1;
+                *i
+            });
+
+            self.raffle_participant_id(&caller).set(id);
+            self.raffle_id_participant(id).set(&caller);
+        }
+
+        let participant_id = self.raffle_participant_id(&caller).get();
+
+        for _ in 0..(payment.1).to_u64().unwrap_or_default() {
+            self.raffle_vector().push(&participant_id);
+        }
+
         // TODO: Burn SFT
+    }
+
+    #[only_owner]
+    #[endpoint(drawRaffleWinner)]
+    fn draw_raffle_winner(&self) {
+        let mut rand_source = RandomnessSource::new();
+        let index: usize = rand_source.next_usize_in_range(1, self.raffle_vector().len() + 1);
+
+        let winner_id: u16 = self.raffle_vector().get(index);
+        let winner_address = self.raffle_id_participant(winner_id).get();
+
+        self.herbs_mapper()
+            .mint_and_send(&winner_address, BigUint::from(1000000 as u32));
+
+        self.raffle_vector().clear();
+    }
+
+    #[payable("*")]
+    #[endpoint(join)]
+    fn join(&self, id: u16) {
+        let caller = self.blockchain().get_caller();
+        self.raffle_id_participant(id).set(&caller);
     }
 
     fn claim_staking_rewards_for_user(&self, user: &ManagedAddress) {
@@ -276,9 +315,17 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn ongoing_quests(&self, user: &ManagedAddress) -> VecMapper<OngoingQuest>;
 
     //Rewards
-    #[view(getRaffleParticipantId)]
+    #[view(getParticipantId)]
     #[storage_mapper("raffleParticipantId")]
     fn raffle_participant_id(&self, user: &ManagedAddress) -> SingleValueMapper<u16>;
+
+    #[view(getParticipantAddress)]
+    #[storage_mapper("raffleIdParticipant")]
+    fn raffle_id_participant(&self, id: u16) -> SingleValueMapper<ManagedAddress>;
+
+    #[view(getRaffleIndex)]
+    #[storage_mapper("raffleIndex")]
+    fn raffle_index(&self) -> SingleValueMapper<u16>;
 
     #[view(getRaffleVector)]
     #[storage_mapper("raffleVector")]

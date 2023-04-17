@@ -100,3 +100,36 @@ getOngoingQuests() {
     --arguments ${USER} \
     --function="getOngoingQuests"
 }
+
+getParticipantId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${USER} \
+    --function="getParticipantId"
+}
+
+getRaffleIndex() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getRaffleIndex"
+}
+
+getRaffleVector() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getRaffleVector"
+}
+
+drawRaffleWinner() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=10000000 \
+    --function="drawRaffleWinner"
+}
+
+getRaffleWinner() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getRaffleWinner"
+}
