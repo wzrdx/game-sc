@@ -3,6 +3,10 @@
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
+use core::iter::FromIterator;
+
+use multiversx_sc::types::heap::Vec;
+
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
 pub struct Quest {
     pub id: u8,
@@ -231,7 +235,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.energy_mapper().mint_and_send(&caller, BigUint::from(1000000 as u32));
         self.herbs_mapper().mint_and_send(&caller, BigUint::from(1000000 as u32));
         self.tickets_mapper()
-            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(1 as u32));
+            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(5 as u32));
     }
 
     #[payable("*")]
@@ -273,7 +277,15 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.send()
             .direct_egld(&winner_address, &BigUint::from(50000000000000000 as u64));
 
-        self.raffle_vector().clear();
+        // TODO: Store current raffle participants count
+        // TODO: Set number of winners as min(20, participants)
+
+        let mut vector: ManagedVec<u16>;
+        vector = ManagedVec::from_iter(self.raffle_vector().iter().filter(|id| *id != winner_id));
+
+        for id in vector.iter() {
+            self.test_vector().push(&id);
+        }
     }
 
     #[view(getStakingRewards)]
@@ -381,4 +393,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getRaffleVector)]
     #[storage_mapper("raffleVector")]
     fn raffle_vector(&self) -> VecMapper<u16>;
+
+    #[view(getTestVector)]
+    #[storage_mapper("testVector")]
+    fn test_vector(&self) -> VecMapper<u16>;
 }
