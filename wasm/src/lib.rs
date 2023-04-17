@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           24
+// Endpoints:                           27
 // Async Callback:                       1
-// Total number of exported functions:  26
+// Total number of exported functions:  29
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -19,6 +19,8 @@ multiversx_sc_wasm_adapter::endpoints! {
     game_sc
     (
         setTokenId
+        issueTicketsCollection
+        createTicketsToken
         issueEnergyToken
         issueHerbsToken
         stake
@@ -35,6 +37,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getStakedNonces
         getLastStakingTimestamp
         getTokenId
+        getTicketsId
         getEnergyTokenId
         getHerbsTokenId
         getOngoingQuests

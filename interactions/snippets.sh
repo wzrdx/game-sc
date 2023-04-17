@@ -9,6 +9,9 @@ USER=erd1jvr26kvxs3xtdzapafrkupnphpzexn4zezr5lwvamam7wxqyasusjntmzr
 
 TOKEN_ID="HOLYCOWS-90e467"
 
+TICKETS_COLLECTION_NAME="Tickets"
+TICKETS_TICKER="TICKETS"
+
 ENERGY_TOKEN_NAME="Energy"
 ENERGY_TICKER="ENERGY"
 
@@ -31,6 +34,25 @@ upgrade() {
     --gas-limit=90000000 \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+issueTicketsCollection() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=60000000 \
+    --value 50000000000000000 \
+    --arguments str:${TICKETS_COLLECTION_NAME} str:${TICKETS_TICKER} \
+    --function="issueTicketsCollection"
+}
+
+createTicketsToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=8000000 \
+    --arguments 1000 \
+    --function="createTicketsToken"
 }
 
 issueEnergyToken() {
@@ -126,10 +148,4 @@ drawRaffleWinner() {
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=10000000 \
     --function="drawRaffleWinner"
-}
-
-getRaffleWinner() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getRaffleWinner"
 }

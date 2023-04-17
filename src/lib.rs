@@ -43,6 +43,41 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[only_owner]
     #[payable("EGLD")]
+    #[endpoint(issueTicketsCollection)]
+    fn issue_tickets_collection(&self, token_display_name: ManagedBuffer, token_ticker: ManagedBuffer) {
+        let issue_cost = self.call_value().egld_value();
+
+        self.tickets_mapper().issue_and_set_all_roles(
+            EsdtTokenType::SemiFungible,
+            issue_cost,
+            token_display_name,
+            token_ticker,
+            0 as usize,
+            None,
+        );
+    }
+
+    #[only_owner]
+    #[endpoint(createTicketsToken)]
+    fn create_tickets_token(&self, royalties: BigUint) {
+        let attributes = self.build_attributes_buffer();
+        let hash_buffer = self.crypto().sha256(&attributes);
+        let attributes_hash = hash_buffer.as_managed_buffer();
+        let uris = self.build_uris_vec();
+
+        self.send().esdt_nft_create(
+            &self.tickets_mapper().get_token_id(),
+            &BigUint::from(1 as u32),
+            &ManagedBuffer::new_from_bytes("Golden Ticket".as_bytes()),
+            &royalties,
+            &attributes_hash,
+            &attributes,
+            &uris,
+        );
+    }
+
+    #[only_owner]
+    #[payable("EGLD")]
     #[endpoint(issueEnergyToken)]
     fn issue_energy_token(&self, token_display_name: ManagedBuffer, token_ticker: ManagedBuffer) {
         let issue_cost = self.call_value().egld_value();
@@ -190,18 +225,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
-    fn get_token_mapper(&self, index: usize) -> FungibleTokenMapper {
-        let mapper;
-
-        if index == 0 {
-            mapper = self.energy_mapper();
-        } else {
-            mapper = self.herbs_mapper();
-        }
-
-        mapper
-    }
-
     #[endpoint(faucet)]
     fn faucet(&self) {
         let caller = self.blockchain().get_caller();
@@ -259,16 +282,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.raffle_id_participant(id).set(&caller);
     }
 
-    fn claim_staking_rewards_for_user(&self, user: &ManagedAddress) {
-        let current_timestamp = self.blockchain().get_block_timestamp();
-        let reward = self.get_staking_rewards(user);
-        self.last_staking_timestamp(user).set(current_timestamp);
-
-        if reward > 0 {
-            self.energy_mapper().mint_and_send(user, reward);
-        }
-    }
-
     #[view(getStakingRewards)]
     fn get_staking_rewards(&self, user: &ManagedAddress) -> BigUint {
         let current_timestamp = self.blockchain().get_block_timestamp();
@@ -284,6 +297,46 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         BigUint::from(block_diff * 84 * nft_count)
     }
 
+    fn get_token_mapper(&self, index: usize) -> FungibleTokenMapper {
+        let mapper;
+
+        if index == 0 {
+            mapper = self.energy_mapper();
+        } else {
+            mapper = self.herbs_mapper();
+        }
+
+        mapper
+    }
+
+    fn claim_staking_rewards_for_user(&self, user: &ManagedAddress) {
+        let current_timestamp = self.blockchain().get_block_timestamp();
+        let reward = self.get_staking_rewards(user);
+        self.last_staking_timestamp(user).set(current_timestamp);
+
+        if reward > 0 {
+            self.energy_mapper().mint_and_send(user, reward);
+        }
+    }
+
+    fn build_uris_vec(&self) -> ManagedVec<ManagedBuffer> {
+        let mut uris = ManagedVec::new();
+        uris.push(ManagedBuffer::new_from_bytes(
+            "https://ipfs.io/ipfs/bafkreidiiudhpj4cy364zvucdzvtscsguybdo2q5fv7r32djgsfp3r575a".as_bytes(),
+        ));
+
+        uris
+    }
+
+    fn build_attributes_buffer(&self) -> ManagedBuffer {
+        let mut attributes = ManagedBuffer::new();
+        attributes.append(&ManagedBuffer::new_from_bytes(
+            "tags:Company X;metadata:bafkreigrkib7uq72s2j232x3pbj34gs6sbtg2vaotv2433tsljfjevx3zu".as_bytes(),
+        ));
+
+        attributes
+    }
+
     // Staking
     #[view(getStakedNonces)]
     #[storage_mapper("stakedNonces")]
@@ -297,6 +350,10 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getTokenId)]
     #[storage_mapper("nonFungibleTokenMapper")]
     fn nft_mapper(&self) -> NonFungibleTokenMapper;
+
+    #[view(getTicketsId)]
+    #[storage_mapper("ticketsMapper")]
+    fn tickets_mapper(&self) -> NonFungibleTokenMapper;
 
     #[view(getEnergyTokenId)]
     #[storage_mapper("energyMapper")]
