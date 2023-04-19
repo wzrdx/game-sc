@@ -1,11 +1,12 @@
-USER_PEM="~/elrond-wallet/wallet.pem"
-# USER_PEM="~/Crypto/wallet-owner.pem"
+# USER_PEM="~/elrond-wallet/wallet.pem"
+USER_PEM="~/Crypto/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgq9459wl67kadq47jq8xqwp56muskyaajvukrq9xjh8z
 OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 USER=erd1jvr26kvxs3xtdzapafrkupnphpzexn4zezr5lwvamam7wxqyasusjntmzr
+MAC_USER=erd12vx2sn6aca5sdfhf0am7z74d4vw4yz2tm2p59nvyd3svdcqtxwnqdphu6d
 
 TOKEN_ID="HOLYCOWS-90e467"
 
@@ -109,13 +110,6 @@ getStakedNonces() {
     --function="getStakedNonces"
 }
 
-getStakingRewards() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments ${USER} \
-    --function="getStakingRewards"
-}
-
 getOngoingQuests() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
@@ -150,15 +144,16 @@ drawRaffleWinner() {
     --function="drawRaffleWinner"
 }
 
-getTestVector() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getTestVector"
-}
-
 getParticipantAddress() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --arguments 2 \
     --function="getParticipantAddress"
+}
+
+getStakingInfo() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${MAC_USER} \
+    --function="getStakingInfo"
 }

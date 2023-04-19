@@ -32,7 +32,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         faucet
         joinRaffle
         drawRaffleWinner
-        getStakingRewards
+        getStakingInfo
         getStakedNonces
         getLastStakingTimestamp
         getTokenId

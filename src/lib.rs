@@ -22,6 +22,13 @@ pub struct OngoingQuest {
     pub end_timestamp: u64,
 }
 
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
+pub struct StakingInfo<M: ManagedTypeApi> {
+    pub rewards: BigUint<M>,
+    pub timestamp: u64,
+    pub nonces: ManagedVec<M, u64>,
+}
+
 #[multiversx_sc::contract]
 pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
@@ -137,6 +144,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         if payments.len() > 0 {
             self.send().direct_multi(&caller, &payments);
             self.staked_nonces(&caller).clear();
+            self.last_staking_timestamp(&caller).clear();
         }
     }
 
@@ -288,7 +296,21 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
-    #[view(getStakingRewards)]
+    #[view(getStakingInfo)]
+    fn get_staking_info(&self, user: &ManagedAddress) -> StakingInfo<Self::Api> {
+        let mut nonces: ManagedVec<u64> = ManagedVec::new();
+
+        for nonce in self.staked_nonces(user).iter() {
+            nonces.push(nonce)
+        }
+
+        StakingInfo {
+            rewards: self.get_staking_rewards(user),
+            timestamp: self.last_staking_timestamp(user).get(),
+            nonces,
+        }
+    }
+
     fn get_staking_rewards(&self, user: &ManagedAddress) -> BigUint {
         let current_timestamp = self.blockchain().get_block_timestamp();
         let last_timestamp = self.last_staking_timestamp(user).get();
