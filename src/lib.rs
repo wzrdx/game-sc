@@ -33,26 +33,26 @@ pub struct StakingInfo<M: ManagedTypeApi> {
 pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
     fn init(&self) {
-        self.quests().clear();
+        // self.quests().clear();
 
-        let quests = [
-            Quest {
-                id: 1,
-                duration: 120,
-                is_final: false,
-                requirements: [1000000, 0],
-                rewards: [0, 2000000],
-            },
-            Quest {
-                id: 2,
-                duration: 120,
-                is_final: false,
-                requirements: [0, 2000000],
-                rewards: [500000, 0],
-            },
-        ];
+        // let quests = [
+        //     Quest {
+        //         id: 1,
+        //         duration: 30,
+        //         is_final: false,
+        //         requirements: [1000000, 0],
+        //         rewards: [0, 2000000],
+        //     },
+        //     Quest {
+        //         id: 2,
+        //         duration: 30,
+        //         is_final: false,
+        //         requirements: [0, 2000000],
+        //         rewards: [500000, 0],
+        //     },
+        // ];
 
-        self.quests().extend_from_slice(&quests);
+        // self.quests().extend_from_slice(&quests);
     }
 
     #[only_owner]
@@ -242,7 +242,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             }
         }
 
-        self.ongoing_quests(&caller).swap_remove(ongoing_quest.id as usize);
+        // TODO: Remove the correct index
+        self.ongoing_quests(&caller).swap_remove(1 as usize);
     }
 
     #[payable("*")]
@@ -340,6 +341,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         for id in vector.iter() {
             self.test_vector().push(&id);
         }
+    }
+
+    #[only_owner]
+    #[endpoint(clearOngoingQuests)]
+    fn clear_ongoing_quests(&self, user: &ManagedAddress) {
+        self.ongoing_quests(user).clear();
     }
 
     #[view(getStakingInfo)]
@@ -450,6 +457,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn herbs_mapper(&self) -> FungibleTokenMapper;
 
     // Quests
+    #[view(getQuests)]
     #[storage_mapper("quests")]
     fn quests(&self) -> VecMapper<Quest>;
 

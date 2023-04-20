@@ -164,3 +164,18 @@ getStakingInfo() {
     --arguments ${MAC_USER} \
     --function="getStakingInfo"
 }
+
+clearOngoingQuests() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=6000000 \
+    --arguments ${USER} \
+    --function="clearOngoingQuests"
+}
+
+getQuests() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getQuests"
+}
