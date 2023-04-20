@@ -35,13 +35,22 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn init(&self) {
         self.quests().clear();
 
-        let quests = [Quest {
-            id: 1,
-            duration: 240,
-            is_final: false,
-            requirements: [0, 1000000],
-            rewards: [2500000, 0],
-        }];
+        let quests = [
+            Quest {
+                id: 1,
+                duration: 120,
+                is_final: false,
+                requirements: [1000000, 0],
+                rewards: [0, 2000000],
+            },
+            Quest {
+                id: 2,
+                duration: 120,
+                is_final: false,
+                requirements: [0, 2000000],
+                rewards: [500000, 0],
+            },
+        ];
 
         self.quests().extend_from_slice(&quests);
     }
@@ -170,6 +179,32 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
 
         let quest = self.quests().get(id as usize);
+
+        // Payment check & burning of tokens
+        let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
+        let requirements: [u64; 2] = quest.requirements;
+
+        require!(
+            payments.len() == requirements.iter().filter(|&x| *x > 0).count(),
+            "Received incorrect number of payments"
+        );
+
+        let mut payment_index: usize = 0;
+
+        for (i, requirement) in requirements.iter().enumerate() {
+            if *requirement > 0 {
+                let payment = payments.get(payment_index);
+                let mapper = self.get_token_mapper(i);
+
+                mapper.require_same_token(&payment.token_identifier);
+                require!(payment.amount == BigUint::from(*requirement), "Incorrect payment");
+                mapper.burn(&payment.amount);
+
+                payment_index += 1;
+            }
+        }
+
+        // Add to ongoing quests
         let current_timestamp = self.blockchain().get_block_timestamp();
 
         self.ongoing_quests(&caller).push(&OngoingQuest {
@@ -195,6 +230,17 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             current_timestamp >= ongoing_quest.end_timestamp,
             "Quest cannot be completed yet"
         );
+
+        // Rewards
+        let quest = self.quests().get(id as usize);
+        let rewards: [u64; 2] = quest.rewards;
+
+        for (i, reward) in rewards.iter().enumerate() {
+            if *reward > 0 {
+                let mapper = self.get_token_mapper(i);
+                mapper.mint_and_send(&caller, BigUint::from(*reward));
+            }
+        }
 
         self.ongoing_quests(&caller).swap_remove(ongoing_quest.id as usize);
     }
@@ -309,6 +355,18 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             timestamp: self.last_staking_timestamp(user).get(),
             nonces,
         }
+    }
+
+    #[view(getOngoingQuestTimestamp)]
+    fn get_ongoing_quest_timestamp(&self, user: &ManagedAddress, id: u8) -> u64 {
+        let search_result = self.ongoing_quests(user).iter().find(|q| (*q).id == id);
+
+        let timestamp: u64 = match search_result {
+            Some(q) => q.end_timestamp,
+            None => 0 as u64,
+        };
+
+        timestamp
     }
 
     fn get_staking_rewards(&self, user: &ManagedAddress) -> BigUint {

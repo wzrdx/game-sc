@@ -1,5 +1,5 @@
-# USER_PEM="~/elrond-wallet/wallet.pem"
-USER_PEM="~/Crypto/wallet-kzcpl.pem"
+USER_PEM="~/elrond-wallet/wallet.pem"
+# USER_PEM="~/Crypto/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 
@@ -115,6 +115,13 @@ getOngoingQuests() {
     --proxy=${PROXY} \
     --arguments ${USER} \
     --function="getOngoingQuests"
+}
+
+getOngoingQuestTimestamp() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${USER} 1 \
+    --function="getOngoingQuestTimestamp"
 }
 
 getParticipantId() {
