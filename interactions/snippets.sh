@@ -19,6 +19,12 @@ ENERGY_TICKER="ENERGY"
 HERBS_TOKEN_NAME="Herbs"
 HERBS_TICKER="HERBS"
 
+GEMS_TOKEN_NAME="Gems"
+GEMS_TICKER="GEMS"
+
+ESSENCE_TOKEN_NAME="Essence"
+ESSENCE_TICKER="ESSENCE"
+
 
 deploy() {
     mxpy --verbose contract deploy --project=${PROJECT} --metadata-payable --metadata-payable-by-sc \
@@ -60,7 +66,7 @@ issueEnergyToken() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=60000000 \
+    --gas-limit=90000000 \
     --value 50000000000000000 \
     --arguments str:${ENERGY_TOKEN_NAME} str:${ENERGY_TICKER} \
     --function="issueEnergyToken"
@@ -70,10 +76,30 @@ issueHerbsToken() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=60000000 \
+    --gas-limit=90000000 \
     --value 50000000000000000 \
     --arguments str:${HERBS_TOKEN_NAME} str:${HERBS_TICKER} \
     --function="issueHerbsToken"
+}
+
+issueGemsToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=90000000 \
+    --value 50000000000000000 \
+    --arguments str:${GEMS_TOKEN_NAME} str:${GEMS_TICKER} \
+    --function="issueGemsToken"
+}
+
+issueEssenceToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=90000000 \
+    --value 50000000000000000 \
+    --arguments str:${ESSENCE_TOKEN_NAME} str:${ESSENCE_TICKER} \
+    --function="issueEssenceToken"
 }
 
 getEnergyTokenId() {
@@ -86,6 +112,18 @@ getHerbsTokenId() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="getHerbsTokenId"
+}
+
+getGemsTokenId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getGemsTokenId"
+}
+
+getEssenceTokenId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getEssenceTokenId"
 }
 
 setTokenId() {

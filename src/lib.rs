@@ -6,7 +6,7 @@ multiversx_sc::derive_imports!();
 /* For regular quests, the requirements/rewards slice contains the amount of tokens
 in the following order: [Energy, Herbs, Gems, Essence].
 For the final quest (mission), the sum of the elements in the rewards slice is equal
-to the number of rewarded tickets. E.g. [1, 0, 0, 0] = 1 ticket
+to the number of rewarded tickets. E.g. [1] = 1 ticket
 */
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct Quest<M: ManagedTypeApi> {
@@ -103,6 +103,26 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         let issue_cost = self.call_value().egld_value();
 
         self.herbs_mapper()
+            .issue_and_set_all_roles(issue_cost, token_display_name, token_ticker, 6 as usize, None);
+    }
+
+    #[only_owner]
+    #[payable("EGLD")]
+    #[endpoint(issueGemsToken)]
+    fn issue_gems_token(&self, token_display_name: ManagedBuffer, token_ticker: ManagedBuffer) {
+        let issue_cost = self.call_value().egld_value();
+
+        self.gems_mapper()
+            .issue_and_set_all_roles(issue_cost, token_display_name, token_ticker, 6 as usize, None);
+    }
+
+    #[only_owner]
+    #[payable("EGLD")]
+    #[endpoint(issueEssenceToken)]
+    fn issue_essence_token(&self, token_display_name: ManagedBuffer, token_ticker: ManagedBuffer) {
+        let issue_cost = self.call_value().egld_value();
+
+        self.essence_mapper()
             .issue_and_set_all_roles(issue_cost, token_display_name, token_ticker, 6 as usize, None);
     }
 
@@ -254,8 +274,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         let caller = self.blockchain().get_caller();
         self.energy_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
         self.herbs_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
+        self.gems_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
+        self.essence_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
+
         self.tickets_mapper()
-            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(5 as u32));
+            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(1 as u32));
     }
 
     #[payable("*")]
@@ -361,8 +384,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         if index == 0 {
             mapper = self.energy_mapper();
-        } else {
+        } else if index == 1 {
             mapper = self.herbs_mapper();
+        } else if index == 2 {
+            mapper = self.gems_mapper();
+        } else {
+            mapper = self.essence_mapper();
         }
 
         mapper
@@ -421,6 +448,14 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getHerbsTokenId)]
     #[storage_mapper("herbsMapper")]
     fn herbs_mapper(&self) -> FungibleTokenMapper;
+
+    #[view(getGemsTokenId)]
+    #[storage_mapper("gemsMapper")]
+    fn gems_mapper(&self) -> FungibleTokenMapper;
+
+    #[view(getEssenceTokenId)]
+    #[storage_mapper("essenceMapper")]
+    fn essence_mapper(&self) -> FungibleTokenMapper;
 
     // Quests
     #[view(getQuests)]
