@@ -217,7 +217,15 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn complete_quest(&self, id: u8) {
         let caller = self.blockchain().get_caller();
 
-        let search_result = self.ongoing_quests(&caller).iter().find(|q| (*q).id == id);
+        let mut search_result: Option<OngoingQuest> = None;
+        let mut index_to_remove: usize = 0;
+
+        for (i, q) in self.ongoing_quests(&caller).iter().enumerate() {
+            if q.id == id {
+                search_result = Some(q);
+                index_to_remove = i + 1;
+            }
+        }
 
         let ongoing_quest = match search_result {
             Some(q) => q,
@@ -242,8 +250,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             }
         }
 
-        // TODO: Remove the correct index
-        self.ongoing_quests(&caller).swap_remove(1 as usize);
+        self.ongoing_quests(&caller).swap_remove(index_to_remove);
     }
 
     #[payable("*")]
@@ -485,4 +492,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getTestVector)]
     #[storage_mapper("testVector")]
     fn test_vector(&self) -> VecMapper<u16>;
+
+    #[view(getTestIndex)]
+    #[storage_mapper("testIndex")]
+    fn test_index(&self) -> SingleValueMapper<usize>;
 }

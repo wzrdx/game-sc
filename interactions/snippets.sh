@@ -179,3 +179,9 @@ getQuests() {
     --proxy=${PROXY} \
     --function="getQuests"
 }
+
+getTestIndex() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getTestIndex"
+}
