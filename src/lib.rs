@@ -1,7 +1,5 @@
 #![no_std]
 
-use core::iter::FromIterator;
-
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
@@ -10,7 +8,6 @@ in the following order: [Energy, Herbs, Gems, Essence].
 For the final quest (mission), the sum of the elements in the rewards slice is equal
 to the number of rewarded tickets. E.g. [1, 0, 0, 0] = 1 ticket
 */
-
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct Quest<M: ManagedTypeApi> {
     pub id: u8,
@@ -36,37 +33,17 @@ pub struct StakingInfo<M: ManagedTypeApi> {
 #[multiversx_sc::contract]
 pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
-    fn init(&self) {
-        self.quests().clear();
-
-        let requirements = [1000000, 0] as [u64; 2];
-        let rewards = [0, 2000000];
-
-        let mut req_vec = ManagedVec::new();
-        let mut rew_vec = ManagedVec::new();
-
-        for value in requirements.iter() {
-            req_vec.push(*value);
-        }
-
-        for value in rewards.iter() {
-            rew_vec.push(*value);
-        }
-
-        let quests = [Quest {
-            id: 1,
-            duration: 30,
-            is_final: false,
-            requirements: req_vec,
-            rewards: rew_vec,
-        }];
-
-        self.quests().extend_from_slice(&quests);
-    }
+    fn init(&self) {}
 
     #[only_owner]
     #[endpoint(setQuests)]
-    fn set_quests(&self, quests: ManagedVec<Quest<Self::Api>>) {}
+    fn set_quests(&self, quests: ManagedVec<Quest<Self::Api>>) {
+        self.quests().clear();
+
+        for quest in quests.iter() {
+            self.quests().push(&quest);
+        }
+    }
 
     #[only_owner]
     #[endpoint(setTokenId)]
@@ -323,6 +300,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         // TODO: Store current raffle participants count
         // TODO: Set number of winners as min(20, participants)
 
+        // TODO: Try using ArrayVec with .as_slice()
         // let mut vector: ManagedVec<u16>;
         // vector = ManagedVec::from_iter(self.raffle_vector().iter().filter(|id| *id != winner_id));
 
