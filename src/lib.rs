@@ -1,7 +1,5 @@
 #![no_std]
 
-use core::iter::FromIterator;
-
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
@@ -10,23 +8,13 @@ in the following order: [Energy, Herbs, Gems, Essence].
 For the final quest (mission), the sum of the elements in the rewards slice is equal
 to the number of rewarded tickets. E.g. [1, 0, 0, 0] = 1 ticket
 */
-
-// #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
-// pub struct Quest<M: ManagedTypeApi> {
-//     pub id: u8,
-//     pub duration: usize,
-//     pub is_final: bool,
-//     pub requirements: ManagedVec<M, u64>,
-//     pub rewards: ManagedVec<M, u64>,
-// }
-
-#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct Quest {
     pub id: u8,
     pub duration: usize,
     pub is_final: bool,
-    pub requirements: [u64; 2],
-    pub rewards: [u64; 2],
+    pub requirements: ArrayVec<u64, 2>,
+    pub rewards: ArrayVec<u64, 2>,
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
@@ -206,7 +194,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         // Payment check & burning of tokens
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
-        let requirements: [u64; 2] = quest.requirements;
+        let requirements = &quest.requirements;
 
         require!(
             payments.len() == requirements.iter().filter(|&x| *x > 0).count(),
@@ -265,7 +253,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         // Rewards
         let quest = self.quests().get(id as usize);
-        let rewards: [u64; 2] = quest.rewards;
+        let rewards = &quest.rewards;
 
         if quest.is_final {
             let tickets_amount: u64 = rewards.iter().sum();
@@ -334,8 +322,9 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         // TODO: Store current raffle participants count
         // TODO: Set number of winners as min(20, participants)
 
+        // TODO: Try using an ArrayVec as it has a maximum cap and can be used with .as_slice()
         let mut vector: ManagedVec<u16>;
-        vector = ManagedVec::from_iter(self.raffle_vector().iter().filter(|id| *id != winner_id));
+        let f = self.raffle_vector().iter().filter(|id| *id != winner_id);
 
         for id in vector.iter() {
             self.test_vector().push(&id);
