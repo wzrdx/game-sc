@@ -1,11 +1,24 @@
 #![no_std]
 
+use core::iter::FromIterator;
+
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
-use core::iter::FromIterator;
+/* For regular quests, the requirements/rewards slice contains the amount of tokens
+in the following order: [Energy, Herbs, Gems, Essence].
+For the final quest (mission), the sum of the elements in the rewards slice is equal
+to the number of rewarded tickets. E.g. [1, 0, 0, 0] = 1 ticket
+*/
 
-use multiversx_sc::types::heap::Vec;
+// #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+// pub struct Quest<M: ManagedTypeApi> {
+//     pub id: u8,
+//     pub duration: usize,
+//     pub is_final: bool,
+//     pub requirements: ManagedVec<M, u64>,
+//     pub rewards: ManagedVec<M, u64>,
+// }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
 pub struct Quest {
@@ -50,10 +63,21 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         //         requirements: [0, 2000000],
         //         rewards: [500000, 0],
         //     },
+        //     Quest {
+        //         id: 3,
+        //         duration: 60,
+        //         is_final: true,
+        //         requirements: [2000000, 2000000],
+        //         rewards: [1, 0],
+        //     },
         // ];
 
         // self.quests().extend_from_slice(&quests);
     }
+
+    // #[only_owner]
+    // #[endpoint(setQuests)]
+    // fn set_quests(&self, quests: ManagedVec<Quest<Self::Api>>) {}
 
     #[only_owner]
     #[endpoint(setTokenId)]
@@ -243,59 +267,27 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         let quest = self.quests().get(id as usize);
         let rewards: [u64; 2] = quest.rewards;
 
-        for (i, reward) in rewards.iter().enumerate() {
-            if *reward > 0 {
-                let mapper = self.get_token_mapper(i);
-                mapper.mint_and_send(&caller, BigUint::from(*reward));
+        if quest.is_final {
+            let tickets_amount: u64 = rewards.iter().sum();
+            self.tickets_mapper()
+                .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(tickets_amount));
+        } else {
+            for (i, reward) in rewards.iter().enumerate() {
+                if *reward > 0 {
+                    let mapper = self.get_token_mapper(i);
+                    mapper.mint_and_send(&caller, BigUint::from(*reward));
+                }
             }
         }
 
         self.ongoing_quests(&caller).swap_remove(index_to_remove);
     }
 
-    #[payable("*")]
-    #[endpoint(exchange)]
-    fn exchange(&self, id: u8) {
-        let caller = self.blockchain().get_caller();
-        let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
-        let quest = self.quests().get(id as usize);
-
-        let requirements: [u64; 2] = quest.requirements;
-        let rewards: [u64; 2] = quest.rewards;
-
-        require!(
-            payments.len() == requirements.iter().filter(|&x| *x > 0).count(),
-            "Received incorrect number of payments"
-        );
-
-        let mut payment_index: usize = 0;
-
-        for (i, requirement) in requirements.iter().enumerate() {
-            if *requirement > 0 {
-                let payment = payments.get(payment_index);
-                let mapper = self.get_token_mapper(i);
-
-                mapper.require_same_token(&payment.token_identifier);
-                require!(payment.amount == BigUint::from(*requirement), "Incorrect payment");
-                mapper.burn(&payment.amount);
-
-                payment_index += 1;
-            }
-        }
-
-        for (i, reward) in rewards.iter().enumerate() {
-            if *reward > 0 {
-                let mapper = self.get_token_mapper(i);
-                mapper.mint_and_send(&caller, BigUint::from(*reward));
-            }
-        }
-    }
-
     #[endpoint(faucet)]
     fn faucet(&self) {
         let caller = self.blockchain().get_caller();
-        self.energy_mapper().mint_and_send(&caller, BigUint::from(1000000 as u32));
-        self.herbs_mapper().mint_and_send(&caller, BigUint::from(1000000 as u32));
+        self.energy_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
+        self.herbs_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
         self.tickets_mapper()
             .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(5 as u32));
     }
