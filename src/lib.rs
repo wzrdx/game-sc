@@ -11,22 +11,13 @@ For the final quest (mission), the sum of the elements in the rewards slice is e
 to the number of rewarded tickets. E.g. [1, 0, 0, 0] = 1 ticket
 */
 
-// #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
-// pub struct Quest<M: ManagedTypeApi> {
-//     pub id: u8,
-//     pub duration: usize,
-//     pub is_final: bool,
-//     pub requirements: ManagedVec<M, u64>,
-//     pub rewards: ManagedVec<M, u64>,
-// }
-
-#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
-pub struct Quest {
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct Quest<M: ManagedTypeApi> {
     pub id: u8,
     pub duration: usize,
     pub is_final: bool,
-    pub requirements: [u64; 2],
-    pub rewards: [u64; 2],
+    pub requirements: ManagedVec<M, u64>,
+    pub rewards: ManagedVec<M, u64>,
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
@@ -46,38 +37,36 @@ pub struct StakingInfo<M: ManagedTypeApi> {
 pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
     fn init(&self) {
-        // self.quests().clear();
+        self.quests().clear();
 
-        // let quests = [
-        //     Quest {
-        //         id: 1,
-        //         duration: 30,
-        //         is_final: false,
-        //         requirements: [1000000, 0],
-        //         rewards: [0, 2000000],
-        //     },
-        //     Quest {
-        //         id: 2,
-        //         duration: 30,
-        //         is_final: false,
-        //         requirements: [0, 2000000],
-        //         rewards: [500000, 0],
-        //     },
-        //     Quest {
-        //         id: 3,
-        //         duration: 60,
-        //         is_final: true,
-        //         requirements: [2000000, 2000000],
-        //         rewards: [1, 0],
-        //     },
-        // ];
+        let requirements = [1000000, 0] as [u64; 2];
+        let rewards = [0, 2000000];
 
-        // self.quests().extend_from_slice(&quests);
+        let mut req_vec = ManagedVec::new();
+        let mut rew_vec = ManagedVec::new();
+
+        for value in requirements.iter() {
+            req_vec.push(*value);
+        }
+
+        for value in rewards.iter() {
+            rew_vec.push(*value);
+        }
+
+        let quests = [Quest {
+            id: 1,
+            duration: 30,
+            is_final: false,
+            requirements: req_vec,
+            rewards: rew_vec,
+        }];
+
+        self.quests().extend_from_slice(&quests);
     }
 
-    // #[only_owner]
-    // #[endpoint(setQuests)]
-    // fn set_quests(&self, quests: ManagedVec<Quest<Self::Api>>) {}
+    #[only_owner]
+    #[endpoint(setQuests)]
+    fn set_quests(&self, quests: ManagedVec<Quest<Self::Api>>) {}
 
     #[only_owner]
     #[endpoint(setTokenId)]
@@ -206,22 +195,22 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         // Payment check & burning of tokens
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
-        let requirements: [u64; 2] = quest.requirements;
+        let requirements = &quest.requirements;
 
         require!(
-            payments.len() == requirements.iter().filter(|&x| *x > 0).count(),
+            payments.len() == requirements.iter().filter(|&x| x > 0).count(),
             "Received incorrect number of payments"
         );
 
         let mut payment_index: usize = 0;
 
         for (i, requirement) in requirements.iter().enumerate() {
-            if *requirement > 0 {
+            if requirement > 0 {
                 let payment = payments.get(payment_index);
                 let mapper = self.get_token_mapper(i);
 
                 mapper.require_same_token(&payment.token_identifier);
-                require!(payment.amount == BigUint::from(*requirement), "Incorrect payment");
+                require!(payment.amount == BigUint::from(requirement), "Incorrect payment");
                 mapper.burn(&payment.amount);
 
                 payment_index += 1;
@@ -265,7 +254,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         // Rewards
         let quest = self.quests().get(id as usize);
-        let rewards: [u64; 2] = quest.rewards;
+        let rewards = &quest.rewards;
 
         if quest.is_final {
             let tickets_amount: u64 = rewards.iter().sum();
@@ -273,9 +262,9 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
                 .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(tickets_amount));
         } else {
             for (i, reward) in rewards.iter().enumerate() {
-                if *reward > 0 {
+                if reward > 0 {
                     let mapper = self.get_token_mapper(i);
-                    mapper.mint_and_send(&caller, BigUint::from(*reward));
+                    mapper.mint_and_send(&caller, BigUint::from(reward));
                 }
             }
         }
@@ -334,12 +323,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         // TODO: Store current raffle participants count
         // TODO: Set number of winners as min(20, participants)
 
-        let mut vector: ManagedVec<u16>;
-        vector = ManagedVec::from_iter(self.raffle_vector().iter().filter(|id| *id != winner_id));
+        // let mut vector: ManagedVec<u16>;
+        // vector = ManagedVec::from_iter(self.raffle_vector().iter().filter(|id| *id != winner_id));
 
-        for id in vector.iter() {
-            self.test_vector().push(&id);
-        }
+        // for id in vector.iter() {
+        //     self.test_vector().push(&id);
+        // }
     }
 
     #[only_owner]
@@ -458,7 +447,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     // Quests
     #[view(getQuests)]
     #[storage_mapper("quests")]
-    fn quests(&self) -> VecMapper<Quest>;
+    fn quests(&self) -> VecMapper<Quest<Self::Api>>;
 
     #[view(getOngoingQuests)]
     #[storage_mapper("ongoingQuests")]
