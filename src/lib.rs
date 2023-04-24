@@ -1,5 +1,7 @@
 #![no_std]
 
+use core::iter::FromIterator;
+
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
@@ -305,31 +307,52 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             self.raffle_vector().push(&participant_id);
         }
 
+        self.raffle_participants().insert(caller);
+
         self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
     }
 
     #[only_owner]
     #[endpoint(drawRaffleWinner)]
-    fn draw_raffle_winner(&self) {
+    fn draw_raffle_winner(&self, winners_count: usize) {
+        require!(
+            winners_count > 0 && winners_count < self.raffle_participants().len(),
+            "Invalid number of winners"
+        );
+
         let mut rand_source = RandomnessSource::new();
-        let index: usize = rand_source.next_usize_in_range(1, self.raffle_vector().len() + 1);
+        let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.raffle_vector().iter());
 
-        let winner_id: u16 = self.raffle_vector().get(index);
-        let winner_address = self.raffle_id_participant(winner_id).get();
+        let mut payments_count: usize = 0;
 
-        self.send()
-            .direct_egld(&winner_address, &BigUint::from(50000000000000000 as u64));
+        for _ in 0..winners_count {
+            let index: usize = rand_source.next_usize_in_range(0, vector.len());
+            let winner_id: u16 = vector.get(index);
 
-        // TODO: Store current raffle participants count
-        // TODO: Set number of winners as min(20, participants)
+            let winner_address = self.raffle_id_participant(winner_id).get();
 
-        // TODO: Try using ArrayVec with .as_slice()
-        // let mut vector: ManagedVec<u16>;
-        // vector = ManagedVec::from_iter(self.raffle_vector().iter().filter(|id| *id != winner_id));
+            let payment_amount: u64 = if payments_count >= (winners_count / 2) {
+                2500000000000000
+            } else {
+                5000000000000000
+            };
 
-        // for id in vector.iter() {
-        //     self.test_vector().push(&id);
-        // }
+            self.send().direct_egld(&winner_address, &BigUint::from(payment_amount));
+
+            vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
+            payments_count += 1;
+        }
+
+        // Store remaining losers
+        for id in vector.iter() {
+            self.test_vector().push(&id);
+        }
+    }
+
+    #[only_owner]
+    #[endpoint(clearRaffle)]
+    fn clear_raffle(&self) {
+        self.test_vector().clear();
     }
 
     #[only_owner]
@@ -483,11 +506,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("raffleVector")]
     fn raffle_vector(&self) -> VecMapper<u16>;
 
+    #[view(getRaffleParticipants)]
+    #[storage_mapper("raffleParticipants")]
+    fn raffle_participants(&self) -> UnorderedSetMapper<ManagedAddress>;
+
+    // Testing
     #[view(getTestVector)]
     #[storage_mapper("testVector")]
     fn test_vector(&self) -> VecMapper<u16>;
-
-    #[view(getTestIndex)]
-    #[storage_mapper("testIndex")]
-    fn test_index(&self) -> SingleValueMapper<usize>;
 }

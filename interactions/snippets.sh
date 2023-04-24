@@ -186,6 +186,7 @@ drawRaffleWinner() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=10000000 \
+    --arguments 3 \
     --function="drawRaffleWinner"
 }
 
@@ -218,8 +219,22 @@ getQuests() {
     --function="getQuests"
 }
 
-getTestIndex() {
+clearRaffle() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=6000000 \
+    --function="clearRaffle"
+}
+
+getTestVector() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getTestIndex"
+    --function="getTestVector"
+}
+
+getRaffleParticipants() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getRaffleParticipants"
 }
