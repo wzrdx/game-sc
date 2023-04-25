@@ -355,6 +355,19 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.test_vector().clear();
     }
 
+    #[payable("*")]
+    #[endpoint(swapEnergy)]
+    fn swap_energy(&self) {
+        let payment: EsdtTokenPayment = self.call_value().single_esdt();
+        self.energy_mapper().require_same_token(&payment.token_identifier);
+
+        let caller = self.blockchain().get_caller();
+        let multiplier: u64 = 1000000000;
+
+        self.energy_mapper().burn(&payment.amount);
+        self.send().direct_egld(&caller, &(payment.amount * multiplier));
+    }
+
     #[only_owner]
     #[endpoint(clearOngoingQuests)]
     fn clear_ongoing_quests(&self, user: &ManagedAddress) {
