@@ -382,7 +382,15 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[view(getSubmittedTickets)]
     fn get_submitted_tickets(&self, user: &ManagedAddress) -> usize {
-        self.raffle_vector().len()
+        if self.raffle_participant_id(user).is_empty() {
+            return 0;
+        } else {
+            let participant_id = self.raffle_participant_id(user).get();
+            let filtered_vec: ManagedVec<u16> =
+                ManagedVec::from_iter(self.raffle_vector().iter().filter(|t| *t == participant_id));
+
+            return filtered_vec.len();
+        }
     }
 
     #[view(getStakingInfo)]

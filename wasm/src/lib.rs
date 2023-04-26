@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           39
+// Endpoints:                           40
 // Async Callback:                       1
-// Total number of exported functions:  41
+// Total number of exported functions:  42
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -38,6 +38,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         clearRaffle
         swapEnergy
         clearOngoingQuests
+        getSubmittedTickets
         getStakingInfo
         getOngoingQuestTimestamp
         getStakedNonces

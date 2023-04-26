@@ -247,3 +247,10 @@ setRaffleTimestamp() {
     --arguments 1682857638 \
     --function="setRaffleTimestamp"
 }
+
+getSubmittedTickets() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${USER} \
+    --function="getSubmittedTickets"
+}
