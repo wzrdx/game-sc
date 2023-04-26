@@ -350,6 +350,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     #[only_owner]
+    #[endpoint(setRaffleTimestamp)]
+    fn set_raffle_timestamp(&self, timestamp: u64) {
+        self.raffle_timestamp().set(timestamp);
+    }
+
+    #[only_owner]
     #[endpoint(clearRaffle)]
     fn clear_raffle(&self) {
         self.test_vector().clear();
@@ -372,6 +378,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[endpoint(clearOngoingQuests)]
     fn clear_ongoing_quests(&self, user: &ManagedAddress) {
         self.ongoing_quests(user).clear();
+    }
+
+    #[view(getSubmittedTickets)]
+    fn get_submitted_tickets(&self, user: &ManagedAddress) -> usize {
+        self.raffle_vector().len()
     }
 
     #[view(getStakingInfo)]
@@ -522,6 +533,10 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getRaffleParticipants)]
     #[storage_mapper("raffleParticipants")]
     fn raffle_participants(&self) -> UnorderedSetMapper<ManagedAddress>;
+
+    #[view(getRaffleTimestamp)]
+    #[storage_mapper("raffleTimestamp")]
+    fn raffle_timestamp(&self) -> SingleValueMapper<u64>;
 
     // Testing
     #[view(getTestVector)]

@@ -238,3 +238,12 @@ getRaffleParticipants() {
     --proxy=${PROXY} \
     --function="getRaffleParticipants"
 }
+
+setRaffleTimestamp() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=6000000 \
+    --arguments 1682857638 \
+    --function="setRaffleTimestamp"
+}

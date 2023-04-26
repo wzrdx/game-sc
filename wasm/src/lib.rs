@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           37
+// Endpoints:                           39
 // Async Callback:                       1
-// Total number of exported functions:  39
+// Total number of exported functions:  41
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -34,6 +34,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         faucet
         joinRaffle
         drawRaffleWinner
+        setRaffleTimestamp
         clearRaffle
         swapEnergy
         clearOngoingQuests
@@ -54,6 +55,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getRaffleIndex
         getRaffleVector
         getRaffleParticipants
+        getRaffleTimestamp
         getTestVector
         callBack
     )
