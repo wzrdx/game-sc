@@ -280,12 +280,20 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.essence_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
 
         self.tickets_mapper()
-            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(1 as u32));
+            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(5 as u32));
     }
 
     #[payable("*")]
     #[endpoint(joinRaffle)]
     fn join_raffle(&self) {
+        let current_timestamp = self.blockchain().get_block_timestamp();
+        let raffle_timestamp = self.raffle_timestamp().get();
+
+        require!(
+            current_timestamp <= raffle_timestamp,
+            "Cannot submit tickets after raffle submission has ended"
+        );
+
         let payment: EsdtTokenPayment = self.call_value().single_esdt();
         self.tickets_mapper().require_same_token(&payment.token_identifier);
 
@@ -408,6 +416,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    // TODO: Deprecated
     #[view(getOngoingQuestTimestamp)]
     fn get_ongoing_quest_timestamp(&self, user: &ManagedAddress, id: u8) -> u64 {
         let search_result = self.ongoing_quests(user).iter().find(|q| (*q).id == id);
