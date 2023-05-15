@@ -259,6 +259,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             let tickets_amount: u64 = rewards.iter().sum();
             self.tickets_mapper()
                 .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(tickets_amount));
+
+            self.tickets_earned(&caller).update(|i| {
+                *i += 1;
+            });
+
+            self.ticket_earners().insert(caller.clone());
         } else {
             for (i, reward) in rewards.iter().enumerate() {
                 if reward > 0 {
@@ -275,12 +281,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn faucet(&self) {
         let caller = self.blockchain().get_caller();
         self.energy_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
-        self.herbs_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
-        self.gems_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
-        self.essence_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
+        // self.herbs_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
+        // self.gems_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
+        // self.essence_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
 
-        self.tickets_mapper()
-            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(5 as u32));
+        // self.tickets_mapper()
+        //     .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(5 as u32));
     }
 
     #[payable("*")]
@@ -530,7 +536,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("ongoingQuests")]
     fn ongoing_quests(&self, user: &ManagedAddress) -> VecMapper<OngoingQuest>;
 
-    //Rewards
+    // Rewards
     #[view(getParticipantId)]
     #[storage_mapper("raffleParticipantId")]
     fn raffle_participant_id(&self, user: &ManagedAddress) -> SingleValueMapper<u16>;
@@ -554,6 +560,15 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getRaffleTimestamp)]
     #[storage_mapper("raffleTimestamp")]
     fn raffle_timestamp(&self) -> SingleValueMapper<u64>;
+
+    // Beta
+    #[view(getTicketsEarned)]
+    #[storage_mapper("ticketsEarned")]
+    fn tickets_earned(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
+
+    #[view(getTicketEarners)]
+    #[storage_mapper("ticketEarners")]
+    fn ticket_earners(&self) -> UnorderedSetMapper<ManagedAddress>;
 
     // Testing
     #[view(getTestVector)]

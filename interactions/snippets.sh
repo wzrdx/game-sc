@@ -1,5 +1,5 @@
-USER_PEM="~/elrond-wallet/wallet.pem"
-# USER_PEM="~/Crypto/wallet-kzcpl.pem"
+# USER_PEM="~/elrond-wallet/wallet.pem"
+USER_PEM="~/Crypto/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 
@@ -253,4 +253,17 @@ getSubmittedTickets() {
     --proxy=${PROXY} \
     --arguments ${USER} \
     --function="getSubmittedTickets"
+}
+
+getTicketsEarned() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${MAC_USER} \
+    --function="getTicketsEarned"
+}
+
+getTicketEarners() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getTicketEarners"
 }
