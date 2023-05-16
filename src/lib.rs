@@ -32,6 +32,12 @@ pub struct StakingInfo<M: ManagedTypeApi> {
     pub nonces: ManagedVec<M, u64>,
 }
 
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct TicketEarner<M: ManagedTypeApi> {
+    pub tickets_earned: usize,
+    pub address: ManagedAddress<M>,
+}
+
 #[multiversx_sc::contract]
 pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
@@ -264,7 +270,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
                 *i += 1;
             });
 
-            self.ticket_earners().insert(caller.clone());
+            self.ticket_earners_addresses().insert(caller.clone());
         } else {
             for (i, reward) in rewards.iter().enumerate() {
                 if reward > 0 {
@@ -281,12 +287,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn faucet(&self) {
         let caller = self.blockchain().get_caller();
         self.energy_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
-        // self.herbs_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
-        // self.gems_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
-        // self.essence_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
+        self.herbs_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
+        self.gems_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
+        self.essence_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
 
-        // self.tickets_mapper()
-        //     .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(5 as u32));
+        self.tickets_mapper()
+            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(5 as u32));
     }
 
     #[payable("*")]
@@ -422,17 +428,18 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
-    // TODO: Deprecated
-    #[view(getOngoingQuestTimestamp)]
-    fn get_ongoing_quest_timestamp(&self, user: &ManagedAddress, id: u8) -> u64 {
-        let search_result = self.ongoing_quests(user).iter().find(|q| (*q).id == id);
+    #[view(getTicketEarners)]
+    fn get_ticket_earners(&self) -> ManagedVec<TicketEarner<Self::Api>> {
+        let mut earners: ManagedVec<TicketEarner<Self::Api>> = ManagedVec::new();
 
-        let timestamp: u64 = match search_result {
-            Some(q) => q.end_timestamp,
-            None => 0 as u64,
-        };
+        for address in self.ticket_earners_addresses().iter() {
+            earners.push(TicketEarner {
+                address: address.clone(),
+                tickets_earned: self.tickets_earned(&address).get(),
+            });
+        }
 
-        timestamp
+        earners
     }
 
     fn get_staking_rewards(&self, user: &ManagedAddress) -> BigUint {
@@ -566,9 +573,9 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("ticketsEarned")]
     fn tickets_earned(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
 
-    #[view(getTicketEarners)]
-    #[storage_mapper("ticketEarners")]
-    fn ticket_earners(&self) -> UnorderedSetMapper<ManagedAddress>;
+    #[view(getTicketEarnersAddresses)]
+    #[storage_mapper("ticketEarnersAddresses")]
+    fn ticket_earners_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
 
     // Testing
     #[view(getTestVector)]

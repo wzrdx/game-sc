@@ -40,7 +40,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         clearOngoingQuests
         getSubmittedTickets
         getStakingInfo
-        getOngoingQuestTimestamp
+        getTicketEarners
         getStakedNonces
         getLastStakingTimestamp
         getTokenId
@@ -58,7 +58,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getRaffleParticipants
         getRaffleTimestamp
         getTicketsEarned
-        getTicketEarners
+        getTicketEarnersAddresses
         getTestVector
         callBack
     )
