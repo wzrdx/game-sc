@@ -36,6 +36,7 @@ pub struct StakingInfo<M: ManagedTypeApi> {
 pub struct TicketEarner<M: ManagedTypeApi> {
     pub tickets_earned: usize,
     pub address: ManagedAddress<M>,
+    pub last_timestamp: u64,
 }
 
 #[multiversx_sc::contract]
@@ -261,6 +262,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         let quest = self.quests().get(id as usize);
         let rewards = &quest.rewards;
 
+        // Ticket
         if quest.is_final {
             let tickets_amount: u64 = rewards.iter().sum();
             self.tickets_mapper()
@@ -271,6 +273,9 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             });
 
             self.ticket_earners_addresses().insert(caller.clone());
+
+            let current_timestamp = self.blockchain().get_block_timestamp();
+            self.ticket_earner_last_timestamp(&caller).set(current_timestamp);
         } else {
             for (i, reward) in rewards.iter().enumerate() {
                 if reward > 0 {
@@ -436,6 +441,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             earners.push(TicketEarner {
                 address: address.clone(),
                 tickets_earned: self.tickets_earned(&address).get(),
+                last_timestamp: self.ticket_earner_last_timestamp(&address).get(),
             });
         }
 
@@ -576,6 +582,9 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getTicketEarnersAddresses)]
     #[storage_mapper("ticketEarnersAddresses")]
     fn ticket_earners_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
+
+    #[storage_mapper("ticketEarnerLastTimestamp")]
+    fn ticket_earner_last_timestamp(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
     // Testing
     #[view(getTestVector)]
