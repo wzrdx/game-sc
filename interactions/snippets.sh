@@ -5,13 +5,14 @@ CHAIN_ID="D"
 
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgq9459wl67kadq47jq8xqwp56muskyaajvukrq9xjh8z
 OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
+
 USER=erd1jvr26kvxs3xtdzapafrkupnphpzexn4zezr5lwvamam7wxqyasusjntmzr
 MAC_USER=erd12vx2sn6aca5sdfhf0am7z74d4vw4yz2tm2p59nvyd3svdcqtxwnqdphu6d
 
 TOKEN_ID="HOLYCOWS-90e467"
 
-TICKETS_COLLECTION_NAME="Tickets"
-TICKETS_TICKER="TICKETS"
+TICKETS_COLLECTION_NAME="HomeXTickets"
+TICKETS_TICKER="HOMETICKET"
 
 ENERGY_TOKEN_NAME="Energy"
 ENERGY_TICKER="ENERGY"
@@ -23,7 +24,7 @@ GEMS_TOKEN_NAME="Gems"
 GEMS_TICKER="GEMS"
 
 ESSENCE_TOKEN_NAME="Essence"
-ESSENCE_TICKER="ESSENCE"
+ESSENCE_TICKER="ESSENCE" 
 
 
 deploy() {
@@ -102,6 +103,12 @@ issueEssenceToken() {
     --function="issueEssenceToken"
 }
 
+getTicketsId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getTicketsId"
+}
+
 getEnergyTokenId() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
@@ -141,6 +148,12 @@ getTokenId() {
     --function="getTokenId"
 }
 
+getQuests() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getQuests"
+}
+
 getStakedNonces() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
@@ -148,31 +161,20 @@ getStakedNonces() {
     --function="getStakedNonces"
 }
 
-getOngoingQuests() {
+getStakingInfo() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --arguments ${USER} \
-    --function="getOngoingQuests"
+    --arguments ${MAC_USER} \
+    --function="getStakingInfo"
 }
 
-getOngoingQuestTimestamp() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments ${USER} 1 \
-    --function="getOngoingQuestTimestamp"
-}
-
-getParticipantId() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments ${USER} \
-    --function="getParticipantId"
-}
-
-getRaffleIndex() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getRaffleIndex"
+setRaffleTimestamp() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=6000000 \
+    --arguments 1682857458 \
+    --function="setRaffleTimestamp"
 }
 
 getRaffleVector() {
@@ -190,80 +192,14 @@ drawRaffleWinner() {
     --function="drawRaffleWinner"
 }
 
-getParticipantAddress() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments 2 \
-    --function="getParticipantAddress"
-}
-
-getStakingInfo() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments ${MAC_USER} \
-    --function="getStakingInfo"
-}
-
-clearOngoingQuests() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=6000000 \
-    --arguments ${USER} \
-    --function="clearOngoingQuests"
-}
-
-getQuests() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getQuests"
-}
-
-clearRaffle() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=6000000 \
-    --function="clearRaffle"
-}
-
-getTestVector() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getTestVector"
-}
-
 getRaffleParticipants() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="getRaffleParticipants"
 }
 
-setRaffleTimestamp() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=6000000 \
-    --arguments 1682857458 \
-    --function="setRaffleTimestamp"
-}
-
-getSubmittedTickets() {
+getParticipants() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --arguments ${USER} \
-    --function="getSubmittedTickets"
-}
-
-getTicketsEarned() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments ${MAC_USER} \
-    --function="getTicketsEarned"
-}
-
-getTicketEarners() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getTicketEarners"
+    --function="getParticipants"
 }

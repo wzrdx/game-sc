@@ -33,10 +33,9 @@ pub struct StakingInfo<M: ManagedTypeApi> {
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
-pub struct TicketEarner<M: ManagedTypeApi> {
-    pub tickets_earned: usize,
+pub struct Participant<M: ManagedTypeApi> {
     pub address: ManagedAddress<M>,
-    pub last_timestamp: u64,
+    pub tickets_count: usize,
 }
 
 #[multiversx_sc::contract]
@@ -135,6 +134,58 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             .issue_and_set_all_roles(issue_cost, token_display_name, token_ticker, 6 as usize, None);
     }
 
+    #[only_owner]
+    #[endpoint(faucet)]
+    fn faucet(&self) {
+        let caller = self.blockchain().get_caller();
+        self.energy_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
+        self.herbs_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
+        self.gems_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
+        self.essence_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
+
+        self.tickets_mapper()
+            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(5 as u32));
+    }
+
+    #[only_owner]
+    #[endpoint(drawRaffleWinner)]
+    fn draw_raffle_winner(&self, winners_count: usize) {
+        require!(
+            winners_count > 0 && winners_count < self.raffle_participants().len(),
+            "Invalid number of winners"
+        );
+
+        let mut rand_source = RandomnessSource::new();
+        let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.raffle_vector().iter());
+
+        let mut payments_count: usize = 0;
+
+        for _ in 0..winners_count {
+            let index: usize = rand_source.next_usize_in_range(0, vector.len());
+            let winner_id: u16 = vector.get(index);
+
+            let winner_address = self.raffle_id_participant(winner_id).get();
+
+            let payment_amount: u64 = if payments_count >= (winners_count / 2) {
+                2500000000000000
+            } else {
+                5000000000000000
+            };
+
+            self.send().direct_egld(&winner_address, &BigUint::from(payment_amount));
+
+            vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
+            payments_count += 1;
+        }
+    }
+
+    #[only_owner]
+    #[endpoint(setRaffleTimestamp)]
+    fn set_raffle_timestamp(&self, timestamp: u64) {
+        self.raffle_timestamp().set(timestamp);
+    }
+
+    #[only_user_account]
     #[payable("*")]
     #[endpoint(stake)]
     fn stake(&self) {
@@ -151,6 +202,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    #[only_user_account]
     #[endpoint(unstake)]
     fn unstake(&self) {
         let caller = self.blockchain().get_caller();
@@ -176,6 +228,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    #[only_user_account]
     #[endpoint(claimStakingRewards)]
     fn claim_staking_rewards(&self) {
         let caller = self.blockchain().get_caller();
@@ -188,6 +241,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.claim_staking_rewards_for_user(&caller);
     }
 
+    #[only_user_account]
     #[payable("*")]
     #[endpoint(startQuest)]
     fn start_quest(&self, id: u8) {
@@ -232,6 +286,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         });
     }
 
+    #[only_user_account]
     #[endpoint(completeQuest)]
     fn complete_quest(&self, id: u8) {
         let caller = self.blockchain().get_caller();
@@ -267,15 +322,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             let tickets_amount: u64 = rewards.iter().sum();
             self.tickets_mapper()
                 .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(tickets_amount));
-
-            self.tickets_earned(&caller).update(|i| {
-                *i += 1;
-            });
-
-            self.ticket_earners_addresses().insert(caller.clone());
-
-            let current_timestamp = self.blockchain().get_block_timestamp();
-            self.ticket_earner_last_timestamp(&caller).set(current_timestamp);
         } else {
             for (i, reward) in rewards.iter().enumerate() {
                 if reward > 0 {
@@ -288,18 +334,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.ongoing_quests(&caller).swap_remove(index_to_remove);
     }
 
-    #[endpoint(faucet)]
-    fn faucet(&self) {
-        let caller = self.blockchain().get_caller();
-        self.energy_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
-        self.herbs_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
-        self.gems_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
-        self.essence_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
-
-        self.tickets_mapper()
-            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(5 as u32));
-    }
-
+    #[only_user_account]
     #[payable("*")]
     #[endpoint(joinRaffle)]
     fn join_raffle(&self) {
@@ -337,55 +372,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
     }
 
-    #[only_owner]
-    #[endpoint(drawRaffleWinner)]
-    fn draw_raffle_winner(&self, winners_count: usize) {
-        require!(
-            winners_count > 0 && winners_count < self.raffle_participants().len(),
-            "Invalid number of winners"
-        );
-
-        let mut rand_source = RandomnessSource::new();
-        let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.raffle_vector().iter());
-
-        let mut payments_count: usize = 0;
-
-        for _ in 0..winners_count {
-            let index: usize = rand_source.next_usize_in_range(0, vector.len());
-            let winner_id: u16 = vector.get(index);
-
-            let winner_address = self.raffle_id_participant(winner_id).get();
-
-            let payment_amount: u64 = if payments_count >= (winners_count / 2) {
-                2500000000000000
-            } else {
-                5000000000000000
-            };
-
-            self.send().direct_egld(&winner_address, &BigUint::from(payment_amount));
-
-            vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
-            payments_count += 1;
-        }
-
-        // Store remaining losers
-        for id in vector.iter() {
-            self.test_vector().push(&id);
-        }
-    }
-
-    #[only_owner]
-    #[endpoint(setRaffleTimestamp)]
-    fn set_raffle_timestamp(&self, timestamp: u64) {
-        self.raffle_timestamp().set(timestamp);
-    }
-
-    #[only_owner]
-    #[endpoint(clearRaffle)]
-    fn clear_raffle(&self) {
-        self.test_vector().clear();
-    }
-
+    #[only_user_account]
     #[payable("*")]
     #[endpoint(swapEnergy)]
     fn swap_energy(&self) {
@@ -397,12 +384,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         self.energy_mapper().burn(&payment.amount);
         self.send().direct_egld(&caller, &(payment.amount * multiplier));
-    }
-
-    #[only_owner]
-    #[endpoint(clearOngoingQuests)]
-    fn clear_ongoing_quests(&self, user: &ManagedAddress) {
-        self.ongoing_quests(user).clear();
     }
 
     #[view(getSubmittedTickets)]
@@ -418,6 +399,27 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    #[view(getParticipantsCount)]
+    fn get_participants_count(&self) -> usize {
+        self.raffle_participants().len()
+    }
+
+    #[view(getParticipants)]
+    fn get_participants(&self, start: usize, end: usize) -> ManagedVec<Participant<Self::Api>> {
+        let mut participants: ManagedVec<Participant<Self::Api>> = ManagedVec::new();
+
+        for (i, address) in self.raffle_participants().iter().enumerate() {
+            if i >= start && i < end {
+                participants.push(Participant {
+                    address: address.clone(),
+                    tickets_count: self.get_submitted_tickets(&address),
+                });
+            }
+        }
+
+        participants
+    }
+
     #[view(getStakingInfo)]
     fn get_staking_info(&self, user: &ManagedAddress) -> StakingInfo<Self::Api> {
         let mut nonces: ManagedVec<u64> = ManagedVec::new();
@@ -431,21 +433,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             timestamp: self.last_staking_timestamp(user).get(),
             nonces,
         }
-    }
-
-    #[view(getTicketEarners)]
-    fn get_ticket_earners(&self) -> ManagedVec<TicketEarner<Self::Api>> {
-        let mut earners: ManagedVec<TicketEarner<Self::Api>> = ManagedVec::new();
-
-        for address in self.ticket_earners_addresses().iter() {
-            earners.push(TicketEarner {
-                address: address.clone(),
-                tickets_earned: self.tickets_earned(&address).get(),
-                last_timestamp: self.ticket_earner_last_timestamp(&address).get(),
-            });
-        }
-
-        earners
     }
 
     fn get_staking_rewards(&self, user: &ManagedAddress) -> BigUint {
@@ -491,7 +478,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn build_uris_vec(&self) -> ManagedVec<ManagedBuffer> {
         let mut uris = ManagedVec::new();
         uris.push(ManagedBuffer::new_from_bytes(
-            "https://ipfs.io/ipfs/bafkreidiiudhpj4cy364zvucdzvtscsguybdo2q5fv7r32djgsfp3r575a".as_bytes(),
+            "https://ipfs.io/ipfs/bafybeiezcv3mihkkzoug3swhfghwoggc5i7kuocbekeyndiensdlqagoyy".as_bytes(),
         ));
 
         uris
@@ -573,21 +560,4 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getRaffleTimestamp)]
     #[storage_mapper("raffleTimestamp")]
     fn raffle_timestamp(&self) -> SingleValueMapper<u64>;
-
-    // Beta
-    #[view(getTicketsEarned)]
-    #[storage_mapper("ticketsEarned")]
-    fn tickets_earned(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
-
-    #[view(getTicketEarnersAddresses)]
-    #[storage_mapper("ticketEarnersAddresses")]
-    fn ticket_earners_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
-
-    #[storage_mapper("ticketEarnerLastTimestamp")]
-    fn ticket_earner_last_timestamp(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
-
-    // Testing
-    #[view(getTestVector)]
-    #[storage_mapper("testVector")]
-    fn test_vector(&self) -> VecMapper<u16>;
 }
