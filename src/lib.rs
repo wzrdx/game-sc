@@ -148,8 +148,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     #[only_owner]
-    #[endpoint(drawRaffleWinner)]
-    fn draw_raffle_winner(&self, winners_count: usize) {
+    #[endpoint(drawRaffleWinners)]
+    fn draw_raffle_winners(&self, winners_count: usize) {
         require!(
             winners_count > 0 && winners_count < self.raffle_participants().len(),
             "Invalid number of winners"
@@ -177,12 +177,21 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
             payments_count += 1;
         }
+
+        let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
+        self.tx_hashes().insert(hash);
     }
 
     #[only_owner]
     #[endpoint(setRaffleTimestamp)]
     fn set_raffle_timestamp(&self, timestamp: u64) {
         self.raffle_timestamp().set(timestamp);
+    }
+
+    #[only_owner]
+    #[endpoint(setRafflePot)]
+    fn set_raffle_pot(&self, value: usize) {
+        self.raffle_pot().set(value);
     }
 
     #[only_user_account]
@@ -399,6 +408,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    #[view(getSubmittedTicketsTotal)]
+    fn get_submitted_tickets_total(&self) -> usize {
+        self.raffle_vector().len()
+    }
+
     #[view(getParticipantsCount)]
     fn get_participants_count(&self) -> usize {
         self.raffle_participants().len()
@@ -560,4 +574,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getRaffleTimestamp)]
     #[storage_mapper("raffleTimestamp")]
     fn raffle_timestamp(&self) -> SingleValueMapper<u64>;
+
+    #[view(getRafflePot)]
+    #[storage_mapper("rafflePot")]
+    fn raffle_pot(&self) -> SingleValueMapper<usize>;
+
+    #[view(getTxHashes)]
+    #[storage_mapper("txHashes")]
+    fn tx_hashes(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
 }

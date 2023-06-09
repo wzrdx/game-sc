@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           38
+// Endpoints:                           42
 // Async Callback:                       1
-// Total number of exported functions:  40
+// Total number of exported functions:  44
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -27,8 +27,9 @@ multiversx_sc_wasm_adapter::endpoints! {
         issueGemsToken
         issueEssenceToken
         faucet
-        drawRaffleWinner
+        drawRaffleWinners
         setRaffleTimestamp
+        setRafflePot
         stake
         unstake
         claimStakingRewards
@@ -37,6 +38,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         joinRaffle
         swapEnergy
         getSubmittedTickets
+        getSubmittedTicketsTotal
         getParticipantsCount
         getParticipants
         getStakingInfo
@@ -56,6 +58,8 @@ multiversx_sc_wasm_adapter::endpoints! {
         getRaffleVector
         getRaffleParticipants
         getRaffleTimestamp
+        getRafflePot
+        getTxHashes
         callBack
     )
 }

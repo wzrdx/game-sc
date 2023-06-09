@@ -1,5 +1,5 @@
-USER_PEM="~/elrond-wallet/wallet.pem"
-# USER_PEM="~/Crypto/wallet-kzcpl.pem"
+# USER_PEM="~/elrond-wallet/wallet.pem"
+USER_PEM="~/Crypto/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 
@@ -173,8 +173,17 @@ setRaffleTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1682857458 \
+    --arguments 1687269600 \
     --function="setRaffleTimestamp"
+}
+
+setRafflePot() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=6000000 \
+    --arguments 10 \
+    --function="setRafflePot"
 }
 
 getRaffleVector() {
@@ -183,13 +192,13 @@ getRaffleVector() {
     --function="getRaffleVector"
 }
 
-drawRaffleWinner() {
+drawRaffleWinners() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=10000000 \
     --arguments 3 \
-    --function="drawRaffleWinner"
+    --function="drawRaffleWinners"
 }
 
 getRaffleParticipants() {
@@ -202,4 +211,16 @@ getParticipants() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="getParticipants"
+}
+
+getRafflePot() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getRafflePot"
+}
+
+getTxHashes() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getTxHashes"
 }
