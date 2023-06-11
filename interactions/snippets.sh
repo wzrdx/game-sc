@@ -9,7 +9,8 @@ OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 USER=erd1jvr26kvxs3xtdzapafrkupnphpzexn4zezr5lwvamam7wxqyasusjntmzr
 MAC_USER=erd12vx2sn6aca5sdfhf0am7z74d4vw4yz2tm2p59nvyd3svdcqtxwnqdphu6d
 
-TOKEN_ID="HOLYCOWS-90e467"
+TRAVELERS_ID="HOLYCOWS-90e467"
+ELDERS_ID="PINKF-f70e86"
 
 TICKETS_COLLECTION_NAME="HomeXTickets"
 TICKETS_TICKER="HOMETICKET"
@@ -42,6 +43,15 @@ upgrade() {
     --gas-limit=90000000 \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+setCollectionIds() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=5000000 \
+    --arguments str:${TRAVELERS_ID} str:${ELDERS_ID} \
+    --function="setCollectionIds"
 }
 
 issueTicketsCollection() {
@@ -133,19 +143,16 @@ getEssenceTokenId() {
     --function="getEssenceTokenId"
 }
 
-setTokenId() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=2000000 \
-    --arguments str:${TOKEN_ID} \
-    --function="setTokenId"
-}
-
-getTokenId() {
+getTravelersCollectionId() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getTokenId"
+    --function="getTravelersCollectionId"
+}
+
+getEldersCollectionId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getEldersCollectionId"
 }
 
 getQuests() {

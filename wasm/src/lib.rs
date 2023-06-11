@@ -19,7 +19,7 @@ multiversx_sc_wasm_adapter::endpoints! {
     game_sc
     (
         setQuests
-        setTokenId
+        setCollectionIds
         issueTicketsCollection
         createTicketsToken
         issueEnergyToken
@@ -42,9 +42,9 @@ multiversx_sc_wasm_adapter::endpoints! {
         getParticipantsCount
         getParticipants
         getStakingInfo
-        getStakedNonces
         getLastStakingTimestamp
-        getTokenId
+        getTravelersCollectionId
+        getEldersCollectionId
         getTicketsId
         getEnergyTokenId
         getHerbsTokenId

@@ -1,5 +1,8 @@
 #![no_std]
 
+const TRAVELER_ENERGY_PER_S: u64 = 84; // 0.3034
+const ELDER_ENERGY_PER_S: u64 = 112; // 0.4032
+
 use core::iter::FromIterator;
 
 multiversx_sc::imports!();
@@ -29,7 +32,8 @@ pub struct OngoingQuest {
 pub struct StakingInfo<M: ManagedTypeApi> {
     pub rewards: BigUint<M>,
     pub timestamp: u64,
-    pub nonces: ManagedVec<M, u64>,
+    pub traveler_nonces: ManagedVec<M, u64>,
+    pub elder_nonces: ManagedVec<M, u64>,
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
@@ -54,9 +58,10 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     #[only_owner]
-    #[endpoint(setTokenId)]
-    fn set_token_id(&self, token_id: TokenIdentifier) {
-        self.nft_mapper().set_token_id(token_id);
+    #[endpoint(setCollectionIds)]
+    fn set_collection_ids(&self, travelers_id: TokenIdentifier, elders_id: TokenIdentifier) {
+        self.travelers_mapper().set_token_id(travelers_id);
+        self.elders_mapper().set_token_id(elders_id);
     }
 
     #[only_owner]
@@ -199,15 +204,27 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[endpoint(stake)]
     fn stake(&self) {
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
-        self.nft_mapper().require_all_same_token(&payments);
-
         require!(payments.len() > 0, "Must stake at least one NFT");
+
+        for payment in payments.into_iter() {
+            require!(
+                payment.token_identifier == self.travelers_mapper().get_token_id()
+                    || payment.token_identifier == self.elders_mapper().get_token_id(),
+                "NFT/s must be from the Home X collections"
+            );
+        }
 
         let caller = self.blockchain().get_caller();
         self.claim_staking_rewards_for_user(&caller);
 
         for payment in payments.into_iter() {
-            self.staked_nonces(&caller).insert(payment.token_nonce);
+            if payment.token_identifier == self.travelers_mapper().get_token_id() {
+                self.staked_traveler_nonces(&caller).insert(payment.token_nonce);
+            }
+
+            if payment.token_identifier == self.elders_mapper().get_token_id() {
+                self.staked_elder_nonces(&caller).insert(payment.token_nonce);
+            }
         }
     }
 
@@ -215,24 +232,31 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[endpoint(unstake)]
     fn unstake(&self) {
         let caller = self.blockchain().get_caller();
-        let token_id = self.nft_mapper().get_token_id();
 
         require!(
-            self.staked_nonces(&caller).len() > 0,
+            (self.staked_traveler_nonces(&caller).len() + self.staked_elder_nonces(&caller).len()) > 0,
             "Must have at least one staked NFT in order to unstake"
         );
 
         self.claim_staking_rewards_for_user(&caller);
 
         let mut payments: ManagedVec<EsdtTokenPayment> = ManagedVec::new();
+        let travelers_id = self.travelers_mapper().get_token_id();
+        let elders_id = self.elders_mapper().get_token_id();
 
-        for nonce in self.staked_nonces(&caller).iter() {
-            payments.push(EsdtTokenPayment::new(token_id.clone(), nonce, BigUint::from(1 as u32)))
+        for nonce in self.staked_traveler_nonces(&caller).iter() {
+            payments.push(EsdtTokenPayment::new(travelers_id.clone(), nonce, BigUint::from(1 as u32)))
+        }
+
+        for nonce in self.staked_elder_nonces(&caller).iter() {
+            payments.push(EsdtTokenPayment::new(elders_id.clone(), nonce, BigUint::from(1 as u32)))
         }
 
         if payments.len() > 0 {
             self.send().direct_multi(&caller, &payments);
-            self.staked_nonces(&caller).clear();
+            self.staked_traveler_nonces(&caller).clear();
+            self.staked_elder_nonces(&caller).clear();
+
             self.last_staking_timestamp(&caller).clear();
         }
     }
@@ -243,8 +267,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         let caller = self.blockchain().get_caller();
 
         require!(
-            self.staked_nonces(&caller).len() > 0,
-            "Must have at least one staked NFT in order to unstake"
+            (self.staked_traveler_nonces(&caller).len() + self.staked_elder_nonces(&caller).len()) > 0,
+            "Must have at least one staked NFT in order to claim rewards"
         );
 
         self.claim_staking_rewards_for_user(&caller);
@@ -436,31 +460,23 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[view(getStakingInfo)]
     fn get_staking_info(&self, user: &ManagedAddress) -> StakingInfo<Self::Api> {
-        let mut nonces: ManagedVec<u64> = ManagedVec::new();
+        let mut traveler_nonces: ManagedVec<u64> = ManagedVec::new();
+        let mut elder_nonces: ManagedVec<u64> = ManagedVec::new();
 
-        for nonce in self.staked_nonces(user).iter() {
-            nonces.push(nonce)
+        for nonce in self.staked_traveler_nonces(user).iter() {
+            traveler_nonces.push(nonce)
+        }
+
+        for nonce in self.staked_elder_nonces(user).iter() {
+            elder_nonces.push(nonce)
         }
 
         StakingInfo {
             rewards: self.get_staking_rewards(user),
             timestamp: self.last_staking_timestamp(user).get(),
-            nonces,
+            traveler_nonces,
+            elder_nonces,
         }
-    }
-
-    fn get_staking_rewards(&self, user: &ManagedAddress) -> BigUint {
-        let current_timestamp = self.blockchain().get_block_timestamp();
-        let last_timestamp = self.last_staking_timestamp(user).get();
-
-        if last_timestamp == 0 || current_timestamp <= last_timestamp {
-            return BigUint::zero();
-        }
-
-        let block_diff: u64 = current_timestamp - last_timestamp;
-        let nft_count: u64 = self.staked_nonces(user).len() as u64;
-
-        BigUint::from(block_diff * 84 * nft_count)
     }
 
     fn get_token_mapper(&self, index: usize) -> FungibleTokenMapper {
@@ -489,6 +505,25 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    fn get_staking_rewards(&self, user: &ManagedAddress) -> BigUint {
+        let current_timestamp = self.blockchain().get_block_timestamp();
+        let last_timestamp = self.last_staking_timestamp(user).get();
+
+        if last_timestamp == 0 || current_timestamp <= last_timestamp {
+            return BigUint::zero();
+        }
+
+        let block_diff: u64 = current_timestamp - last_timestamp;
+
+        let traveler_count: u64 = self.staked_traveler_nonces(user).len() as u64;
+        let elder_count: u64 = self.staked_elder_nonces(user).len() as u64;
+
+        let travelers_rewards = BigUint::from(block_diff * TRAVELER_ENERGY_PER_S * traveler_count);
+        let elders_rewards = BigUint::from(block_diff * ELDER_ENERGY_PER_S * elder_count);
+
+        travelers_rewards + elders_rewards
+    }
+
     fn build_uris_vec(&self) -> ManagedVec<ManagedBuffer> {
         let mut uris = ManagedVec::new();
         uris.push(ManagedBuffer::new_from_bytes(
@@ -508,19 +543,26 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     // Staking
-    #[view(getStakedNonces)]
-    #[storage_mapper("stakedNonces")]
-    fn staked_nonces(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
+    #[storage_mapper("stakedTravelerNonces")]
+    fn staked_traveler_nonces(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
+
+    #[storage_mapper("stakedElderNonces")]
+    fn staked_elder_nonces(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
 
     #[view(getLastStakingTimestamp)]
     #[storage_mapper("lastStakingTimestamp")]
     fn last_staking_timestamp(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
-    // Tokens
-    #[view(getTokenId)]
-    #[storage_mapper("nonFungibleTokenMapper")]
-    fn nft_mapper(&self) -> NonFungibleTokenMapper;
+    // NFT Collections
+    #[view(getTravelersCollectionId)]
+    #[storage_mapper("travelersMapper")]
+    fn travelers_mapper(&self) -> NonFungibleTokenMapper;
 
+    #[view(getEldersCollectionId)]
+    #[storage_mapper("eldersMapper")]
+    fn elders_mapper(&self) -> NonFungibleTokenMapper;
+
+    // Tokens
     #[view(getTicketsId)]
     #[storage_mapper("ticketsMapper")]
     fn tickets_mapper(&self) -> NonFungibleTokenMapper;
