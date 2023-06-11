@@ -1,7 +1,7 @@
 #![no_std]
 
 const TRAVELER_ENERGY_PER_S: u64 = 84; // 0.3034
-const ELDER_ENERGY_PER_S: u64 = 112; // 0.4032
+const ELDER_ENERGY_PER_S: u64 = 84; // 0.3034
 const START_DATE: u64 = 1686673800; // 13 June 19:30 EEST
 
 use core::iter::FromIterator;
@@ -204,6 +204,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[payable("*")]
     #[endpoint(stake)]
     fn stake(&self) {
+        self.require_time_bounds();
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
         require!(payments.len() > 0, "Must stake at least one NFT");
 
@@ -232,6 +233,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[only_user_account]
     #[endpoint(unstake)]
     fn unstake(&self) {
+        self.require_time_bounds();
         let caller = self.blockchain().get_caller();
 
         require!(
@@ -265,6 +267,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[only_user_account]
     #[endpoint(claimStakingRewards)]
     fn claim_staking_rewards(&self) {
+        self.require_time_bounds();
         let caller = self.blockchain().get_caller();
 
         require!(
@@ -279,6 +282,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[payable("*")]
     #[endpoint(startQuest)]
     fn start_quest(&self, id: u8) {
+        self.require_time_bounds();
         let caller = self.blockchain().get_caller();
 
         for ongoing_quest in self.ongoing_quests(&caller).iter() {
@@ -323,6 +327,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[only_user_account]
     #[endpoint(completeQuest)]
     fn complete_quest(&self, id: u8) {
+        self.require_time_bounds();
         let caller = self.blockchain().get_caller();
 
         let mut search_result: Option<OngoingQuest> = None;
@@ -372,6 +377,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[payable("*")]
     #[endpoint(joinRaffle)]
     fn join_raffle(&self) {
+        self.require_time_bounds();
         let current_timestamp = self.blockchain().get_block_timestamp();
         let raffle_timestamp = self.raffle_timestamp().get();
 
@@ -410,6 +416,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[payable("*")]
     #[endpoint(swapEnergy)]
     fn swap_energy(&self) {
+        self.require_time_bounds();
         let payment: EsdtTokenPayment = self.call_value().single_esdt();
         self.energy_mapper().require_same_token(&payment.token_identifier);
 
@@ -541,6 +548,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         ));
 
         attributes
+    }
+
+    fn require_time_bounds(&self) {
+        let current_timestamp = self.blockchain().get_block_timestamp();
+        require!(current_timestamp >= START_DATE, "The game has not started yet");
     }
 
     // Staking
