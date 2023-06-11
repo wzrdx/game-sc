@@ -161,13 +161,6 @@ getQuests() {
     --function="getQuests"
 }
 
-getStakedNonces() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments ${USER} \
-    --function="getStakedNonces"
-}
-
 getStakingInfo() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \

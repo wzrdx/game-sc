@@ -2,6 +2,7 @@
 
 const TRAVELER_ENERGY_PER_S: u64 = 84; // 0.3034
 const ELDER_ENERGY_PER_S: u64 = 112; // 0.4032
+const START_DATE: u64 = 1686673800; // 13 June 19:30 EEST
 
 use core::iter::FromIterator;
 
@@ -536,7 +537,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn build_attributes_buffer(&self) -> ManagedBuffer {
         let mut attributes = ManagedBuffer::new();
         attributes.append(&ManagedBuffer::new_from_bytes(
-            "tags:Company X;metadata:bafkreigrkib7uq72s2j232x3pbj34gs6sbtg2vaotv2433tsljfjevx3zu".as_bytes(),
+            "tags:Home X;metadata:bafkreigrkib7uq72s2j232x3pbj34gs6sbtg2vaotv2433tsljfjevx3zu".as_bytes(),
         ));
 
         attributes
