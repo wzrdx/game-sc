@@ -2,7 +2,7 @@
 
 const TRAVELER_ENERGY_PER_S: u64 = 84; // 0.3034
 const ELDER_ENERGY_PER_S: u64 = 84; // 0.3034
-const START_DATE: u64 = 1686673800; // 13 June 19:30 EEST
+const START_DATE: u64 = 1686544151; // 1686673800 13 June 19:30 EEST
 
 use core::iter::FromIterator;
 
@@ -41,6 +41,13 @@ pub struct StakingInfo<M: ManagedTypeApi> {
 pub struct Participant<M: ManagedTypeApi> {
     pub address: ManagedAddress<M>,
     pub tickets_count: usize,
+}
+
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
+pub struct TicketStats {
+    pub earners_count: usize,
+    pub tickets_count: usize,
+    pub most_earned: usize,
 }
 
 #[multiversx_sc::contract]
@@ -140,6 +147,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             .issue_and_set_all_roles(issue_cost, token_display_name, token_ticker, 6 as usize, None);
     }
 
+    // TODO: Remove
     #[only_owner]
     #[endpoint(faucet)]
     fn faucet(&self) {
@@ -200,6 +208,14 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.raffle_pot().set(value);
     }
 
+    #[only_owner]
+    #[endpoint(clearTicketsHistory)]
+    fn clear_tickets_history(&self) {
+        for address in self.tickets_earned().keys() {
+            self.tickets_earned().remove(&address);
+        }
+    }
+
     #[only_user_account]
     #[payable("*")]
     #[endpoint(stake)]
@@ -228,6 +244,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
                 self.staked_elder_nonces(&caller).insert(payment.token_nonce);
             }
         }
+
+        self.staked_addresses().insert(caller);
     }
 
     #[only_user_account]
@@ -262,6 +280,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
             self.last_staking_timestamp(&caller).clear();
         }
+
+        self.staked_addresses().swap_remove(&caller);
     }
 
     #[only_user_account]
@@ -361,6 +381,9 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             let tickets_amount: u64 = rewards.iter().sum();
             self.tickets_mapper()
                 .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(tickets_amount));
+
+            let tickets_earned: usize = self.tickets_earned().remove(&caller).unwrap_or_default();
+            self.tickets_earned().insert(caller.clone(), tickets_earned + 1);
         } else {
             for (i, reward) in rewards.iter().enumerate() {
                 if reward > 0 {
@@ -466,6 +489,43 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         participants
     }
 
+    // Tickets stats
+    #[view(getTicketStats)]
+    fn get_ticket_stats(&self) -> TicketStats {
+        let mut earners_count: usize = 0;
+        let mut tickets_count: usize = 0;
+        let mut most_earned: usize = 0;
+
+        for value in self.tickets_earned().values() {
+            earners_count += 1;
+            tickets_count += &value;
+            most_earned = most_earned.max(value);
+        }
+
+        TicketStats {
+            earners_count,
+            tickets_count,
+            most_earned,
+        }
+    }
+
+    // Staking
+    #[view(getStakedAddressesCount)]
+    fn get_staked_addresses_count(&self) -> usize {
+        self.staked_addresses().len()
+    }
+
+    #[view(getStakedNFTsCount)]
+    fn get_staked_nfts_count(&self) -> usize {
+        let mut count: usize = 0;
+
+        for address in self.staked_addresses().iter() {
+            count += self.staked_traveler_nonces(&address).len() + self.staked_elder_nonces(&address).len();
+        }
+
+        count
+    }
+
     #[view(getStakingInfo)]
     fn get_staking_info(&self, user: &ManagedAddress) -> StakingInfo<Self::Api> {
         let mut traveler_nonces: ManagedVec<u64> = ManagedVec::new();
@@ -565,6 +625,14 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getLastStakingTimestamp)]
     #[storage_mapper("lastStakingTimestamp")]
     fn last_staking_timestamp(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
+
+    #[view(getStakedAddresses)]
+    #[storage_mapper("stakedAddresses")]
+    fn staked_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
+
+    // Tickets stats
+    #[storage_mapper("ticketsEarned")]
+    fn tickets_earned(&self) -> MapMapper<ManagedAddress, usize>;
 
     // NFT Collections
     #[view(getTravelersCollectionId)]

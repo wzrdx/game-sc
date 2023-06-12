@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           42
+// Endpoints:                           47
 // Async Callback:                       1
-// Total number of exported functions:  44
+// Total number of exported functions:  49
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -30,6 +30,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         drawRaffleWinners
         setRaffleTimestamp
         setRafflePot
+        clearTicketsHistory
         stake
         unstake
         claimStakingRewards
@@ -41,8 +42,12 @@ multiversx_sc_wasm_adapter::endpoints! {
         getSubmittedTicketsTotal
         getParticipantsCount
         getParticipants
+        getTicketStats
+        getStakedAddressesCount
+        getStakedNFTsCount
         getStakingInfo
         getLastStakingTimestamp
+        getStakedAddresses
         getTravelersCollectionId
         getEldersCollectionId
         getTicketsId

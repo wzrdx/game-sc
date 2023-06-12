@@ -224,3 +224,23 @@ getTxHashes() {
     --proxy=${PROXY} \
     --function="getTxHashes"
 }
+
+getStakedAddressesCount() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getStakedAddressesCount"
+}
+
+getStakedNFTsCount() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getStakedNFTsCount"
+}
+
+clearTicketsHistory() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=12000000 \
+    --function="clearTicketsHistory"
+}
