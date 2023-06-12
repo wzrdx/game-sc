@@ -3,6 +3,7 @@
 const TRAVELER_ENERGY_PER_S: u64 = 84; // 0.3034
 const ELDER_ENERGY_PER_S: u64 = 84; // 0.3034
 const START_DATE: u64 = 1686544151; // 1686673800 13 June 19:30 EEST
+const MULTIPLIER: u64 = 1000000000;
 
 use core::iter::FromIterator;
 
@@ -216,11 +217,23 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    #[only_owner]
+    #[endpoint(setGamePaused)]
+    fn set_game_paused(&self, value: bool) {
+        self.is_game_paused().set(value);
+    }
+
+    #[only_owner]
+    #[endpoint(setSwappingPaused)]
+    fn set_swapping_paused(&self, value: bool) {
+        self.is_swapping_paused().set(value);
+    }
+
     #[only_user_account]
     #[payable("*")]
     #[endpoint(stake)]
     fn stake(&self) {
-        self.require_time_bounds();
+        self.require_conditions();
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
         require!(payments.len() > 0, "Must stake at least one NFT");
 
@@ -251,7 +264,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[only_user_account]
     #[endpoint(unstake)]
     fn unstake(&self) {
-        self.require_time_bounds();
+        self.require_conditions();
         let caller = self.blockchain().get_caller();
 
         require!(
@@ -287,7 +300,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[only_user_account]
     #[endpoint(claimStakingRewards)]
     fn claim_staking_rewards(&self) {
-        self.require_time_bounds();
+        self.require_conditions();
         let caller = self.blockchain().get_caller();
 
         require!(
@@ -302,7 +315,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[payable("*")]
     #[endpoint(startQuest)]
     fn start_quest(&self, id: u8) {
-        self.require_time_bounds();
+        self.require_conditions();
         let caller = self.blockchain().get_caller();
 
         for ongoing_quest in self.ongoing_quests(&caller).iter() {
@@ -347,7 +360,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[only_user_account]
     #[endpoint(completeQuest)]
     fn complete_quest(&self, id: u8) {
-        self.require_time_bounds();
+        self.require_conditions();
         let caller = self.blockchain().get_caller();
 
         let mut search_result: Option<OngoingQuest> = None;
@@ -400,7 +413,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[payable("*")]
     #[endpoint(joinRaffle)]
     fn join_raffle(&self) {
-        self.require_time_bounds();
+        self.require_conditions();
         let current_timestamp = self.blockchain().get_block_timestamp();
         let raffle_timestamp = self.raffle_timestamp().get();
 
@@ -439,15 +452,16 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[payable("*")]
     #[endpoint(swapEnergy)]
     fn swap_energy(&self) {
-        self.require_time_bounds();
+        self.require_conditions();
+        require!(!self.is_swapping_paused().get(), "Swapping is temporarily paused");
+
         let payment: EsdtTokenPayment = self.call_value().single_esdt();
         self.energy_mapper().require_same_token(&payment.token_identifier);
 
         let caller = self.blockchain().get_caller();
-        let multiplier: u64 = 1000000000;
 
         self.energy_mapper().burn(&payment.amount);
-        self.send().direct_egld(&caller, &(payment.amount * multiplier));
+        self.send().direct_egld(&caller, &(payment.amount * MULTIPLIER));
     }
 
     #[view(getSubmittedTickets)]
@@ -610,9 +624,10 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         attributes
     }
 
-    fn require_time_bounds(&self) {
+    fn require_conditions(&self) {
         let current_timestamp = self.blockchain().get_block_timestamp();
         require!(current_timestamp >= START_DATE, "The game has not started yet");
+        require!(!self.is_game_paused().get(), "The game is temporarily paused");
     }
 
     // Staking
@@ -705,4 +720,13 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getTxHashes)]
     #[storage_mapper("txHashes")]
     fn tx_hashes(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
+
+    // System
+    #[view(isGamePaused)]
+    #[storage_mapper("isGamePaused")]
+    fn is_game_paused(&self) -> SingleValueMapper<bool>;
+
+    #[view(isSwappingPaused)]
+    #[storage_mapper("isSwappingPaused")]
+    fn is_swapping_paused(&self) -> SingleValueMapper<bool>;
 }

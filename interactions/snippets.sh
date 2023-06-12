@@ -113,6 +113,24 @@ issueEssenceToken() {
     --function="issueEssenceToken"
 }
 
+setGamePaused() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=6000000 \
+    --arguments true \
+    --function="setGamePaused"
+}
+
+setSwappingPaused() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=6000000 \
+    --arguments true \
+    --function="setSwappingPaused"
+}
+
 getTicketsId() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
@@ -243,4 +261,10 @@ clearTicketsHistory() {
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=12000000 \
     --function="clearTicketsHistory"
+}
+
+isSwappingPaused() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="isSwappingPaused"
 }

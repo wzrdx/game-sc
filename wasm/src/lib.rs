@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           47
+// Endpoints:                           51
 // Async Callback:                       1
-// Total number of exported functions:  49
+// Total number of exported functions:  53
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -31,6 +31,8 @@ multiversx_sc_wasm_adapter::endpoints! {
         setRaffleTimestamp
         setRafflePot
         clearTicketsHistory
+        setGamePaused
+        setSwappingPaused
         stake
         unstake
         claimStakingRewards
@@ -65,6 +67,8 @@ multiversx_sc_wasm_adapter::endpoints! {
         getRaffleTimestamp
         getRafflePot
         getTxHashes
+        isGamePaused
+        isSwappingPaused
         callBack
     )
 }
