@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           51
+// Endpoints:                           52
 // Async Callback:                       1
-// Total number of exported functions:  53
+// Total number of exported functions:  54
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -30,6 +30,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         drawRaffleWinners
         setRaffleTimestamp
         setRafflePot
+        clearRaffle
         clearTicketsHistory
         setGamePaused
         setSwappingPaused

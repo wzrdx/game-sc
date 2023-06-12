@@ -214,8 +214,8 @@ drawRaffleWinners() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=10000000 \
-    --arguments 3 \
+    --gas-limit=20000000 \
+    --arguments 7 \
     --function="drawRaffleWinners"
 }
 
@@ -263,8 +263,22 @@ clearTicketsHistory() {
     --function="clearTicketsHistory"
 }
 
+clearRaffle() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=20000000 \
+    --function="clearRaffle"
+}
+
 isSwappingPaused() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="isSwappingPaused"
+}
+
+isGamePaused() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="isGamePaused"
 }

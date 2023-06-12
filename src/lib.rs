@@ -173,24 +173,29 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         let mut rand_source = RandomnessSource::new();
         let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.raffle_vector().iter());
 
-        let mut payments_count: usize = 0;
-
-        for _ in 0..winners_count {
-            let index: usize = rand_source.next_usize_in_range(0, vector.len());
-            let winner_id: u16 = vector.get(index);
-
+        for index in 1..=winners_count {
+            let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
             let winner_address = self.raffle_id_participant(winner_id).get();
 
-            let payment_amount: u64 = if payments_count >= (winners_count / 2) {
-                2500000000000000
-            } else {
-                5000000000000000
-            };
-
-            self.send().direct_egld(&winner_address, &BigUint::from(payment_amount));
+            if index == 1 {
+                self.send().direct_esdt(
+                    &winner_address,
+                    &self.elders_mapper().get_token_id(),
+                    2 as u64,
+                    &BigUint::from(1 as u32),
+                );
+            } else if index >= 2 && index <= 4 {
+                self.send()
+                    .direct_egld(&winner_address, &BigUint::from(self.get_raffle_payment_amount(index)));
+            } else if index >= 5 && index <= 6 {
+                self.tickets_mapper()
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
+            } else if index >= 7 {
+                self.tickets_mapper()
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
+            }
 
             vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
-            payments_count += 1;
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
@@ -207,6 +212,13 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[endpoint(setRafflePot)]
     fn set_raffle_pot(&self, value: usize) {
         self.raffle_pot().set(value);
+    }
+
+    #[only_owner]
+    #[endpoint(clearRaffle)]
+    fn clear_raffle(&self) {
+        self.raffle_vector().clear();
+        self.raffle_participants().clear();
     }
 
     #[only_owner]
@@ -380,10 +392,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         let current_timestamp = self.blockchain().get_block_timestamp();
 
-        require!(
-            current_timestamp >= ongoing_quest.end_timestamp,
-            "Quest cannot be completed yet"
-        );
+        require!(current_timestamp >= ongoing_quest.end_timestamp, "Quest cannot be completed yet");
 
         // Rewards
         let quest = self.quests().get(id as usize);
@@ -470,8 +479,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             return 0;
         } else {
             let participant_id = self.raffle_participant_id(user).get();
-            let filtered_vec: ManagedVec<u16> =
-                ManagedVec::from_iter(self.raffle_vector().iter().filter(|t| *t == participant_id));
+            let filtered_vec: ManagedVec<u16> = ManagedVec::from_iter(self.raffle_vector().iter().filter(|t| *t == participant_id));
 
             return filtered_vec.len();
         }
@@ -628,6 +636,18 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         let current_timestamp = self.blockchain().get_block_timestamp();
         require!(current_timestamp >= START_DATE, "The game has not started yet");
         require!(!self.is_game_paused().get(), "The game is temporarily paused");
+    }
+
+    fn get_raffle_payment_amount(&self, index: usize) -> u64 {
+        let amount: u64;
+
+        if index == 2 {
+            amount = 50000000000000000;
+        } else {
+            amount = 1000000000000000;
+        }
+
+        amount
     }
 
     // Staking
