@@ -1,5 +1,5 @@
-# USER_PEM="~/elrond-wallet/wallet.pem"
-USER_PEM="~/Crypto/wallet-kzcpl.pem"
+USER_PEM="~/elrond-wallet/wallet.pem"
+# USER_PEM="~/Crypto/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 
@@ -40,7 +40,7 @@ upgrade() {
     mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --project=${PROJECT} \
     --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=90000000 \
+    --gas-limit=120000000 \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
@@ -127,7 +127,7 @@ setSwappingPaused() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments true \
+    --arguments false \
     --function="setSwappingPaused"
 }
 
@@ -271,6 +271,14 @@ clearRaffle() {
     --function="clearRaffle"
 }
 
+clearOngoingQuests() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=20000000 \
+    --function="clearOngoingQuests"
+}
+
 isSwappingPaused() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
@@ -281,4 +289,10 @@ isGamePaused() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="isGamePaused"
+}
+
+getActivePlayers() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getActivePlayers"
 }

@@ -148,6 +148,16 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             .issue_and_set_all_roles(issue_cost, token_display_name, token_ticker, 6 as usize, None);
     }
 
+    #[only_owner]
+    #[endpoint(clearOngoingQuests)]
+    fn clear_ongoing_quests(&self) {
+        for address in self.active_players().iter() {
+            self.ongoing_quests(&address).clear();
+        }
+
+        self.active_players().clear();
+    }
+
     // TODO: Remove
     #[only_owner]
     #[endpoint(faucet)]
@@ -367,6 +377,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             id,
             end_timestamp: current_timestamp + (quest.duration as u64),
         });
+
+        self.active_players().insert(caller.clone());
     }
 
     #[only_user_account]
@@ -416,6 +428,10 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
 
         self.ongoing_quests(&caller).swap_remove(index_to_remove);
+
+        if self.ongoing_quests(&caller).len() == 0 {
+            self.active_players().swap_remove(&caller);
+        }
     }
 
     #[only_user_account]
@@ -707,6 +723,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getOngoingQuests)]
     #[storage_mapper("ongoingQuests")]
     fn ongoing_quests(&self, user: &ManagedAddress) -> VecMapper<OngoingQuest>;
+
+    // Players who have ongoing quests
+    #[view(getActivePlayers)]
+    #[storage_mapper("activePlayers")]
+    fn active_players(&self) -> UnorderedSetMapper<ManagedAddress>;
 
     // Rewards
     #[view(getParticipantId)]
