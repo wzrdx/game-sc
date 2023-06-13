@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           46
+// Endpoints:                           47
 // Async Callback:                       1
-// Total number of exported functions:  48
+// Total number of exported functions:  49
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -26,6 +26,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         issueHerbsToken
         issueGemsToken
         issueEssenceToken
+        airdropEnergy
         clearOngoingQuests
         drawRaffleWinners
         setRaffleTimestamp

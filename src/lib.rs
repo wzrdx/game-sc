@@ -150,6 +150,15 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     #[only_owner]
+    #[endpoint(airdropEnergy)]
+    fn airdrop_energy(&self, addresses: ManagedVec<ManagedAddress>, alloc_per_addr: ManagedVec<u64>) {
+        for (index, address) in addresses.into_iter().enumerate() {
+            self.energy_mapper()
+                .mint_and_send(&address, BigUint::from(alloc_per_addr.get(index)));
+        }
+    }
+
+    #[only_owner]
     #[endpoint(clearOngoingQuests)]
     fn clear_ongoing_quests(&self) {
         for address in self.active_players().iter() {
