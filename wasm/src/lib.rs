@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           47
+// Endpoints:                           46
 // Async Callback:                       1
-// Total number of exported functions:  49
+// Total number of exported functions:  48
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -58,7 +58,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         getEssenceTokenId
         getQuests
         getOngoingQuests
-        getActivePlayers
         getRaffleIndex
         getRaffleParticipants
         getRaffleTimestamp

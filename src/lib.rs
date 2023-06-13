@@ -1,8 +1,8 @@
 #![no_std]
 
-const TRAVELER_ENERGY_PER_S: u64 = 834; // 0.3034
-const ELDER_ENERGY_PER_S: u64 = 834; // 0.3034
-const START_DATE: u64 = 1686544151; // TODO:
+const TRAVELER_ENERGY_PER_S: u64 = 834;
+const ELDER_ENERGY_PER_S: u64 = 834;
+const START_DATE: u64 = 1686672000;
 const MULTIPLIER: u64 = 2400000000; //
 const ENERGY_SWAPPING_THRESHOLD: u64 = 100000;
 
@@ -720,7 +720,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn ongoing_quests(&self, user: &ManagedAddress) -> VecMapper<OngoingQuest>;
 
     // Players who have ongoing quests
-    #[view(getActivePlayers)]
     #[storage_mapper("activePlayers")]
     fn active_players(&self) -> UnorderedSetMapper<ManagedAddress>;
 
