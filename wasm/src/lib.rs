@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           54
+// Endpoints:                           55
 // Async Callback:                       1
-// Total number of exported functions:  56
+// Total number of exported functions:  57
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -36,6 +36,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         setGamePaused
         setSwappingPaused
         stake
+        clear
         unstake
         claimStakingRewards
         startQuest

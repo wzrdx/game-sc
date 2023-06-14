@@ -283,6 +283,19 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.staked_addresses().insert(caller);
     }
 
+    // TODO: Remove
+    #[only_user_account]
+    #[endpoint(clear)]
+    fn clear(&self) {
+        let caller = self.blockchain().get_caller();
+
+        self.staked_traveler_nonces(&caller).clear();
+        self.staked_elder_nonces(&caller).clear();
+
+        self.last_staking_timestamp(&caller).clear();
+        self.staked_addresses().swap_remove(&caller);
+    }
+
     #[only_user_account]
     #[endpoint(unstake)]
     fn unstake(&self) {
@@ -687,11 +700,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     // NFT Collections
     #[view(getTravelersCollectionId)]
-    #[storage_mapper("travelersMapper")]
+    #[storage_mapper("travelersMapper1")]
     fn travelers_mapper(&self) -> NonFungibleTokenMapper;
 
     #[view(getEldersCollectionId)]
-    #[storage_mapper("eldersMapper")]
+    #[storage_mapper("eldersMapper1")]
     fn elders_mapper(&self) -> NonFungibleTokenMapper;
 
     // Tokens

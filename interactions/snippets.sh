@@ -9,7 +9,7 @@ OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 USER=erd1jvr26kvxs3xtdzapafrkupnphpzexn4zezr5lwvamam7wxqyasusjntmzr
 MAC_USER=erd12vx2sn6aca5sdfhf0am7z74d4vw4yz2tm2p59nvyd3svdcqtxwnqdphu6d
 
-TRAVELERS_ID="HOLYCOWS-90e467"
+TRAVELERS_ID="PTESTERS-8fd15c"
 ELDERS_ID="PINKF-f70e86"
 
 TICKETS_COLLECTION_NAME="HomeXTickets"
@@ -43,6 +43,14 @@ upgrade() {
     --gas-limit=120000000 \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+clear() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=9000000 \
+    --function="clear"
 }
 
 setCollectionIds() {
