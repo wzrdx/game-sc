@@ -3,7 +3,8 @@ USER_PEM="~/elrond-wallet/wallet-homex.pem"
 PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 
-SC_ADDRESS=
+SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
+USER=erd195x2uwy6rw3npcza8luazkr58hhxfxmu7tqjwzhj45l4fvdunl6qqa9du3
 
 TRAVELERS_ID="TRAVELER-51bdef"
 ELDERS_ID="HOMEXELDER-d43957"
@@ -27,7 +28,7 @@ ESSENCE_TICKER="ESSENCE"
 deploy() {
     mxpy --verbose contract deploy --project=${PROJECT} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=50000000 \
+    --gas-limit=100000000 \
     --send --outfile="deploy-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
@@ -54,7 +55,7 @@ issueTicketsCollection() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=100000000 \
+    --gas-limit=200000000 \
     --value 50000000000000000 \
     --arguments str:${TICKETS_COLLECTION_NAME} str:${TICKETS_TICKER} \
     --function="issueTicketsCollection"
@@ -64,7 +65,7 @@ createTicketsToken() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=10000000 \
+    --gas-limit=120000000 \
     --arguments 1000 \
     --function="createTicketsToken"
 }
@@ -199,12 +200,6 @@ getRaffleParticipants() {
     --function="getRaffleParticipants"
 }
 
-getParticipants() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getParticipants"
-}
-
 getTxHashes() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
@@ -257,4 +252,17 @@ isGamePaused() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="isGamePaused"
+}
+
+getRaffleTimestamp() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getRaffleTimestamp"
+}
+
+getUserTokenNonces() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${USER} str:${TRAVELERS_ID} \
+    --function="getUserTokenNonces"
 }
