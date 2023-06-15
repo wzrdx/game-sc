@@ -1,5 +1,5 @@
-USER_PEM="~/elrond-wallet/wallet.pem"
-# USER_PEM="~/Crypto/wallet-kzcpl.pem"
+# USER_PEM="~/elrond-wallet/wallet.pem"
+USER_PEM="~/Crypto/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 

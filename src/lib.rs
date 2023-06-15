@@ -598,6 +598,25 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    #[view(getUserTokenNonces)]
+    fn get_all_user_nonces(&self, user_address: ManagedAddress, token_id: TokenIdentifier) -> ManagedVec<u64> {
+        let mut nonces: ManagedVec<u64> = ManagedVec::new();
+
+        if token_id == self.travelers_mapper().get_token_id() {
+            for nonce in self.staked_traveler_nonces(&user_address).iter() {
+                nonces.push(nonce)
+            }
+        }
+
+        if token_id == self.elders_mapper().get_token_id() {
+            for nonce in self.staked_elder_nonces(&user_address).iter() {
+                nonces.push(nonce)
+            }
+        }
+
+        nonces
+    }
+
     fn get_token_mapper(&self, index: usize) -> FungibleTokenMapper {
         let mapper;
 
