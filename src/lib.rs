@@ -298,7 +298,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[only_user_account]
     #[endpoint(unstake)]
-    fn unstake(&self) {
+    fn unstake(&self, traveler_nonces: ManagedVec<u64>, elder_nonces: ManagedVec<u64>) {
         self.require_conditions();
         let caller = self.blockchain().get_caller();
 
@@ -313,23 +313,30 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         let travelers_id = self.travelers_mapper().get_token_id();
         let elders_id = self.elders_mapper().get_token_id();
 
-        for nonce in self.staked_traveler_nonces(&caller).iter() {
-            payments.push(EsdtTokenPayment::new(travelers_id.clone(), nonce, BigUint::from(1 as u32)))
+        for nonce in traveler_nonces.into_iter() {
+            let was_removed = self.staked_traveler_nonces(&caller).swap_remove(&nonce);
+
+            if was_removed {
+                payments.push(EsdtTokenPayment::new(travelers_id.clone(), nonce, BigUint::from(1 as u32)))
+            }
         }
 
-        for nonce in self.staked_elder_nonces(&caller).iter() {
-            payments.push(EsdtTokenPayment::new(elders_id.clone(), nonce, BigUint::from(1 as u32)))
+        for nonce in elder_nonces.into_iter() {
+            let was_removed = self.staked_elder_nonces(&caller).swap_remove(&nonce);
+
+            if was_removed {
+                payments.push(EsdtTokenPayment::new(elders_id.clone(), nonce, BigUint::from(1 as u32)))
+            }
         }
 
         if payments.len() > 0 {
             self.send().direct_multi(&caller, &payments);
-            self.staked_traveler_nonces(&caller).clear();
-            self.staked_elder_nonces(&caller).clear();
-
-            self.last_staking_timestamp(&caller).clear();
         }
 
-        self.staked_addresses().swap_remove(&caller);
+        if self.staked_traveler_nonces(&caller).is_empty() && self.staked_elder_nonces(&caller).is_empty() {
+            self.last_staking_timestamp(&caller).clear();
+            self.staked_addresses().swap_remove(&caller);
+        }
     }
 
     #[only_user_account]
