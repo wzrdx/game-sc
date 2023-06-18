@@ -3,7 +3,7 @@
 const TRAVELER_ENERGY_PER_S: u64 = 84; // 0.3034
 const ELDER_ENERGY_PER_S: u64 = 84; // 0.3034
 const START_DATE: u64 = 1686544151; // 1686673800 13 June 19:30 EEST
-const MULTIPLIER: u64 = 1000000000;
+const MULTIPLIER: u64 = 24000000;
 
 use core::iter::FromIterator;
 
