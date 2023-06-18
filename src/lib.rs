@@ -3,7 +3,7 @@
 const TRAVELER_ENERGY_PER_S: u64 = 834;
 const ELDER_ENERGY_PER_S: u64 = 834;
 const START_DATE: u64 = 1686672000;
-const MULTIPLIER: u64 = 2400000000; //
+const MULTIPLIER: u64 = 24000000; //
 const ENERGY_SWAPPING_THRESHOLD: u64 = 100000;
 
 use core::iter::FromIterator;
