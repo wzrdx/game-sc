@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           56
+// Endpoints:                           48
 // Async Callback:                       1
-// Total number of exported functions:  58
+// Total number of exported functions:  50
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -26,11 +26,10 @@ multiversx_sc_wasm_adapter::endpoints! {
         issueHerbsToken
         issueGemsToken
         issueEssenceToken
+        airdropEnergy
         clearOngoingQuests
-        faucet
         drawRaffleWinners
         setRaffleTimestamp
-        setRafflePot
         clearRaffle
         clearTicketsHistory
         setGamePaused
@@ -52,8 +51,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         getStakedNFTsCount
         getStakingInfo
         getUserTokenNonces
-        getLastStakingTimestamp
-        getStakedAddresses
         getTravelersCollectionId
         getEldersCollectionId
         getTicketsId
@@ -63,14 +60,9 @@ multiversx_sc_wasm_adapter::endpoints! {
         getEssenceTokenId
         getQuests
         getOngoingQuests
-        getActivePlayers
-        getParticipantId
-        getParticipantAddress
         getRaffleIndex
-        getRaffleVector
         getRaffleParticipants
         getRaffleTimestamp
-        getRafflePot
         getTxHashes
         isGamePaused
         isSwappingPaused

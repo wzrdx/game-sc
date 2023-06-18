@@ -1,9 +1,10 @@
 #![no_std]
 
-const TRAVELER_ENERGY_PER_S: u64 = 84; // 0.3034
-const ELDER_ENERGY_PER_S: u64 = 84; // 0.3034
-const START_DATE: u64 = 1686544151; // 1686673800 13 June 19:30 EEST
-const MULTIPLIER: u64 = 24000000;
+const TRAVELER_ENERGY_PER_S: u64 = 834;
+const ELDER_ENERGY_PER_S: u64 = 834;
+const START_DATE: u64 = 1686672000;
+const MULTIPLIER: u64 = 24000000; //
+const ENERGY_SWAPPING_THRESHOLD: u64 = 100000;
 
 use core::iter::FromIterator;
 
@@ -149,6 +150,15 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     #[only_owner]
+    #[endpoint(airdropEnergy)]
+    fn airdrop_energy(&self, addresses: ManagedVec<ManagedAddress>, alloc_per_addr: ManagedVec<u64>) {
+        for (index, address) in addresses.into_iter().enumerate() {
+            self.energy_mapper()
+                .mint_and_send(&address, BigUint::from(alloc_per_addr.get(index)));
+        }
+    }
+
+    #[only_owner]
     #[endpoint(clearOngoingQuests)]
     fn clear_ongoing_quests(&self) {
         for address in self.active_players().iter() {
@@ -156,20 +166,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
 
         self.active_players().clear();
-    }
-
-    // TODO: Remove
-    #[only_owner]
-    #[endpoint(faucet)]
-    fn faucet(&self) {
-        let caller = self.blockchain().get_caller();
-        self.energy_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
-        self.herbs_mapper().mint_and_send(&caller, BigUint::from(10000000 as u32));
-        self.gems_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
-        self.essence_mapper().mint_and_send(&caller, BigUint::from(5000000 as u32));
-
-        self.tickets_mapper()
-            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(5 as u32));
     }
 
     #[only_owner]
@@ -187,6 +183,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
             let winner_address = self.raffle_id_participant(winner_id).get();
 
+            // TODO:
             if index == 1 {
                 self.send().direct_esdt(
                     &winner_address,
@@ -216,12 +213,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[endpoint(setRaffleTimestamp)]
     fn set_raffle_timestamp(&self, timestamp: u64) {
         self.raffle_timestamp().set(timestamp);
-    }
-
-    #[only_owner]
-    #[endpoint(setRafflePot)]
-    fn set_raffle_pot(&self, value: usize) {
-        self.raffle_pot().set(value);
     }
 
     #[only_owner]
@@ -464,7 +455,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         require!(
             current_timestamp <= raffle_timestamp,
-            "Cannot submit tickets after raffle submission has ended"
+            "Cannot submit tickets after the raffle has ended"
         );
 
         let payment: EsdtTokenPayment = self.call_value().single_esdt();
@@ -502,6 +493,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         let payment: EsdtTokenPayment = self.call_value().single_esdt();
         self.energy_mapper().require_same_token(&payment.token_identifier);
+
+        require!(
+            payment.amount >= BigUint::from(ENERGY_SWAPPING_THRESHOLD),
+            "Amount too small to swap"
+        );
 
         let caller = self.blockchain().get_caller();
 
@@ -696,6 +692,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn get_raffle_payment_amount(&self, index: usize) -> u64 {
         let amount: u64;
 
+        // TODO:
         if index == 2 {
             amount = 50000000000000000;
         } else {
@@ -712,11 +709,9 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("stakedElderNonces")]
     fn staked_elder_nonces(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
 
-    #[view(getLastStakingTimestamp)]
     #[storage_mapper("lastStakingTimestamp")]
     fn last_staking_timestamp(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
-    #[view(getStakedAddresses)]
     #[storage_mapper("stakedAddresses")]
     fn staked_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
 
@@ -735,7 +730,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     // Tokens
     #[view(getTicketsId)]
-    #[storage_mapper("ticketsMapper")]
+    #[storage_mapper("sftTicketsMapper")]
     fn tickets_mapper(&self) -> NonFungibleTokenMapper;
 
     #[view(getEnergyTokenId)]
@@ -764,16 +759,13 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn ongoing_quests(&self, user: &ManagedAddress) -> VecMapper<OngoingQuest>;
 
     // Players who have ongoing quests
-    #[view(getActivePlayers)]
     #[storage_mapper("activePlayers")]
     fn active_players(&self) -> UnorderedSetMapper<ManagedAddress>;
 
     // Rewards
-    #[view(getParticipantId)]
     #[storage_mapper("raffleParticipantId")]
     fn raffle_participant_id(&self, user: &ManagedAddress) -> SingleValueMapper<u16>;
 
-    #[view(getParticipantAddress)]
     #[storage_mapper("raffleIdParticipant")]
     fn raffle_id_participant(&self, id: u16) -> SingleValueMapper<ManagedAddress>;
 
@@ -781,7 +773,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("raffleIndex")]
     fn raffle_index(&self) -> SingleValueMapper<u16>;
 
-    #[view(getRaffleVector)]
     #[storage_mapper("raffleVector")]
     fn raffle_vector(&self) -> VecMapper<u16>;
 
@@ -792,10 +783,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(getRaffleTimestamp)]
     #[storage_mapper("raffleTimestamp")]
     fn raffle_timestamp(&self) -> SingleValueMapper<u64>;
-
-    #[view(getRafflePot)]
-    #[storage_mapper("rafflePot")]
-    fn raffle_pot(&self) -> SingleValueMapper<usize>;
 
     #[view(getTxHashes)]
     #[storage_mapper("txHashes")]
