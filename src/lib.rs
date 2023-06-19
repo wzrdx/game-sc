@@ -182,19 +182,18 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
             let winner_address = self.raffle_id_participant(winner_id).get();
 
-            // TODO: NFT nonces
             if index == 1 {
                 self.send().direct_esdt(
                     &winner_address,
                     &self.elders_mapper().get_token_id(),
-                    21 as u64,
+                    60 as u64,
                     &BigUint::from(1 as u32),
                 );
             } else if index == 2 {
                 self.send().direct_esdt(
                     &winner_address,
                     &self.elders_mapper().get_token_id(),
-                    22 as u64,
+                    51 as u64,
                     &BigUint::from(1 as u32),
                 );
             } else if index >= 3 && index <= 15 {
@@ -683,17 +682,16 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn get_raffle_payment_amount(&self, index: usize) -> u64 {
         let amount: u64;
 
-        // TODO: Correct amounts (add a 0)
         if index == 3 {
-            amount = 500000000000000000;
+            amount = 5000000000000000000;
         } else if index == 4 {
-            amount = 400000000000000000;
+            amount = 4000000000000000000;
         } else if index == 5 {
-            amount = 300000000000000000;
+            amount = 3000000000000000000;
         } else if index >= 6 && index <= 8 {
-            amount = 200000000000000000;
+            amount = 2000000000000000000;
         } else if index >= 9 && index <= 15 {
-            amount = 100000000000000000;
+            amount = 1000000000000000000;
         } else {
             amount = 0;
         }

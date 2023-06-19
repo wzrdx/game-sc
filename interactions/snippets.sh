@@ -16,6 +16,7 @@ ELDERS_ID="HOLYCOWS-90e467"
 # CHAIN_ID="1"
 # SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
+WINNERS=30
 
 deploy() {
     mxpy --verbose contract deploy --project=${PROJECT} --metadata-payable --metadata-payable-by-sc \
@@ -182,7 +183,7 @@ drawRaffleWinners() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=600000000 \
-    --arguments 30 \
+    --arguments ${WINNERS} \
     --function="drawRaffleWinners"
 }
 
