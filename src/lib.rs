@@ -711,7 +711,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn get_raffle_payment_amount(&self, index: usize) -> u64 {
         let amount: u64;
 
-        // TODO: Correct amounts
+        // TODO: Correct amounts (add a 0)
         if index == 3 {
             amount = 500000000000000000;
         } else if index == 4 {
@@ -750,20 +750,18 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("ticketsEarned")]
     fn tickets_earned(&self) -> MapMapper<ManagedAddress, usize>;
 
-    // TODO:
     // NFT Collections
     #[view(getTravelersCollectionId)]
-    #[storage_mapper("travelersMapper3")]
+    #[storage_mapper("travelersMapper")]
     fn travelers_mapper(&self) -> NonFungibleTokenMapper;
 
     #[view(getEldersCollectionId)]
-    #[storage_mapper("eldersMapper3")]
+    #[storage_mapper("eldersMapper")]
     fn elders_mapper(&self) -> NonFungibleTokenMapper;
 
-    // TODO: sftTicketsMapper
     // Tokens
     #[view(getTicketsId)]
-    #[storage_mapper("ticketsMapper")]
+    #[storage_mapper("sftTicketsMapper")]
     fn tickets_mapper(&self) -> NonFungibleTokenMapper;
 
     #[view(getEnergyTokenId)]
