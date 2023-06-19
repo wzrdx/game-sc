@@ -2,8 +2,7 @@
 
 const TRAVELER_ENERGY_PER_S: u64 = 834;
 const ELDER_ENERGY_PER_S: u64 = 834;
-const START_DATE: u64 = 1686672000;
-const MULTIPLIER: u64 = 24000000; //
+const MULTIPLIER: u64 = 24000000;
 const ENERGY_SWAPPING_THRESHOLD: u64 = 100000;
 
 use core::iter::FromIterator;
@@ -183,21 +182,28 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
             let winner_address = self.raffle_id_participant(winner_id).get();
 
-            // TODO:
+            // TODO: NFT nonces
             if index == 1 {
                 self.send().direct_esdt(
                     &winner_address,
                     &self.elders_mapper().get_token_id(),
-                    2 as u64,
+                    21 as u64,
                     &BigUint::from(1 as u32),
                 );
-            } else if index >= 2 && index <= 4 {
+            } else if index == 2 {
+                self.send().direct_esdt(
+                    &winner_address,
+                    &self.elders_mapper().get_token_id(),
+                    22 as u64,
+                    &BigUint::from(1 as u32),
+                );
+            } else if index >= 3 && index <= 15 {
                 self.send()
                     .direct_egld(&winner_address, &BigUint::from(self.get_raffle_payment_amount(index)));
-            } else if index >= 5 && index <= 6 {
+            } else if index >= 16 && index <= 20 {
                 self.tickets_mapper()
                     .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
-            } else if index >= 7 {
+            } else if index >= 21 && index <= 30 {
                 self.tickets_mapper()
                     .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
             }
@@ -276,15 +282,30 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     // TODO: Remove
     #[only_user_account]
-    #[endpoint(clear)]
-    fn clear(&self) {
-        let caller = self.blockchain().get_caller();
+    #[endpoint(loadEntries)]
+    fn load_entries(&self, users: ManagedVec<ManagedAddress>) {
+        let mut rand_source = RandomnessSource::new();
 
-        self.staked_traveler_nonces(&caller).clear();
-        self.staked_elder_nonces(&caller).clear();
+        for user in users.into_iter() {
+            if self.raffle_participant_id(&user).is_empty() {
+                let id: u16 = self.raffle_index().update(|i| {
+                    *i += 1;
+                    *i
+                });
 
-        self.last_staking_timestamp(&caller).clear();
-        self.staked_addresses().swap_remove(&caller);
+                self.raffle_participant_id(&user).set(id);
+                self.raffle_id_participant(id).set(user.clone());
+            }
+
+            let participant_id = self.raffle_participant_id(&user).get();
+            let random_amount = rand_source.next_usize_in_range(1, 7);
+
+            for _ in 0..random_amount {
+                self.raffle_vector().push(&participant_id);
+            }
+
+            self.raffle_participants().insert(user.clone());
+        }
     }
 
     #[only_user_account]
@@ -684,22 +705,32 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     fn require_conditions(&self) {
-        let current_timestamp = self.blockchain().get_block_timestamp();
-        require!(current_timestamp >= START_DATE, "The game has not started yet");
         require!(!self.is_game_paused().get(), "The game is temporarily paused");
     }
 
     fn get_raffle_payment_amount(&self, index: usize) -> u64 {
         let amount: u64;
 
-        // TODO:
-        if index == 2 {
-            amount = 50000000000000000;
+        // TODO: Correct amounts
+        if index == 3 {
+            amount = 500000000000000000;
+        } else if index == 4 {
+            amount = 400000000000000000;
+        } else if index == 5 {
+            amount = 300000000000000000;
+        } else if index >= 6 && index <= 8 {
+            amount = 200000000000000000;
+        } else if index >= 9 && index <= 15 {
+            amount = 100000000000000000;
         } else {
-            amount = 1000000000000000;
+            amount = 0;
         }
 
         amount
+    }
+
+    fn to_egld(&self, value: u64) -> u64 {
+        value.mul(1000000000000000000 as u64)
     }
 
     // Staking
@@ -719,18 +750,20 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("ticketsEarned")]
     fn tickets_earned(&self) -> MapMapper<ManagedAddress, usize>;
 
+    // TODO:
     // NFT Collections
     #[view(getTravelersCollectionId)]
-    #[storage_mapper("travelersMapper1")]
+    #[storage_mapper("travelersMapper3")]
     fn travelers_mapper(&self) -> NonFungibleTokenMapper;
 
     #[view(getEldersCollectionId)]
-    #[storage_mapper("eldersMapper1")]
+    #[storage_mapper("eldersMapper3")]
     fn elders_mapper(&self) -> NonFungibleTokenMapper;
 
+    // TODO: sftTicketsMapper
     // Tokens
     #[view(getTicketsId)]
-    #[storage_mapper("sftTicketsMapper")]
+    #[storage_mapper("ticketsMapper")]
     fn tickets_mapper(&self) -> NonFungibleTokenMapper;
 
     #[view(getEnergyTokenId)]

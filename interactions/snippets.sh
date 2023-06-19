@@ -1,12 +1,12 @@
-USER_PEM="~/elrond-wallet/wallet.pem"
-# USER_PEM="~/Crypto/.pem"
+# USER_PEM="~/elrond-wallet/wallet.pem"
+USER_PEM="~/Crypto/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgq9459wl67kadq47jq8xqwp56muskyaajvukrq9xjh8z
 
 TRAVELERS_ID="PTESTERS-8fd15c"
-ELDERS_ID="PINKF-f70e86"
+ELDERS_ID="HOLYCOWS-90e467"
 
 
 deploy() {
@@ -181,8 +181,8 @@ drawRaffleWinners() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=20000000 \
-    --arguments 7 \
+    --gas-limit=600000000 \
+    --arguments 30 \
     --function="drawRaffleWinners"
 }
 

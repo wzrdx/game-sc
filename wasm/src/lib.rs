@@ -35,7 +35,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         setGamePaused
         setSwappingPaused
         stake
-        clear
+        loadEntries
         unstake
         claimStakingRewards
         startQuest
