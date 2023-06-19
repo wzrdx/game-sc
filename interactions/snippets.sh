@@ -16,7 +16,7 @@ ELDERS_ID="HOLYCOWS-90e467"
 # CHAIN_ID="1"
 # SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
-WINNERS=30
+WINNERS=5
 
 deploy() {
     mxpy --verbose contract deploy --project=${PROJECT} --metadata-payable --metadata-payable-by-sc \
@@ -33,6 +33,30 @@ upgrade() {
     --gas-limit=120000000 \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+draw() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --arguments 1 \
+    --gas-limit=600000000 \
+    --function="draw"
+}
+
+# TODO:
+copyVector() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=200000000 \
+    --function="copyVector"
+}
+
+getOperatingVectorLength() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getOperatingVectorLength"
 }
 
 setCollectionIds() {
@@ -259,3 +283,4 @@ getUserTokenNonces() {
     --arguments ${USER} str:${TRAVELERS_ID} \
     --function="getUserTokenNonces"
 }
+

@@ -56,6 +56,15 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[init]
     fn init(&self) {}
 
+    // TODO:
+    #[only_owner]
+    #[endpoint(copyVector)]
+    fn copy_vector(&self) {
+        for element in self.raffle_vector().into_iter() {
+            self.operating_vector().push(&element);
+        }
+    }
+
     #[only_owner]
     #[endpoint(setQuests)]
     fn set_quests(&self, quests: ManagedVec<Quest<Self::Api>>) {
@@ -208,6 +217,61 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             }
 
             vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
+        }
+
+        self.raffle_vector().clear();
+
+        for element in vector.into_iter() {
+            self.raffle_vector().push(&element);
+        }
+
+        let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
+        self.tx_hashes().insert(hash);
+    }
+
+    #[only_owner]
+    #[endpoint(draw)]
+    fn draw(&self, phase: usize) {
+        let mut rand_source = RandomnessSource::new();
+        let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.operating_vector().iter());
+
+        for index in 1..=5 {
+            let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
+            let winner_address = self.raffle_id_participant(winner_id).get();
+
+            if phase == 1 {
+                if index == 1 {
+                    // self.send().direct_esdt(
+                    //     &winner_address,
+                    //     &self.elders_mapper().get_token_id(),
+                    //     60 as u64,
+                    //     &BigUint::from(1 as u32),
+                    // );
+                    self.send().direct_egld(&winner_address, &BigUint::from(999990000000 as u64));
+                } else if index == 2 {
+                    // self.send().direct_esdt(
+                    //     &winner_address,
+                    //     &self.elders_mapper().get_token_id(),
+                    //     51 as u64,
+                    //     &BigUint::from(1 as u32),
+                    // );
+                    self.send().direct_egld(&winner_address, &BigUint::from(7777770000000 as u64));
+                } else if index == 3 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(50000000000000000 as u64));
+                } else if index == 4 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(40000000000000000 as u64));
+                } else if index == 5 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(30000000000000000 as u64));
+                }
+
+                vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
+            }
+        }
+
+        self.operating_vector().clear();
+
+        for element in vector.into_iter() {
+            self.operating_vector().push(&element);
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
@@ -509,6 +573,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    // TODO:
+    #[view(getOperatingVectorLength)]
+    fn get_operating_vector_length(&self) -> usize {
+        self.operating_vector().len()
+    }
+
     #[view(getSubmittedTicketsTotal)]
     fn get_submitted_tickets_total(&self) -> usize {
         self.raffle_vector().len()
@@ -682,16 +752,17 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn get_raffle_payment_amount(&self, index: usize) -> u64 {
         let amount: u64;
 
+        // TODO: Add two 0s
         if index == 3 {
-            amount = 5000000000000000000;
+            amount = 50000000000000000;
         } else if index == 4 {
-            amount = 4000000000000000000;
+            amount = 40000000000000000;
         } else if index == 5 {
-            amount = 3000000000000000000;
+            amount = 30000000000000000;
         } else if index >= 6 && index <= 8 {
-            amount = 2000000000000000000;
+            amount = 20000000000000000;
         } else if index >= 9 && index <= 15 {
-            amount = 1000000000000000000;
+            amount = 10000000000000000;
         } else {
             amount = 0;
         }
@@ -776,6 +847,9 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[storage_mapper("raffleVector")]
     fn raffle_vector(&self) -> VecMapper<u16>;
+
+    #[storage_mapper("operatingVector")]
+    fn operating_vector(&self) -> VecMapper<u16>;
 
     #[view(getRaffleParticipants)]
     #[storage_mapper("raffleParticipants")]
