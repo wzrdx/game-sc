@@ -1,3 +1,4 @@
+### devnet
 # USER_PEM="~/elrond-wallet/wallet.pem"
 USER_PEM="~/Crypto/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
@@ -7,6 +8,13 @@ SC_ADDRESS=erd1qqqqqqqqqqqqqpgq9459wl67kadq47jq8xqwp56muskyaajvukrq9xjh8z
 
 TRAVELERS_ID="PTESTERS-8fd15c"
 ELDERS_ID="HOLYCOWS-90e467"
+
+### mainnet
+# USER_PEM="~/elrond-wallet/wallet-homex.pem"
+# # USER_PEM="~/Crypto/wallet/wallet-homex.pem"
+# PROXY="https://api.multiversx.com"
+# CHAIN_ID="1"
+# SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
 
 deploy() {
