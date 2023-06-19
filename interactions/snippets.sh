@@ -6,8 +6,10 @@
 
 # SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
-# TRAVELERS_ID="PTESTERS-8fd15c"
+TRAVELERS_ID="TRAVELER-51bdef"
 # ELDERS_ID="HOLYCOWS-90e467"
+
+USER=erd1gmmrkz5432xnt4qwh0apv5mrhyuuk7tpvhwsdgg226wd3gfces0s33da8l
 
 ### mainnet
 USER_PEM="~/elrond-wallet/wallet-homex.pem"
