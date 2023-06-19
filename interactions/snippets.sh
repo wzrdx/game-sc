@@ -4,7 +4,7 @@ USER_PEM="~/Crypto/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 
-SC_ADDRESS=erd1qqqqqqqqqqqqqpgq9459wl67kadq47jq8xqwp56muskyaajvukrq9xjh8z
+SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
 TRAVELERS_ID="PTESTERS-8fd15c"
 ELDERS_ID="HOLYCOWS-90e467"
@@ -32,14 +32,6 @@ upgrade() {
     --gas-limit=120000000 \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
-}
-
-clear() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=9000000 \
-    --function="clear"
 }
 
 setCollectionIds() {

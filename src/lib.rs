@@ -280,34 +280,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.staked_addresses().insert(caller);
     }
 
-    // TODO: Remove
-    #[only_user_account]
-    #[endpoint(loadEntries)]
-    fn load_entries(&self, users: ManagedVec<ManagedAddress>) {
-        let mut rand_source = RandomnessSource::new();
-
-        for user in users.into_iter() {
-            if self.raffle_participant_id(&user).is_empty() {
-                let id: u16 = self.raffle_index().update(|i| {
-                    *i += 1;
-                    *i
-                });
-
-                self.raffle_participant_id(&user).set(id);
-                self.raffle_id_participant(id).set(user.clone());
-            }
-
-            let participant_id = self.raffle_participant_id(&user).get();
-            let random_amount = rand_source.next_usize_in_range(1, 7);
-
-            for _ in 0..random_amount {
-                self.raffle_vector().push(&participant_id);
-            }
-
-            self.raffle_participants().insert(user.clone());
-        }
-    }
-
     #[only_user_account]
     #[endpoint(unstake)]
     fn unstake(&self, traveler_nonces: ManagedVec<u64>, elder_nonces: ManagedVec<u64>) {
