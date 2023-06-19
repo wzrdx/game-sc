@@ -1,6 +1,6 @@
 ### devnet
-# USER_PEM="~/elrond-wallet/wallet.pem"
-USER_PEM="~/Crypto/wallet-kzcpl.pem"
+USER_PEM="~/elrond-wallet/wallet.pem"
+# USER_PEM="~/Crypto/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 
@@ -51,6 +51,15 @@ copyVector() {
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=200000000 \
     --function="copyVector"
+}
+
+# TODO:
+clearOperatingVector() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=200000000 \
+    --function="clearOperatingVector"
 }
 
 # TODO:
@@ -257,7 +266,7 @@ clearRaffle() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=20000000 \
+    --gas-limit=600000000 \
     --function="clearRaffle"
 }
 

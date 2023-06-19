@@ -65,6 +65,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    #[only_owner]
+    #[endpoint(clearOperatingVector)]
+    fn clear_operating_vector(&self) {
+        self.operating_vector().clear();
+    }
+
     // TODO: Owner function
     #[only_owner]
     #[endpoint(clearHashes)]
