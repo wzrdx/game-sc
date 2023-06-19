@@ -1,20 +1,20 @@
 ### devnet
 # USER_PEM="~/elrond-wallet/wallet.pem"
-USER_PEM="~/Crypto/wallet-kzcpl.pem"
-PROXY="https://devnet-api.multiversx.com"
-CHAIN_ID="D"
+# USER_PEM="~/Crypto/wallet-kzcpl.pem"
+# PROXY="https://devnet-api.multiversx.com"
+# CHAIN_ID="D"
 
-SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
+# SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
-TRAVELERS_ID="PTESTERS-8fd15c"
-ELDERS_ID="HOLYCOWS-90e467"
+# TRAVELERS_ID="PTESTERS-8fd15c"
+# ELDERS_ID="HOLYCOWS-90e467"
 
 ### mainnet
 # USER_PEM="~/elrond-wallet/wallet-homex.pem"
-# # USER_PEM="~/Crypto/wallet/wallet-homex.pem"
-# PROXY="https://api.multiversx.com"
-# CHAIN_ID="1"
-# SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
+USER_PEM="~/Crypto/wallet/wallet-homex.pem"
+PROXY="https://api.multiversx.com"
+CHAIN_ID="1"
+SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
 WINNERS=30
 
