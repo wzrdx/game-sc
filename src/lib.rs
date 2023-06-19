@@ -297,7 +297,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[payable("*")]
     #[endpoint(stake)]
     fn stake(&self) {
-        self.require_conditions();
+        // self.require_conditions();
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
         require!(payments.len() > 0, "Must stake at least one NFT");
 
@@ -328,7 +328,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[only_user_account]
     #[endpoint(unstake)]
     fn unstake(&self, traveler_nonces: ManagedVec<u64>, elder_nonces: ManagedVec<u64>) {
-        self.require_conditions();
+        // self.require_conditions();
         let caller = self.blockchain().get_caller();
 
         require!(
@@ -371,7 +371,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[only_user_account]
     #[endpoint(claimStakingRewards)]
     fn claim_staking_rewards(&self) {
-        self.require_conditions();
+        // self.require_conditions();
         let caller = self.blockchain().get_caller();
 
         require!(

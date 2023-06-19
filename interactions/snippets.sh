@@ -33,6 +33,15 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
+drawRaffleWinners() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=600000000 \
+    --arguments 6 \
+    --function="drawRaffleWinners"
+}
+
 # TODO:
 copyVector() {
     mxpy --verbose contract call ${SC_ADDRESS} \
@@ -208,15 +217,6 @@ setRaffleTimestamp() {
     --gas-limit=6000000 \
     --arguments 1687190400 \
     --function="setRaffleTimestamp"
-}
-
-drawRaffleWinners() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=600000000 \
-    --arguments 1 \
-    --function="drawRaffleWinners"
 }
 
 getRaffleParticipants() {
