@@ -56,13 +56,20 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[init]
     fn init(&self) {}
 
-    // TODO:
+    // TODO: Owner function
     #[only_owner]
     #[endpoint(copyVector)]
     fn copy_vector(&self) {
         for element in self.raffle_vector().into_iter() {
             self.operating_vector().push(&element);
         }
+    }
+
+    // TODO: Owner function
+    #[only_owner]
+    #[endpoint(clearHashes)]
+    fn clear_hashes(&self) {
+        self.tx_hashes().clear();
     }
 
     #[only_owner]
@@ -239,33 +246,45 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
             let winner_address = self.raffle_id_participant(winner_id).get();
 
+            // TODO: Add elders in phase 1
             if phase == 1 {
                 if index == 1 {
-                    // self.send().direct_esdt(
-                    //     &winner_address,
-                    //     &self.elders_mapper().get_token_id(),
-                    //     60 as u64,
-                    //     &BigUint::from(1 as u32),
-                    // );
-                    self.send().direct_egld(&winner_address, &BigUint::from(999990000000 as u64));
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(6 as u64)));
                 } else if index == 2 {
-                    // self.send().direct_esdt(
-                    //     &winner_address,
-                    //     &self.elders_mapper().get_token_id(),
-                    //     51 as u64,
-                    //     &BigUint::from(1 as u32),
-                    // );
-                    self.send().direct_egld(&winner_address, &BigUint::from(7777770000000 as u64));
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(6 as u64)));
                 } else if index == 3 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(50000000000000000 as u64));
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(5 as u64)));
                 } else if index == 4 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(40000000000000000 as u64));
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(4 as u64)));
                 } else if index == 5 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(30000000000000000 as u64));
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(3 as u64)));
                 }
-
-                vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
+            } else if phase == 2 {
+                if index == 1 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
+                } else if index == 2 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
+                } else if index == 3 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
+                } else if index == 4 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+                } else if index == 5 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+                }
+            } else if phase == 3 {
+                self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+            } else if phase == 4 {
+                self.tickets_mapper()
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
+            } else if phase == 5 {
+                self.tickets_mapper()
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
+            } else if phase == 6 {
+                self.tickets_mapper()
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
             }
+
+            vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
         }
 
         self.operating_vector().clear();
@@ -771,7 +790,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     fn to_egld(&self, value: u64) -> u64 {
-        value.mul(1000000000000000000 as u64)
+        // TODO: Add two 0s
+        value.mul(10000000000000000 as u64)
     }
 
     // Staking

@@ -53,6 +53,16 @@ copyVector() {
     --function="copyVector"
 }
 
+# TODO:
+clearHashes() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=20000000 \
+    --function="clearHashes"
+}
+
+# TODO:
 getOperatingVectorLength() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
