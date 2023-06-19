@@ -56,6 +56,29 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[init]
     fn init(&self) {}
 
+    // TODO:
+    #[only_owner]
+    #[endpoint(copyVector)]
+    fn copy_vector(&self) {
+        for element in self.raffle_vector().into_iter() {
+            self.operating_vector().push(&element);
+        }
+    }
+
+    // TODO:
+    #[only_owner]
+    #[endpoint(clearOperatingVector)]
+    fn clear_operating_vector(&self) {
+        self.operating_vector().clear();
+    }
+
+    // TODO:
+    #[only_owner]
+    #[endpoint(clearHashes)]
+    fn clear_hashes(&self) {
+        self.tx_hashes().clear();
+    }
+
     #[only_owner]
     #[endpoint(setQuests)]
     fn set_quests(&self, quests: ManagedVec<Quest<Self::Api>>) {
@@ -169,45 +192,68 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[only_owner]
     #[endpoint(drawRaffleWinners)]
-    fn draw_raffle_winners(&self, winners_count: usize) {
-        require!(
-            winners_count > 0 && winners_count < self.raffle_participants().len(),
-            "Invalid number of winners"
-        );
-
+    fn draw_raffle_winners(&self, phase: usize) {
         let mut rand_source = RandomnessSource::new();
-        let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.raffle_vector().iter());
+        let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.operating_vector().iter());
 
-        for index in 1..=winners_count {
+        for index in 1..=5 {
             let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
             let winner_address = self.raffle_id_participant(winner_id).get();
 
-            if index == 1 {
-                self.send().direct_esdt(
-                    &winner_address,
-                    &self.elders_mapper().get_token_id(),
-                    60 as u64,
-                    &BigUint::from(1 as u32),
-                );
-            } else if index == 2 {
-                self.send().direct_esdt(
-                    &winner_address,
-                    &self.elders_mapper().get_token_id(),
-                    51 as u64,
-                    &BigUint::from(1 as u32),
-                );
-            } else if index >= 3 && index <= 15 {
-                self.send()
-                    .direct_egld(&winner_address, &BigUint::from(self.get_raffle_payment_amount(index)));
-            } else if index >= 16 && index <= 20 {
+            if phase == 1 {
+                if index == 1 {
+                    self.send().direct_esdt(
+                        &winner_address,
+                        &self.elders_mapper().get_token_id(),
+                        60 as u64,
+                        &BigUint::from(1 as u32),
+                    );
+                } else if index == 2 {
+                    self.send().direct_esdt(
+                        &winner_address,
+                        &self.elders_mapper().get_token_id(),
+                        51 as u64,
+                        &BigUint::from(1 as u32),
+                    );
+                } else if index == 3 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(5 as u64)));
+                } else if index == 4 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(4 as u64)));
+                } else if index == 5 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(3 as u64)));
+                }
+            } else if phase == 2 {
+                if index == 1 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
+                } else if index == 2 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
+                } else if index == 3 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
+                } else if index == 4 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+                } else if index == 5 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+                }
+            } else if phase == 3 {
+                self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+            } else if phase == 4 {
                 self.tickets_mapper()
                     .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
-            } else if index >= 21 && index <= 30 {
+            } else if phase == 5 {
+                self.tickets_mapper()
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
+            } else if phase == 6 {
                 self.tickets_mapper()
                     .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
             }
 
             vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
+        }
+
+        self.operating_vector().clear();
+
+        for element in vector.into_iter() {
+            self.operating_vector().push(&element);
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
@@ -509,6 +555,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    // TODO:
+    #[view(getOperatingVectorLength)]
+    fn get_operating_vector_length(&self) -> usize {
+        self.operating_vector().len()
+    }
+
     #[view(getSubmittedTicketsTotal)]
     fn get_submitted_tickets_total(&self) -> usize {
         self.raffle_vector().len()
@@ -679,26 +731,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         require!(!self.is_game_paused().get(), "The game is temporarily paused");
     }
 
-    fn get_raffle_payment_amount(&self, index: usize) -> u64 {
-        let amount: u64;
-
-        if index == 3 {
-            amount = 5000000000000000000;
-        } else if index == 4 {
-            amount = 4000000000000000000;
-        } else if index == 5 {
-            amount = 3000000000000000000;
-        } else if index >= 6 && index <= 8 {
-            amount = 2000000000000000000;
-        } else if index >= 9 && index <= 15 {
-            amount = 1000000000000000000;
-        } else {
-            amount = 0;
-        }
-
-        amount
-    }
-
     fn to_egld(&self, value: u64) -> u64 {
         value.mul(1000000000000000000 as u64)
     }
@@ -776,6 +808,9 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[storage_mapper("raffleVector")]
     fn raffle_vector(&self) -> VecMapper<u16>;
+
+    #[storage_mapper("operatingVector")]
+    fn operating_vector(&self) -> VecMapper<u16>;
 
     #[view(getRaffleParticipants)]
     #[storage_mapper("raffleParticipants")]

@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           47
+// Endpoints:                           51
 // Async Callback:                       1
-// Total number of exported functions:  49
+// Total number of exported functions:  53
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -18,6 +18,9 @@ multiversx_sc_wasm_adapter::panic_handler!();
 multiversx_sc_wasm_adapter::endpoints! {
     game_sc
     (
+        copyVector
+        clearOperatingVector
+        clearHashes
         setQuests
         setCollectionIds
         issueTicketsCollection
@@ -42,6 +45,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         joinRaffle
         swapEnergy
         getSubmittedTickets
+        getOperatingVectorLength
         getSubmittedTicketsTotal
         getParticipantsCount
         getParticipants

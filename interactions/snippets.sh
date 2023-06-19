@@ -10,13 +10,11 @@
 # ELDERS_ID="HOLYCOWS-90e467"
 
 ### mainnet
-# USER_PEM="~/elrond-wallet/wallet-homex.pem"
-USER_PEM="~/Crypto/wallet/wallet-homex.pem"
+USER_PEM="~/elrond-wallet/wallet-homex.pem"
+# USER_PEM="~/Crypto/wallet/wallet-homex.pem"
 PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
-
-WINNERS=30
 
 deploy() {
     mxpy --verbose contract deploy --project=${PROJECT} --metadata-payable --metadata-payable-by-sc \
@@ -33,6 +31,40 @@ upgrade() {
     --gas-limit=120000000 \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+# TODO:
+copyVector() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=200000000 \
+    --function="copyVector"
+}
+
+# TODO:
+clearOperatingVector() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=200000000 \
+    --function="clearOperatingVector"
+}
+
+# TODO:
+clearHashes() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=20000000 \
+    --function="clearHashes"
+}
+
+# TODO:
+getOperatingVectorLength() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getOperatingVectorLength"
 }
 
 setCollectionIds() {
@@ -183,7 +215,7 @@ drawRaffleWinners() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=600000000 \
-    --arguments ${WINNERS} \
+    --arguments 1 \
     --function="drawRaffleWinners"
 }
 
@@ -223,7 +255,7 @@ clearRaffle() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=20000000 \
+    --gas-limit=600000000 \
     --function="clearRaffle"
 }
 
@@ -259,3 +291,4 @@ getUserTokenNonces() {
     --arguments ${USER} str:${TRAVELERS_ID} \
     --function="getUserTokenNonces"
 }
+
