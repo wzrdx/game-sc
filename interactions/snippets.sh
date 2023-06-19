@@ -1,29 +1,12 @@
 USER_PEM="~/elrond-wallet/wallet-homex.pem"
-# USER_PEM="~/Crypto/.pem"
+# USER_PEM="~/Crypto/wallet/wallet-homex.pem"
 PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
-USER=erd195x2uwy6rw3npcza8luazkr58hhxfxmu7tqjwzhj45l4fvdunl6qqa9du3
 
 TRAVELERS_ID="TRAVELER-51bdef"
 ELDERS_ID="HOMEXELDER-d43957"
-
-TICKETS_COLLECTION_NAME="HomeXTickets"
-TICKETS_TICKER="HOMETICKET"
-
-ENERGY_TOKEN_NAME="Energy"
-ENERGY_TICKER="ENERGY"
-
-HERBS_TOKEN_NAME="Herbs"
-HERBS_TICKER="HERBS"
-
-GEMS_TOKEN_NAME="Gems"
-GEMS_TICKER="GEMS"
-
-ESSENCE_TOKEN_NAME="Essence"
-ESSENCE_TICKER="ESSENCE" 
-
 
 deploy() {
     mxpy --verbose contract deploy --project=${PROJECT} --metadata-payable --metadata-payable-by-sc \
