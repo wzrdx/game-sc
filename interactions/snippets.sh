@@ -16,8 +16,6 @@ ELDERS_ID="HOLYCOWS-90e467"
 # CHAIN_ID="1"
 # SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
-WINNERS=5
-
 deploy() {
     mxpy --verbose contract deploy --project=${PROJECT} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
@@ -33,15 +31,6 @@ upgrade() {
     --gas-limit=120000000 \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
-}
-
-draw() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --arguments 1 \
-    --gas-limit=600000000 \
-    --function="draw"
 }
 
 # TODO:
@@ -226,7 +215,7 @@ drawRaffleWinners() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=600000000 \
-    --arguments ${WINNERS} \
+    --arguments 1 \
     --function="drawRaffleWinners"
 }
 

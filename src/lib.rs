@@ -56,7 +56,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[init]
     fn init(&self) {}
 
-    // TODO: Owner function
+    // TODO:
     #[only_owner]
     #[endpoint(copyVector)]
     fn copy_vector(&self) {
@@ -65,13 +65,14 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    // TODO:
     #[only_owner]
     #[endpoint(clearOperatingVector)]
     fn clear_operating_vector(&self) {
         self.operating_vector().clear();
     }
 
-    // TODO: Owner function
+    // TODO:
     #[only_owner]
     #[endpoint(clearHashes)]
     fn clear_hashes(&self) {
@@ -191,60 +192,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[only_owner]
     #[endpoint(drawRaffleWinners)]
-    fn draw_raffle_winners(&self, winners_count: usize) {
-        require!(
-            winners_count > 0 && winners_count < self.raffle_participants().len(),
-            "Invalid number of winners"
-        );
-
-        let mut rand_source = RandomnessSource::new();
-        let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.raffle_vector().iter());
-
-        for index in 1..=winners_count {
-            let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
-            let winner_address = self.raffle_id_participant(winner_id).get();
-
-            if index == 1 {
-                self.send().direct_esdt(
-                    &winner_address,
-                    &self.elders_mapper().get_token_id(),
-                    60 as u64,
-                    &BigUint::from(1 as u32),
-                );
-            } else if index == 2 {
-                self.send().direct_esdt(
-                    &winner_address,
-                    &self.elders_mapper().get_token_id(),
-                    51 as u64,
-                    &BigUint::from(1 as u32),
-                );
-            } else if index >= 3 && index <= 15 {
-                self.send()
-                    .direct_egld(&winner_address, &BigUint::from(self.get_raffle_payment_amount(index)));
-            } else if index >= 16 && index <= 20 {
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
-            } else if index >= 21 && index <= 30 {
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
-            }
-
-            vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
-        }
-
-        self.raffle_vector().clear();
-
-        for element in vector.into_iter() {
-            self.raffle_vector().push(&element);
-        }
-
-        let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
-        self.tx_hashes().insert(hash);
-    }
-
-    #[only_owner]
-    #[endpoint(draw)]
-    fn draw(&self, phase: usize) {
+    fn drawRaffleWinners(&self, phase: usize) {
         let mut rand_source = RandomnessSource::new();
         let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.operating_vector().iter());
 
@@ -252,12 +200,21 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
             let winner_address = self.raffle_id_participant(winner_id).get();
 
-            // TODO: Add elders in phase 1
             if phase == 1 {
                 if index == 1 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(6 as u64)));
+                    self.send().direct_esdt(
+                        &winner_address,
+                        &self.elders_mapper().get_token_id(),
+                        60 as u64,
+                        &BigUint::from(1 as u32),
+                    );
                 } else if index == 2 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(6 as u64)));
+                    self.send().direct_esdt(
+                        &winner_address,
+                        &self.elders_mapper().get_token_id(),
+                        51 as u64,
+                        &BigUint::from(1 as u32),
+                    );
                 } else if index == 3 {
                     self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(5 as u64)));
                 } else if index == 4 {
@@ -774,30 +731,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         require!(!self.is_game_paused().get(), "The game is temporarily paused");
     }
 
-    fn get_raffle_payment_amount(&self, index: usize) -> u64 {
-        let amount: u64;
-
-        // TODO: Add two 0s
-        if index == 3 {
-            amount = 50000000000000000;
-        } else if index == 4 {
-            amount = 40000000000000000;
-        } else if index == 5 {
-            amount = 30000000000000000;
-        } else if index >= 6 && index <= 8 {
-            amount = 20000000000000000;
-        } else if index >= 9 && index <= 15 {
-            amount = 10000000000000000;
-        } else {
-            amount = 0;
-        }
-
-        amount
-    }
-
     fn to_egld(&self, value: u64) -> u64 {
-        // TODO: Add two 0s
-        value.mul(10000000000000000 as u64)
+        value.mul(1000000000000000000 as u64)
     }
 
     // Staking
