@@ -7,13 +7,10 @@
 # SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
 TRAVELERS_ID="TRAVELER-51bdef"
-# ELDERS_ID="HOLYCOWS-90e467"
-
-USER=erd1gmmrkz5432xnt4qwh0apv5mrhyuuk7tpvhwsdgg226wd3gfces0s33da8l
 
 ### mainnet
-USER_PEM="~/elrond-wallet/wallet-homex.pem"
-# USER_PEM="~/Crypto/wallet/wallet-homex.pem"
+# USER_PEM="~/elrond-wallet/wallet-homex.pem"
+USER_PEM="~/Crypto/wallet/wallet-homex.pem"
 PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
@@ -44,7 +41,7 @@ drawRaffleWinners() {
     --function="drawRaffleWinners"
 }
 
-# TODO:
+# Raffle
 copyVector() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
@@ -53,7 +50,6 @@ copyVector() {
     --function="copyVector"
 }
 
-# TODO:
 clearOperatingVector() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
@@ -62,16 +58,6 @@ clearOperatingVector() {
     --function="clearOperatingVector"
 }
 
-# TODO:
-clearHashes() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=20000000 \
-    --function="clearHashes"
-}
-
-# TODO:
 getOperatingVectorLength() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
