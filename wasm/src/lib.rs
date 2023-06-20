@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           53
+// Endpoints:                           50
 // Async Callback:                       1
-// Total number of exported functions:  55
+// Total number of exported functions:  52
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -20,8 +20,6 @@ multiversx_sc_wasm_adapter::endpoints! {
     (
         copyVector
         clearOperatingVector
-        loadEntries
-        clearHashes
         setQuests
         setCollectionIds
         issueTicketsCollection
@@ -33,7 +31,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         airdropEnergy
         clearOngoingQuests
         drawRaffleWinners
-        draw
         setRaffleTimestamp
         clearRaffle
         clearTicketsHistory

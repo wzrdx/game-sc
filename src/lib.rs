@@ -2,7 +2,7 @@
 
 const TRAVELER_ENERGY_PER_S: u64 = 834;
 const ELDER_ENERGY_PER_S: u64 = 834;
-const MULTIPLIER: u64 = 24000000;
+const MULTIPLIER: u64 = 10000000;
 const ENERGY_SWAPPING_THRESHOLD: u64 = 100000;
 
 use core::iter::FromIterator;
@@ -56,7 +56,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[init]
     fn init(&self) {}
 
-    // TODO:
     #[only_owner]
     #[endpoint(copyVector)]
     fn copy_vector(&self) {
@@ -65,18 +64,10 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
-    // TODO:
     #[only_owner]
     #[endpoint(clearOperatingVector)]
     fn clear_operating_vector(&self) {
         self.operating_vector().clear();
-    }
-
-    // TODO:
-    #[only_owner]
-    #[endpoint(clearHashes)]
-    fn clear_hashes(&self) {
-        self.tx_hashes().clear();
     }
 
     #[only_owner]
@@ -192,7 +183,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[only_owner]
     #[endpoint(drawRaffleWinners)]
-    fn drawRaffleWinners(&self, phase: usize) {
+    fn draw_raffle_winners(&self, phase: usize) {
         let mut rand_source = RandomnessSource::new();
         let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.operating_vector().iter());
 
@@ -555,7 +546,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
-    // TODO:
     #[view(getOperatingVectorLength)]
     fn get_operating_vector_length(&self) -> usize {
         self.operating_vector().len()
