@@ -654,6 +654,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         nonces
     }
 
+    #[view(getActivePlayersCount)]
+    fn get_active_players_count(&self) -> usize {
+        self.active_players().len()
+    }
+
     fn get_token_mapper(&self, index: usize) -> FungibleTokenMapper {
         let mapper;
 

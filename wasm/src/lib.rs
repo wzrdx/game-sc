@@ -20,7 +20,6 @@ multiversx_sc_wasm_adapter::endpoints! {
     (
         copyVector
         clearOperatingVector
-        clearHashes
         setQuests
         setCollectionIds
         issueTicketsCollection
@@ -54,6 +53,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getStakedNFTsCount
         getStakingInfo
         getUserTokenNonces
+        getActivePlayersCount
         getTravelersCollectionId
         getEldersCollectionId
         getTicketsId
