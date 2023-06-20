@@ -9,8 +9,8 @@
 TRAVELERS_ID="TRAVELER-51bdef"
 
 ### mainnet
-# USER_PEM="~/elrond-wallet/wallet-homex.pem"
-USER_PEM="~/Crypto/wallet/wallet-homex.pem"
+USER_PEM="~/elrond-wallet/wallet-homex.pem"
+# USER_PEM="~/Crypto/wallet/wallet-homex.pem"
 PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
@@ -54,7 +54,7 @@ clearOperatingVector() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=200000000 \
+    --gas-limit=150000000 \
     --function="clearOperatingVector"
 }
 
@@ -203,7 +203,7 @@ setRaffleTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1687190400 \
+    --arguments 1688407200 \
     --function="setRaffleTimestamp"
 }
 
@@ -235,7 +235,7 @@ clearTicketsHistory() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=12000000 \
+    --gas-limit=300000000 \
     --function="clearTicketsHistory"
 }
 
@@ -243,7 +243,7 @@ clearRaffle() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=600000000 \
+    --gas-limit=200000000 \
     --function="clearRaffle"
 }
 
@@ -251,7 +251,7 @@ clearOngoingQuests() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=20000000 \
+    --gas-limit=100000000 \
     --function="clearOngoingQuests"
 }
 
