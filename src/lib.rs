@@ -51,6 +51,12 @@ pub struct TicketStats {
     pub most_earned: usize,
 }
 
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct Rarity {
+    pub nonce: u16,
+    pub rarity_class: u8,
+}
+
 #[multiversx_sc::contract]
 pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
@@ -77,6 +83,14 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         for quest in quests.iter() {
             self.quests().push(&quest);
+        }
+    }
+
+    #[only_owner]
+    #[endpoint(loadRarityClasses)]
+    fn load_rarity_classes(&self, nonces: ManagedVec<u16>, classes: ManagedVec<u8>) {
+        for (index, nonce) in nonces.into_iter().enumerate() {
+            self.rarity_class(nonce as u64).set(classes.get(index));
         }
     }
 
@@ -654,6 +668,20 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         nonces
     }
 
+    #[view(getRarityClasses)]
+    fn get_rarity_classes(&self, nonces: ManagedVec<u16>) -> ManagedVec<Rarity> {
+        let mut rarity_classes: ManagedVec<Rarity> = ManagedVec::new();
+
+        for nonce in nonces.into_iter() {
+            rarity_classes.push(Rarity {
+                nonce,
+                rarity_class: self.rarity_class(nonce as u64).get(),
+            });
+        }
+
+        rarity_classes
+    }
+
     fn get_token_mapper(&self, index: usize) -> FungibleTokenMapper {
         let mapper;
 
@@ -737,6 +765,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[storage_mapper("stakedAddresses")]
     fn staked_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
+
+    // Rarity
+    #[view(getRarityClass)]
+    #[storage_mapper("travelerRarityClass")]
+    fn rarity_class(&self, nonce: u64) -> SingleValueMapper<u8>;
 
     // Tickets stats
     #[storage_mapper("ticketsEarned")]

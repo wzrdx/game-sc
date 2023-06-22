@@ -1,6 +1,6 @@
 ### devnet
-# USER_PEM="~/elrond-wallet/wallet.pem"
-USER_PEM="~/Crypto/wallet-kzcpl.pem"
+USER_PEM="~/elrond-wallet/wallet.pem"
+# USER_PEM="~/Crypto/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 
@@ -293,3 +293,9 @@ getUserTokenNonces() {
     --function="getUserTokenNonces"
 }
 
+getRarityClass() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments 1 \
+    --function="getRarityClass"
+}
