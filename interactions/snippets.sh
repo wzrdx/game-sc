@@ -1,10 +1,11 @@
 ### devnet
-USER_PEM="~/elrond-wallet/wallet.pem"
-# USER_PEM="~/Crypto/wallet-kzcpl.pem"
+# USER_PEM="~/elrond-wallet/wallet.pem"
+USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
+OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 
 TRAVELERS_ID="PTESTERS-8fd15c"
 ELDERS_ID="HOLYCOWS-90e467"
@@ -27,8 +28,8 @@ deploy() {
 
 upgrade() {
     mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
-    --project=${PROJECT} \
     --recall-nonce --pem=${USER_PEM} \
+    --bytecode="./output/game-sc.wasm" \
     --gas-limit=120000000 \
     --send --outfile="upgrade-devnet.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
@@ -298,4 +299,11 @@ getRarityClass() {
     --proxy=${PROXY} \
     --arguments 1 \
     --function="getRarityClass"
+}
+
+getTravelerRewards() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${OWNER} \
+    --function="getTravelerRewards"
 }
