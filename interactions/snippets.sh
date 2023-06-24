@@ -301,9 +301,9 @@ getRarityClass() {
     --function="getRarityClass"
 }
 
-getTravelerRewards() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments ${OWNER} \
-    --function="getTravelerRewards"
-}
+# getTravelerRewards() {
+#     mxpy --verbose contract query ${SC_ADDRESS} \
+#     --proxy=${PROXY} \
+#     --arguments ${OWNER} \
+#     --function="getTravelerRewards"
+# }
