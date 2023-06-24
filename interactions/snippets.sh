@@ -15,20 +15,21 @@ PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
+
 deploy() {
     mxpy --verbose contract deploy --project=${PROJECT} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
     --gas-limit=100000000 \
-    --send --outfile="deploy-devnet.interaction.json" \
+    --send --outfile="deploy.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
 upgrade() {
     mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
-    --project=${PROJECT} \
     --recall-nonce --pem=${USER_PEM} \
+    --bytecode="./output/game-sc.wasm" \
     --gas-limit=120000000 \
-    --send --outfile="upgrade-devnet.interaction.json" \
+    --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
@@ -280,3 +281,16 @@ getUserTokenNonces() {
     --function="getUserTokenNonces"
 }
 
+getRarityClass() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments 1 \
+    --function="getRarityClass"
+}
+
+# getTravelerRewards() {
+#     mxpy --verbose contract query ${SC_ADDRESS} \
+#     --proxy=${PROXY} \
+#     --arguments ${OWNER} \
+#     --function="getTravelerRewards"
+# }

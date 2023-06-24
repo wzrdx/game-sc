@@ -1,7 +1,13 @@
 #![no_std]
 
-const TRAVELER_ENERGY_PER_S: u64 = 834;
+const COMMON_ENERGY_PER_S: u64 = 834;
+const UNCOMMON_ENERGY_PER_S: u64 = 834;
+const RARE_ENERGY_PER_S: u64 = 834;
+const ROYALS_ENERGY_PER_S: u64 = 834;
+const ONEOFONE_ENERGY_PER_S: u64 = 834;
+
 const ELDER_ENERGY_PER_S: u64 = 834;
+
 const MULTIPLIER: u64 = 10000000;
 const ENERGY_SWAPPING_THRESHOLD: u64 = 100000;
 
@@ -51,6 +57,12 @@ pub struct TicketStats {
     pub most_earned: usize,
 }
 
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct Rarity {
+    pub nonce: u16,
+    pub rarity_class: u8,
+}
+
 #[multiversx_sc::contract]
 pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
@@ -77,6 +89,14 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         for quest in quests.iter() {
             self.quests().push(&quest);
+        }
+    }
+
+    #[only_owner]
+    #[endpoint(loadRarityClasses)]
+    fn load_rarity_classes(&self, nonces: ManagedVec<u16>, classes: ManagedVec<u8>) {
+        for (index, nonce) in nonces.into_iter().enumerate() {
+            self.rarity_class(nonce as u64).set(classes.get(index));
         }
     }
 
@@ -651,9 +671,18 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         nonces
     }
 
-    #[view(getActivePlayersCount)]
-    fn get_active_players_count(&self) -> usize {
-        self.active_players().len()
+    #[view(getRarityClasses)]
+    fn get_rarity_classes(&self, nonces: ManagedVec<u16>) -> ManagedVec<Rarity> {
+        let mut rarity_classes: ManagedVec<Rarity> = ManagedVec::new();
+
+        for nonce in nonces.into_iter() {
+            rarity_classes.push(Rarity {
+                nonce,
+                rarity_class: self.rarity_class(nonce as u64).get(),
+            });
+        }
+
+        rarity_classes
     }
 
     fn get_token_mapper(&self, index: usize) -> FungibleTokenMapper {
@@ -682,24 +711,51 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
-    fn get_staking_rewards(&self, user: &ManagedAddress) -> BigUint {
-        let current_timestamp = self.blockchain().get_block_timestamp();
-        let last_timestamp = self.last_staking_timestamp(user).get();
+    // fn get_staking_rewards(&self, user: &ManagedAddress) -> BigUint {
+    //     let current_timestamp = self.blockchain().get_block_timestamp();
+    //     let last_timestamp = self.last_staking_timestamp(user).get();
 
-        if last_timestamp == 0 || current_timestamp <= last_timestamp {
-            return BigUint::zero();
-        }
+    //     if last_timestamp == 0 || current_timestamp <= last_timestamp {
+    //         return BigUint::zero();
+    //     }
 
-        let block_diff: u64 = current_timestamp - last_timestamp;
+    //     let block_diff: u64 = current_timestamp - last_timestamp;
+    //     let travelers_rewards = BigUint::from(block_diff * self.get_travelers_yield(user));
 
-        let traveler_count: u64 = self.staked_traveler_nonces(user).len() as u64;
-        let elder_count: u64 = self.staked_elder_nonces(user).len() as u64;
+    //     let elder_count: u64 = self.staked_elder_nonces(user).len() as u64;
+    //     let elders_rewards = BigUint::from(block_diff * ELDER_ENERGY_PER_S * elder_count);
 
-        let travelers_rewards = BigUint::from(block_diff * TRAVELER_ENERGY_PER_S * traveler_count);
-        let elders_rewards = BigUint::from(block_diff * ELDER_ENERGY_PER_S * elder_count);
+    //     travelers_rewards + elders_rewards
+    // }
 
-        travelers_rewards + elders_rewards
-    }
+    // #[view(getTravelerRewards)]
+    // fn get_travelers_yield(&self, user: &ManagedAddress) -> u64 {
+    //     let mut travelers_rewards: u64 = 0;
+
+    //     for nonce in self.staked_traveler_nonces(user).iter() {
+    //         travelers_rewards += self.get_energy_yield(self.rarity_class(nonce).get());
+    //     }
+
+    //     travelers_rewards
+    // }
+
+    // fn get_energy_yield(&self, rarity_class: u8) -> u64 {
+    //     let mut energy_yield: u64 = 0;
+
+    //     if rarity_class == 1 {
+    //         energy_yield = COMMON_ENERGY_PER_S;
+    //     } else if rarity_class == 2 {
+    //         energy_yield = UNCOMMON_ENERGY_PER_S;
+    //     } else if rarity_class == 3 {
+    //         energy_yield = RARE_ENERGY_PER_S;
+    //     } else if rarity_class == 4 {
+    //         energy_yield = ROYALS_ENERGY_PER_S;
+    //     } else if rarity_class == 5 {
+    //         energy_yield = ONEOFONE_ENERGY_PER_S;
+    //     }
+
+    //     energy_yield
+    // }
 
     fn build_uris_vec(&self) -> ManagedVec<ManagedBuffer> {
         let mut uris = ManagedVec::new();
@@ -739,6 +795,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[storage_mapper("stakedAddresses")]
     fn staked_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
+
+    // Rarity
+    #[view(getRarityClass)]
+    #[storage_mapper("travelerRarityClass")]
+    fn rarity_class(&self, nonce: u64) -> SingleValueMapper<u8>;
 
     // Tickets stats
     #[storage_mapper("ticketsEarned")]

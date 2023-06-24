@@ -5,3 +5,9 @@
 
 # The mxpy output
 /output*/
+
+/wasm/*
+/wasm
+
+deploy.interaction.json
+upgrade.interaction.json

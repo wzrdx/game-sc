@@ -21,6 +21,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         copyVector
         clearOperatingVector
         setQuests
+        loadRarityClasses
         setCollectionIds
         issueTicketsCollection
         createTicketsToken
@@ -53,7 +54,9 @@ multiversx_sc_wasm_adapter::endpoints! {
         getStakedNFTsCount
         getStakingInfo
         getUserTokenNonces
-        getActivePlayersCount
+        getRarityClasses
+        getTravelerRewards
+        getRarityClass
         getTravelersCollectionId
         getEldersCollectionId
         getTicketsId
