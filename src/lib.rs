@@ -711,6 +711,25 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    fn get_staking_rewards(&self, user: &ManagedAddress) -> BigUint {
+        let current_timestamp = self.blockchain().get_block_timestamp();
+        let last_timestamp = self.last_staking_timestamp(user).get();
+
+        if last_timestamp == 0 || current_timestamp <= last_timestamp {
+            return BigUint::zero();
+        }
+
+        let block_diff: u64 = current_timestamp - last_timestamp;
+
+        let traveler_count: u64 = self.staked_traveler_nonces(user).len() as u64;
+        let elder_count: u64 = self.staked_elder_nonces(user).len() as u64;
+
+        let travelers_rewards = BigUint::from(block_diff * COMMON_ENERGY_PER_S * traveler_count);
+        let elders_rewards = BigUint::from(block_diff * ELDER_ENERGY_PER_S * elder_count);
+
+        travelers_rewards + elders_rewards
+    }
+
     // fn get_staking_rewards(&self, user: &ManagedAddress) -> BigUint {
     //     let current_timestamp = self.blockchain().get_block_timestamp();
     //     let last_timestamp = self.last_staking_timestamp(user).get();

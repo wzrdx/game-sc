@@ -6,8 +6,10 @@
 # The mxpy output
 /output*/
 
+wasm
 /wasm/*
 /wasm
+/wasm/src/lib.rs
 
 deploy.interaction.json
 upgrade.interaction.json

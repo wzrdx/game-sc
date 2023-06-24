@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           51
+// Endpoints:                           53
 // Async Callback:                       1
-// Total number of exported functions:  53
+// Total number of exported functions:  55
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -55,7 +55,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         getStakingInfo
         getUserTokenNonces
         getRarityClasses
-        getTravelerRewards
         getRarityClass
         getTravelersCollectionId
         getEldersCollectionId
