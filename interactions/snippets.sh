@@ -233,7 +233,7 @@ setRaffleTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1688407200 \
+    --arguments 1687993184 \
     --function="setRaffleTimestamp"
 }
 
