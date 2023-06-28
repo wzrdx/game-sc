@@ -63,10 +63,40 @@ pub struct Rarity {
     pub rarity_class: u8,
 }
 
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct Trial<M: ManagedTypeApi> {
+    pub index: usize,
+    pub hashes: ManagedVec<M, ManagedByteArray<M, 32>>,
+}
+
 #[multiversx_sc::contract]
 pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
     fn init(&self) {}
+
+    #[only_owner]
+    #[endpoint(copyHashes)]
+    fn copy_hashes(&self) {
+        let mut trial = self.trials().get(self.current_trial().get());
+
+        for hash in self.tx_hashes().iter() {
+            trial.hashes.push(hash);
+        }
+
+        self.trials().set(self.current_trial().get(), &trial);
+    }
+
+    #[only_owner]
+    #[endpoint(initializeTrial)]
+    fn initialize_trial(&self, index: usize) {
+        self.current_trial().set(index);
+        let hashes: ManagedVec<ManagedByteArray<Self::Api, 32>> = ManagedVec::new();
+
+        self.trials().push(&Trial {
+            index: self.current_trial().get(),
+            hashes,
+        });
+    }
 
     #[only_owner]
     #[endpoint(copyVector)]
@@ -267,8 +297,10 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             self.operating_vector().push(&element);
         }
 
+        // Save hash
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
-        self.tx_hashes().insert(hash);
+        let mut trial = self.trials().get(self.current_trial().get());
+        trial.hashes.push(hash);
     }
 
     #[only_owner]
@@ -873,9 +905,17 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("raffleTimestamp")]
     fn raffle_timestamp(&self) -> SingleValueMapper<u64>;
 
+    #[view(getTrials)]
+    #[storage_mapper("trials")]
+    fn trials(&self) -> VecMapper<Trial<Self::Api>>;
+
     #[view(getTxHashes)]
     #[storage_mapper("txHashes")]
     fn tx_hashes(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
+
+    #[view(getCurrentTrial)]
+    #[storage_mapper("currentTrial")]
+    fn current_trial(&self) -> SingleValueMapper<usize>;
 
     // System
     #[view(isGamePaused)]
