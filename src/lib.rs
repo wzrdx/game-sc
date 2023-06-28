@@ -473,7 +473,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[only_user_account]
     #[endpoint(completeQuest)]
     fn complete_quest(&self, id: u8) {
-        self.require_conditions();
         let caller = self.blockchain().get_caller();
 
         let mut search_result: Option<OngoingQuest> = None;
