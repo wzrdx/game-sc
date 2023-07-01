@@ -396,12 +396,20 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     fn start_quest(&self, id: u8) {
         self.require_conditions();
         let caller = self.blockchain().get_caller();
+        let current_timestamp = self.blockchain().get_block_timestamp();
 
         for ongoing_quest in self.ongoing_quests(&caller).iter() {
             require!(id != ongoing_quest.id, "Cannot start an already ongoing quest");
         }
 
         let quest = self.quests().get(id as usize);
+        let quest_duration = quest.duration as u64;
+        let raffle_timestamp = self.raffle_timestamp().get();
+
+        require!(
+            quest_duration + current_timestamp < raffle_timestamp,
+            "Quest duration exceeds end of Trial"
+        );
 
         // Payment check & burning of tokens
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
