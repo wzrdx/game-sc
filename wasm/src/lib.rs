@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           58
+// Endpoints:                           56
 // Async Callback:                       1
-// Total number of exported functions:  60
+// Total number of exported functions:  58
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -18,8 +18,7 @@ multiversx_sc_wasm_adapter::panic_handler!();
 multiversx_sc_wasm_adapter::endpoints! {
     game_sc
     (
-        copyHashes
-        initializeTrial
+        addRaffle
         copyVector
         clearOperatingVector
         setQuests
@@ -51,6 +50,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getSubmittedTicketsTotal
         getParticipantsCount
         getParticipants
+        getRaffles
         getTicketStats
         getStakedAddressesCount
         getStakedNFTsCount
@@ -71,9 +71,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getRaffleIndex
         getRaffleParticipants
         getRaffleTimestamp
-        getTrials
         getTxHashes
-        getCurrentTrial
         isGamePaused
         isSwappingPaused
         callBack

@@ -64,9 +64,19 @@ pub struct Rarity {
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
-pub struct Trial<M: ManagedTypeApi> {
-    pub index: usize,
+pub struct Raffle<M: ManagedTypeApi> {
+    pub id: usize,
+    pub timestamp: u64,
+    pub vector: ManagedVec<M, u16>,
+    pub participants: ManagedVec<M, ManagedAddress<M>>,
     pub hashes: ManagedVec<M, ManagedByteArray<M, 32>>,
+}
+
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct CompactRaffle {
+    pub id: usize,
+    pub timestamp: u64,
+    pub vector_size: usize,
 }
 
 #[multiversx_sc::contract]
@@ -74,26 +84,41 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[init]
     fn init(&self) {}
 
+    // Raffles
     #[only_owner]
-    #[endpoint(copyHashes)]
-    fn copy_hashes(&self) {
-        let mut trial = self.trials().get(self.current_trial().get());
+    #[endpoint(addRaffle)]
+    fn add_raffle(&self, id: usize, timestamp: u64, participants: ManagedVec<ManagedAddress>) {
+        let mut rand_source = RandomnessSource::new();
+        let mut vector: ManagedVec<u16> = ManagedVec::new();
+        let mut hashes = ManagedVec::new();
 
-        for hash in self.tx_hashes().iter() {
-            trial.hashes.push(hash);
+        for address in participants.into_iter() {
+            if self.raffle_participant_id(&address).is_empty() {
+                let id: u16 = self.raffle_index().update(|i| {
+                    *i += 1;
+                    *i
+                });
+
+                self.raffle_participant_id(&address).set(id);
+                self.raffle_id_participant(id).set(&address);
+            }
+
+            let participant_id = self.raffle_participant_id(&address).get();
+
+            for _ in 0..rand_source.next_usize_in_range(1, 10) {
+                vector.push(participant_id);
+            }
         }
 
-        self.trials().set(self.current_trial().get(), &trial);
-    }
+        for hash in self.tx_hashes().iter() {
+            hashes.push(hash);
+        }
 
-    #[only_owner]
-    #[endpoint(initializeTrial)]
-    fn initialize_trial(&self, index: usize) {
-        self.current_trial().set(index);
-        let hashes: ManagedVec<ManagedByteArray<Self::Api, 32>> = ManagedVec::new();
-
-        self.trials().push(&Trial {
-            index: self.current_trial().get(),
+        self.raffles().push(&Raffle {
+            id,
+            timestamp,
+            vector,
+            participants,
             hashes,
         });
     }
@@ -112,6 +137,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.operating_vector().clear();
     }
 
+    // Quests
     #[only_owner]
     #[endpoint(setQuests)]
     fn set_quests(&self, quests: ManagedVec<Quest<Self::Api>>) {
@@ -242,27 +268,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             let winner_address = self.raffle_id_participant(winner_id).get();
 
             if phase == 1 {
-                if index == 1 {
-                    self.send().direct_esdt(
-                        &winner_address,
-                        &self.elders_mapper().get_token_id(),
-                        60 as u64,
-                        &BigUint::from(1 as u32),
-                    );
-                } else if index == 2 {
-                    self.send().direct_esdt(
-                        &winner_address,
-                        &self.elders_mapper().get_token_id(),
-                        51 as u64,
-                        &BigUint::from(1 as u32),
-                    );
-                } else if index == 3 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(5 as u64)));
-                } else if index == 4 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(4 as u64)));
-                } else if index == 5 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(3 as u64)));
-                }
+                self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(3 as u64)));
             } else if phase == 2 {
                 if index == 1 {
                     self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
@@ -297,10 +303,10 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             self.operating_vector().push(&element);
         }
 
-        // Save hash
-        let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
-        let mut trial = self.trials().get(self.current_trial().get());
-        trial.hashes.push(hash);
+        // TODO: Save hash
+        // let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
+        // let mut trial = self.raffles().get(self.current_trial().get());
+        // trial.hashes.push(hash);
     }
 
     #[only_owner]
@@ -588,15 +594,21 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.send().direct_egld(&caller, &(payment.amount * MULTIPLIER));
     }
 
+    // Raffle
     #[view(getSubmittedTickets)]
-    fn get_submitted_tickets(&self, user: &ManagedAddress) -> usize {
+    fn get_submitted_tickets(&self, raffle_id: usize, user: &ManagedAddress) -> usize {
+        let raffle = self.raffles().get(raffle_id);
+
         if self.raffle_participant_id(user).is_empty() {
             return 0;
         } else {
             let participant_id = self.raffle_participant_id(user).get();
-            let filtered_vec: ManagedVec<u16> = ManagedVec::from_iter(self.raffle_vector().iter().filter(|t| *t == participant_id));
 
-            return filtered_vec.len();
+            // let filtered_vec: ManagedVec<u16> = ManagedVec::from_iter(raffle.vector.iter().filter(|t| *t == participant_id));
+            // return filtered_vec.len();
+
+            let filter = raffle.vector.iter().filter(|t| *t == participant_id);
+            return filter.count();
         }
     }
 
@@ -611,24 +623,41 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     #[view(getParticipantsCount)]
-    fn get_participants_count(&self) -> usize {
-        self.raffle_participants().len()
+    fn get_participants_count(&self, raffle_id: usize) -> usize {
+        let raffle = self.raffles().get(raffle_id);
+        raffle.vector.len()
     }
 
     #[view(getParticipants)]
-    fn get_participants(&self, start: usize, end: usize) -> ManagedVec<Participant<Self::Api>> {
+    fn get_participants(&self, raffle_id: usize, start: usize, end: usize) -> ManagedVec<Participant<Self::Api>> {
         let mut participants: ManagedVec<Participant<Self::Api>> = ManagedVec::new();
+        let raffle = self.raffles().get(raffle_id);
 
-        for (i, address) in self.raffle_participants().iter().enumerate() {
+        for (i, address) in raffle.participants.into_iter().enumerate() {
             if i >= start && i < end {
                 participants.push(Participant {
                     address: address.clone(),
-                    tickets_count: self.get_submitted_tickets(&address),
+                    tickets_count: self.get_submitted_tickets(raffle_id, &address),
                 });
             }
         }
 
         participants
+    }
+
+    #[view(getRaffles)]
+    fn get_raffles(&self) -> ManagedVec<CompactRaffle> {
+        let mut raffles: ManagedVec<CompactRaffle> = ManagedVec::new();
+
+        for raffle in self.raffles().iter() {
+            raffles.push(CompactRaffle {
+                id: raffle.id,
+                timestamp: raffle.timestamp,
+                vector_size: raffle.vector.len(),
+            });
+        }
+
+        raffles
     }
 
     // Tickets stats
@@ -910,17 +939,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("raffleTimestamp")]
     fn raffle_timestamp(&self) -> SingleValueMapper<u64>;
 
-    #[view(getTrials)]
-    #[storage_mapper("trials")]
-    fn trials(&self) -> VecMapper<Trial<Self::Api>>;
+    #[storage_mapper("raffles")]
+    fn raffles(&self) -> VecMapper<Raffle<Self::Api>>;
 
     #[view(getTxHashes)]
     #[storage_mapper("txHashes")]
     fn tx_hashes(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
-
-    #[view(getCurrentTrial)]
-    #[storage_mapper("currentTrial")]
-    fn current_trial(&self) -> SingleValueMapper<usize>;
 
     // System
     #[view(isGamePaused)]
