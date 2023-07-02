@@ -604,19 +604,18 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         } else {
             let participant_id = self.raffle_participant_id(user).get();
 
-            // let filtered_vec: ManagedVec<u16> = ManagedVec::from_iter(raffle.vector.iter().filter(|t| *t == participant_id));
-            // return filtered_vec.len();
-
             let filter = raffle.vector.iter().filter(|t| *t == participant_id);
             return filter.count();
         }
     }
 
+    // TODO: Deprecated
     #[view(getOperatingVectorLength)]
     fn get_operating_vector_length(&self) -> usize {
         self.operating_vector().len()
     }
 
+    // TODO: Deprecated
     #[view(getSubmittedTicketsTotal)]
     fn get_submitted_tickets_total(&self) -> usize {
         self.raffle_vector().len()
@@ -658,6 +657,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
 
         raffles
+    }
+
+    #[view(getHashes)]
+    fn get_hashes(&self, raffle_id: usize) -> ManagedVec<ManagedByteArray<Self::Api, 32>> {
+        let raffle = self.raffles().get(raffle_id);
+        raffle.hashes
     }
 
     // Tickets stats

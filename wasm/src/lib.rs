@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           56
+// Endpoints:                           57
 // Async Callback:                       1
-// Total number of exported functions:  58
+// Total number of exported functions:  59
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -51,6 +51,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getParticipantsCount
         getParticipants
         getRaffles
+        getHashes
         getTicketStats
         getStakedAddressesCount
         getStakedNFTsCount
