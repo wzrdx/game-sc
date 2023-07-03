@@ -81,17 +81,18 @@ drawRaffleWinners() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=600000000 \
-    --arguments 6 \
+    --arguments 5 \
     --function="drawRaffleWinners"
 }
 
 # Raffle
-copyVector() {
+copyOperatingVector() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=200000000 \
-    --function="copyVector"
+    --arguments 2 \
+    --function="copyOperatingVector"
 }
 
 clearOperatingVector() {

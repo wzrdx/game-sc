@@ -118,6 +118,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
+    #[view(getOperatingVectorLength)]
+    fn get_operating_vector_length(&self) -> usize {
+        self.operating_vector().len()
+    }
+
     // Quests
     #[only_owner]
     #[endpoint(setQuests)]
@@ -240,7 +245,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[only_owner]
     #[endpoint(drawRaffleWinners)]
-    fn draw_raffle_winners(&self, raffle_id: usize, phase: usize) {
+    fn draw_raffle_winners(&self, phase: usize) {
         let mut rand_source = RandomnessSource::new();
         let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.operating_vector().iter());
 
@@ -249,30 +254,44 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             let winner_address = self.raffle_id_participant(winner_id).get();
 
             if phase == 1 {
-                self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(3 as u64)));
+                if index == 1 {
+                    self.herbs_mapper().mint_and_send(&winner_address, BigUint::from(1000000 as u64));
+                } else if index == 2 {
+                    self.herbs_mapper().mint_and_send(&winner_address, BigUint::from(1000000 as u64));
+                } else if index == 3 {
+                    self.herbs_mapper().mint_and_send(&winner_address, BigUint::from(1000000 as u64));
+                } else if index == 4 {
+                    self.herbs_mapper().mint_and_send(&winner_address, BigUint::from(1000000 as u64));
+                } else if index == 5 {
+                    self.herbs_mapper().mint_and_send(&winner_address, BigUint::from(1000000 as u64));
+                }
             } else if phase == 2 {
                 if index == 1 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
-                } else if index == 2 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
-                } else if index == 3 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
-                } else if index == 4 {
+                    self.herbs_mapper().mint_and_send(&winner_address, BigUint::from(1000000 as u64));
+                } else {
                     self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
-                } else if index == 5 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+                    self.essence_mapper()
+                        .mint_and_send(&winner_address, BigUint::from(100000000 as u64));
                 }
             } else if phase == 3 {
                 self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+                self.essence_mapper()
+                    .mint_and_send(&winner_address, BigUint::from(100000000 as u64));
             } else if phase == 4 {
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
+                if index == 1 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+                    self.essence_mapper()
+                        .mint_and_send(&winner_address, BigUint::from(100000000 as u64));
+                } else {
+                    self.tickets_mapper()
+                        .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(3 as u32));
+                }
             } else if phase == 5 {
                 self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
             } else if phase == 6 {
                 self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
             }
 
             vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
@@ -285,7 +304,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
-        self.raffle_hashes(raffle_id).insert(hash);
+        self.tx_hashes_second_trial().insert(hash);
     }
 
     #[only_owner]
@@ -901,10 +920,13 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("operatingVector")]
     fn operating_vector(&self) -> VecMapper<u16>;
 
-    // TODO: Backwards compatibility
+    // Trial 1
     #[view(getTxHashes)]
     #[storage_mapper("txHashes")]
     fn tx_hashes(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
+
+    #[storage_mapper("txHashesSecondTrial")]
+    fn tx_hashes_second_trial(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
 
     // System
     #[view(isGamePaused)]
