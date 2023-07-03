@@ -215,47 +215,71 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
                 if index == 1 {
                     self.send().direct_esdt(
                         &winner_address,
-                        &self.elders_mapper().get_token_id(),
-                        60 as u64,
+                        &self.travelers_mapper().get_token_id(),
+                        1195 as u64,
                         &BigUint::from(1 as u32),
                     );
                 } else if index == 2 {
                     self.send().direct_esdt(
                         &winner_address,
-                        &self.elders_mapper().get_token_id(),
-                        51 as u64,
+                        &self.travelers_mapper().get_token_id(),
+                        468 as u64,
                         &BigUint::from(1 as u32),
                     );
                 } else if index == 3 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(5 as u64)));
+                    self.send().direct_esdt(
+                        &winner_address,
+                        &self.travelers_mapper().get_token_id(),
+                        876 as u64,
+                        &BigUint::from(1 as u32),
+                    );
                 } else if index == 4 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(4 as u64)));
+                    self.send().direct_esdt(
+                        &winner_address,
+                        &self.travelers_mapper().get_token_id(),
+                        465 as u64,
+                        &BigUint::from(1 as u32),
+                    );
                 } else if index == 5 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(3 as u64)));
+                    self.send().direct_esdt(
+                        &winner_address,
+                        &self.travelers_mapper().get_token_id(),
+                        1959 as u64,
+                        &BigUint::from(1 as u32),
+                    );
                 }
             } else if phase == 2 {
                 if index == 1 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
-                } else if index == 2 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
-                } else if index == 3 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(2 as u64)));
-                } else if index == 4 {
+                    self.send().direct_esdt(
+                        &winner_address,
+                        &self.travelers_mapper().get_token_id(),
+                        2600 as u64,
+                        &BigUint::from(1 as u32),
+                    );
+                } else {
                     self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
-                } else if index == 5 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+                    self.essence_mapper()
+                        .mint_and_send(&winner_address, BigUint::from(100000000 as u64));
                 }
             } else if phase == 3 {
                 self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+                self.essence_mapper()
+                    .mint_and_send(&winner_address, BigUint::from(100000000 as u64));
             } else if phase == 4 {
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
+                if index == 1 {
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+                    self.essence_mapper()
+                        .mint_and_send(&winner_address, BigUint::from(100000000 as u64));
+                } else {
+                    self.tickets_mapper()
+                        .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(3 as u32));
+                }
             } else if phase == 5 {
                 self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
             } else if phase == 6 {
                 self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
             }
 
             vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
@@ -268,7 +292,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
-        self.tx_hashes().insert(hash);
+        self.tx_hashes_second_trial().insert(hash);
     }
 
     #[only_owner]
@@ -900,9 +924,13 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("raffleTimestamp")]
     fn raffle_timestamp(&self) -> SingleValueMapper<u64>;
 
+    // Trial 1
     #[view(getTxHashes)]
     #[storage_mapper("txHashes")]
     fn tx_hashes(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
+
+    #[storage_mapper("txHashesSecondTrial")]
+    fn tx_hashes_second_trial(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
 
     // System
     #[view(isGamePaused)]
