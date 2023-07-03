@@ -1,17 +1,15 @@
 #![no_std]
 
-const COMMON_ENERGY_PER_S: u64 = 834;
-const UNCOMMON_ENERGY_PER_S: u64 = 834;
-const RARE_ENERGY_PER_S: u64 = 834;
-const ROYALS_ENERGY_PER_S: u64 = 834;
-const ONEOFONE_ENERGY_PER_S: u64 = 834;
+const COMMON_ENERGY_PER_S: u64 = 278 * 3;
+const UNCOMMON_ENERGY_PER_S: u64 = 278 * 4;
+const RARE_ENERGY_PER_S: u64 = 278 * 6;
+const ROYALS_ENERGY_PER_S: u64 = 278 * 8;
+const ONEOFONE_ENERGY_PER_S: u64 = 278 * 10;
 
-const ELDER_ENERGY_PER_S: u64 = 834;
+const ELDER_ENERGY_PER_S: u64 = 278 * 9;
 
-const MULTIPLIER: u64 = 10000000;
-const ENERGY_SWAPPING_THRESHOLD: u64 = 100000;
-
-const RAFFLE_CAP: u64 = 4;
+// TODO: 4
+const RAFFLE_CAP: u64 = 8;
 
 use core::iter::FromIterator;
 
@@ -319,12 +317,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.is_game_paused().set(value);
     }
 
-    #[only_owner]
-    #[endpoint(setSwappingPaused)]
-    fn set_swapping_paused(&self, value: bool) {
-        self.is_swapping_paused().set(value);
-    }
-
     #[only_user_account]
     #[payable("*")]
     #[endpoint(stake)]
@@ -562,27 +554,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.raffle_participants(raffle_id).insert(caller);
 
         self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
-    }
-
-    #[only_user_account]
-    #[payable("*")]
-    #[endpoint(swapEnergy)]
-    fn swap_energy(&self) {
-        self.require_conditions();
-        require!(!self.is_swapping_paused().get(), "Swapping is temporarily paused");
-
-        let payment: EsdtTokenPayment = self.call_value().single_esdt();
-        self.energy_mapper().require_same_token(&payment.token_identifier);
-
-        require!(
-            payment.amount >= BigUint::from(ENERGY_SWAPPING_THRESHOLD),
-            "Amount too small to swap"
-        );
-
-        let caller = self.blockchain().get_caller();
-
-        self.energy_mapper().burn(&payment.amount);
-        self.send().direct_egld(&caller, &(payment.amount * MULTIPLIER));
     }
 
     // Raffle
@@ -939,10 +910,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[view(isGamePaused)]
     #[storage_mapper("isGamePaused")]
     fn is_game_paused(&self) -> SingleValueMapper<bool>;
-
-    #[view(isSwappingPaused)]
-    #[storage_mapper("isSwappingPaused")]
-    fn is_swapping_paused(&self) -> SingleValueMapper<bool>;
 
     #[view(getTrialTimestamp)]
     #[storage_mapper("trialTimestamp")]
