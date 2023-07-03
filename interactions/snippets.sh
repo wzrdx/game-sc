@@ -33,10 +33,18 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
-getRaffles() {
+getRafflesStorage() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getRaffles"
+    --function="getRafflesStorage"
+}
+
+clearRaffles() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=9000000 \
+    --function="clearRaffles"
 }
 
 copyHashes() {
@@ -234,13 +242,13 @@ getQuests() {
     --function="getQuests"
 }
 
-setRaffleTimestamp() {
+setTrialTimestamp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1688993184 \
-    --function="setRaffleTimestamp"
+    --arguments 1688927833 \
+    --function="setTrialTimestamp"
 }
 
 getRaffleParticipants() {
@@ -280,6 +288,7 @@ clearRaffle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=200000000 \
+    --arguments 1 \
     --function="clearRaffle"
 }
 
