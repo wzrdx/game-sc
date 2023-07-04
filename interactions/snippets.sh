@@ -6,6 +6,7 @@ CHAIN_ID="D"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
 TRAVELERS_ID="TRAVELER-51bdef"
+OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 
 ### mainnet
 # USER_PEM="~/elrond-wallet/wallet-homex.pem"
@@ -30,6 +31,22 @@ upgrade() {
     --gas-limit=120000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+addBattle() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=9000000 \
+    --arguments 1691164800 \
+    --function="addBattle"
+}
+
+getCompletedQuests() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments 1 ${OWNER} \
+    --function="getCompletedQuests"
 }
 
 getStakedUsersLength() {
