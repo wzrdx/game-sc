@@ -315,8 +315,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             self.operating_vector().push(&element);
         }
 
-        // TODO: Save hashes
-        // let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
+        let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
+        self.raffle_hashes(raffle_id).insert(hash);
     }
 
     #[only_owner]

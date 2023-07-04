@@ -248,7 +248,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1688927833 \
+    --arguments 1689350400 \
     --function="setTrialTimestamp"
 }
 
@@ -332,10 +332,3 @@ getRarityClass() {
     --arguments 1 \
     --function="getRarityClass"
 }
-
-# getTravelerRewards() {
-#     mxpy --verbose contract query ${SC_ADDRESS} \
-#     --proxy=${PROXY} \
-#     --arguments ${OWNER} \
-#     --function="getTravelerRewards"
-# }
