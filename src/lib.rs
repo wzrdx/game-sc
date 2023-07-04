@@ -735,6 +735,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         rarity_classes
     }
 
+    #[view(getStakedUsersLength)]
+    fn get_staked_users_length(&self) -> usize {
+        self.staked_addresses().len()
+    }
+
     fn get_token_mapper(&self, index: usize) -> FungibleTokenMapper {
         let mapper;
 
@@ -932,11 +937,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("operatingVector")]
     fn operating_vector(&self) -> VecMapper<u16>;
 
-    // Trial 1
+    // TODO: Remove
     #[storage_mapper("txHashes")]
     fn tx_hashes(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
 
-    // Trial 2
+    // TODO: Remove
     #[view(getTxHashes)]
     #[storage_mapper("txHashesSecondTrial")]
     fn tx_hashes_second_trial(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;

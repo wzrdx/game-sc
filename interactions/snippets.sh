@@ -9,11 +9,11 @@ SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 TRAVELERS_ID="TRAVELER-51bdef"
 
 ### mainnet
-USER_PEM="~/elrond-wallet/wallet-homex.pem"
-# USER_PEM="~/Crypto/wallets/wallet-homex.pem"
-PROXY="https://api.multiversx.com"
-CHAIN_ID="1"
-SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
+# USER_PEM="~/elrond-wallet/wallet-homex.pem"
+# # USER_PEM="~/Crypto/wallets/wallet-homex.pem"
+# PROXY="https://api.multiversx.com"
+# CHAIN_ID="1"
+# SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
 
 deploy() {
@@ -70,10 +70,10 @@ getTrials() {
     --function="getTrials"
 }
 
-getCurrentTrial() {
+getStakedUsersLength() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getCurrentTrial"
+    --function="getStakedUsersLength"
 }
 
 drawRaffleWinners() {
