@@ -16,8 +16,7 @@ const ELDER_ENERGY_PER_S: u64 = 278 * 3;
 
 // const ELDER_ENERGY_PER_S: u64 = 278 * 9;
 
-// TODO: 4
-const RAFFLE_CAP: u64 = 8;
+const RAFFLE_CAP: u64 = 4;
 
 use core::iter::FromIterator;
 
@@ -86,33 +85,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     // Raffles
     #[only_owner]
     #[endpoint(addRaffle)]
-    fn add_raffle(&self, timestamp: u64, participants: ManagedVec<ManagedAddress>) {
-        let mut rand_source = RandomnessSource::new();
+    fn add_raffle(&self, timestamp: u64) {
         let index = self.raffles_count().get() + 1;
-
-        for address in participants.into_iter() {
-            if self.raffle_participant_id(&address).is_empty() {
-                let id: u16 = self.raffle_index().update(|i| {
-                    *i += 1;
-                    *i
-                });
-
-                self.raffle_participant_id(&address).set(id);
-                self.raffle_id_participant(id).set(&address);
-            }
-
-            let participant_id = self.raffle_participant_id(&address).get();
-
-            for _ in 0..rand_source.next_usize_in_range(1, 10) {
-                self.raffle_vector(index).push(&participant_id);
-            }
-
-            self.raffle_participants(index).insert(address);
-        }
-
-        for hash in self.tx_hashes().iter() {
-            self.raffle_hashes(index).insert(hash);
-        }
 
         self.raffle_timestamp(index).set(timestamp);
         self.raffles_count().set(index);
@@ -253,7 +227,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
     #[only_owner]
     #[endpoint(drawRaffleWinners)]
-    fn draw_raffle_winners(&self, phase: usize) {
+    fn draw_raffle_winners(&self, raffle_id: usize, phase: usize) {
         let mut rand_source = RandomnessSource::new();
         let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.operating_vector().iter());
 
@@ -341,8 +315,8 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
             self.operating_vector().push(&element);
         }
 
-        let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
-        self.tx_hashes_second_trial().insert(hash);
+        // TODO: Save hashes
+        // let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
     }
 
     #[only_owner]
