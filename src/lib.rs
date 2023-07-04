@@ -92,6 +92,17 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.raffles_count().set(index);
     }
 
+    // Energy
+    #[only_owner]
+    #[endpoint(claimAllEnergy)]
+    fn claim_all_energy(&self, start: usize, end: usize) {
+        for (i, user) in self.staked_addresses().into_iter().enumerate() {
+            if i >= start && i < end {
+                self.claim_staking_rewards_for_user(&user);
+            }
+        }
+    }
+
     #[only_owner]
     #[endpoint(copyOperatingVector)]
     fn copy_operating_vector(&self, raffle_id: usize) {
@@ -937,11 +948,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("operatingVector")]
     fn operating_vector(&self) -> VecMapper<u16>;
 
-    // Trial 1
+    // TODO: Remove
     #[storage_mapper("txHashes")]
     fn tx_hashes(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
 
-    // Trial 2
+    // TODO: Remove
     #[view(getTxHashes)]
     #[storage_mapper("txHashesSecondTrial")]
     fn tx_hashes_second_trial(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;

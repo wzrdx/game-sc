@@ -19,6 +19,7 @@ multiversx_sc_wasm_adapter::endpoints! {
     game_sc
     (
         addRaffle
+        claimAllEnergy
         copyOperatingVector
         getOperatingVectorLength
         setQuests
