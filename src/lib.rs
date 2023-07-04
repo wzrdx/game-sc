@@ -49,6 +49,13 @@ pub struct Participant<M: ManagedTypeApi> {
     pub tickets_count: usize,
 }
 
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct BattleParticipant<M: ManagedTypeApi> {
+    pub address: ManagedAddress<M>,
+    pub tickets_count: usize,
+    pub quests: usize,
+}
+
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
 pub struct TicketStats {
     pub earners_count: usize,
@@ -63,10 +70,10 @@ pub struct Rarity {
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
-pub struct CompactRaffle {
+pub struct Competition {
     pub id: usize,
     pub timestamp: u64,
-    pub vector_size: usize,
+    pub tickets: usize,
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
@@ -79,6 +86,16 @@ pub struct Airdrop<M: ManagedTypeApi> {
 pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
     fn init(&self) {}
+
+    // Battles
+    #[only_owner]
+    #[endpoint(addBattle)]
+    fn add_battle(&self, timestamp: u64) {
+        let index = self.battles_count().get() + 1;
+
+        self.battle_timestamp(index).set(timestamp);
+        self.battles_count().set(index);
+    }
 
     // Raffles
     #[only_owner]
@@ -564,6 +581,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         if self.ongoing_quests(&caller).len() == 0 {
             self.active_players().swap_remove(&caller);
         }
+
+        let current_battle_id = self.battles_count().get();
+
+        self.completed_quests(current_battle_id, &caller).update(|i| {
+            *i += 1;
+        });
     }
 
     #[only_user_account]
@@ -585,7 +608,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         let payment_amount: u64 = payment.amount.to_u64().unwrap_or_default();
 
         // Raffle cap
-        let submitted_tickets = self.get_submitted_tickets(raffle_id, &caller);
+        let submitted_tickets = self.get_raffle_submitted_tickets(raffle_id, &caller);
 
         require!(
             (submitted_tickets as u64) + payment_amount <= RAFFLE_CAP,
@@ -613,9 +636,39 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
     }
 
-    // Raffle
-    #[view(getSubmittedTickets)]
-    fn get_submitted_tickets(&self, raffle_id: usize, user: &ManagedAddress) -> usize {
+    #[only_user_account]
+    #[payable("*")]
+    #[endpoint(joinBattle)]
+    fn join_battle(&self, battle_id: usize) {
+        self.require_conditions();
+        let current_timestamp = self.blockchain().get_block_timestamp();
+        let caller = self.blockchain().get_caller();
+
+        require!(
+            current_timestamp <= self.battle_timestamp(battle_id).get(),
+            "Cannot submit tickets after the battle has ended"
+        );
+
+        let payment: EsdtTokenPayment = self.call_value().single_esdt();
+        self.tickets_mapper().require_same_token(&payment.token_identifier);
+
+        let payment_amount: u64 = payment.amount.to_u64().unwrap_or_default();
+
+        self.battle_submission(battle_id, &caller).update(|i| {
+            *i += payment_amount as usize;
+        });
+
+        self.battle_total_tickets(battle_id).update(|i| {
+            *i += payment_amount as usize;
+        });
+
+        self.battle_participants(battle_id).insert(caller);
+        self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
+    }
+
+    // Raffles
+    #[view(getRaffleSubmittedTickets)]
+    fn get_raffle_submitted_tickets(&self, raffle_id: usize, user: &ManagedAddress) -> usize {
         if self.raffle_participant_id(user).is_empty() {
             return 0;
         } else {
@@ -627,20 +680,20 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
     }
 
-    #[view(getParticipantsCount)]
-    fn get_participants_count(&self, raffle_id: usize) -> usize {
+    #[view(getRaffleParticipantsCount)]
+    fn get_raffle_participants_count(&self, raffle_id: usize) -> usize {
         self.raffle_participants(raffle_id).len()
     }
 
-    #[view(getParticipants)]
-    fn get_participants(&self, raffle_id: usize, start: usize, end: usize) -> ManagedVec<Participant<Self::Api>> {
+    #[view(getRaffleParticipants)]
+    fn get_raffle_participants(&self, raffle_id: usize, start: usize, end: usize) -> ManagedVec<Participant<Self::Api>> {
         let mut participants: ManagedVec<Participant<Self::Api>> = ManagedVec::new();
 
         for (i, address) in self.raffle_participants(raffle_id).into_iter().enumerate() {
             if i >= start && i < end {
                 participants.push(Participant {
                     address: address.clone(),
-                    tickets_count: self.get_submitted_tickets(raffle_id, &address),
+                    tickets_count: self.get_raffle_submitted_tickets(raffle_id, &address),
                 });
             }
         }
@@ -649,25 +702,66 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     #[view(getRaffles)]
-    fn get_raffles(&self) -> ManagedVec<CompactRaffle> {
-        let mut raffles: ManagedVec<CompactRaffle> = ManagedVec::new();
+    fn get_raffles(&self) -> ManagedVec<Competition> {
+        let mut raffles: ManagedVec<Competition> = ManagedVec::new();
         let count = self.raffles_count().get();
 
         for index in 1..=count {
-            let vector_size = if self.raffle_vector(index).is_empty() {
+            let tickets = if self.raffle_vector(index).is_empty() {
                 self.raffle_vector_size(index).get()
             } else {
                 self.raffle_vector(index).len()
             };
 
-            raffles.push(CompactRaffle {
+            raffles.push(Competition {
                 id: index,
                 timestamp: self.raffle_timestamp(index).get(),
-                vector_size,
+                tickets,
             });
         }
 
         raffles
+    }
+
+    // Battles
+    #[view(getBattleParticipantsCount)]
+    fn get_battle_participants_count(&self, battle_id: usize) -> usize {
+        self.battle_participants(battle_id).len()
+    }
+
+    #[view(getBattleParticipants)]
+    fn get_battle_participants(&self, battle_id: usize, start: usize, end: usize) -> ManagedVec<BattleParticipant<Self::Api>> {
+        let mut participants: ManagedVec<BattleParticipant<Self::Api>> = ManagedVec::new();
+
+        for (i, address) in self.battle_participants(battle_id).into_iter().enumerate() {
+            if i >= start && i < end {
+                participants.push(BattleParticipant {
+                    address: address.clone(),
+                    tickets_count: self.battle_submission(battle_id, &address).get(),
+                    quests: self.completed_quests(battle_id, &address).get(),
+                });
+            }
+        }
+
+        participants
+    }
+
+    #[view(getBattles)]
+    fn get_battles(&self) -> ManagedVec<Competition> {
+        let mut battles: ManagedVec<Competition> = ManagedVec::new();
+        let count = self.battles_count().get();
+
+        for index in 1..=count {
+            let tickets = self.battle_total_tickets(index).get();
+
+            battles.push(Competition {
+                id: index,
+                timestamp: self.battle_timestamp(index).get(),
+                tickets,
+            });
+        }
+
+        battles
     }
 
     // Tickets stats
@@ -963,14 +1057,30 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("operatingVector")]
     fn operating_vector(&self) -> VecMapper<u16>;
 
-    // TODO: Remove
-    #[storage_mapper("txHashes")]
-    fn tx_hashes(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
+    // Battles
+    #[view(getBattleSubmittedTickets)]
+    #[storage_mapper("battleSubmission")]
+    fn battle_submission(&self, battle_id: usize, user: &ManagedAddress) -> SingleValueMapper<usize>;
 
-    // TODO: Remove
-    #[view(getTxHashes)]
-    #[storage_mapper("txHashesSecondTrial")]
-    fn tx_hashes_second_trial(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
+    #[storage_mapper("battleParticipants")]
+    fn battle_participants(&self, battle_id: usize) -> UnorderedSetMapper<ManagedAddress>;
+
+    #[storage_mapper("battleTotalTickets")]
+    fn battle_total_tickets(&self, battle_id: usize) -> SingleValueMapper<usize>;
+
+    #[storage_mapper("battleTimestamp")]
+    fn battle_timestamp(&self, battle_id: usize) -> SingleValueMapper<u64>;
+
+    #[view(getBattleHashes)]
+    #[storage_mapper("battleHashes")]
+    fn battle_hashes(&self, battle_id: usize) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
+
+    #[view(getCompletedQuests)]
+    #[storage_mapper("completedQuests")]
+    fn completed_quests(&self, battle_id: usize, user: &ManagedAddress) -> SingleValueMapper<usize>;
+
+    #[storage_mapper("battlesCount")]
+    fn battles_count(&self) -> SingleValueMapper<usize>;
 
     // System
     #[view(isGamePaused)]
