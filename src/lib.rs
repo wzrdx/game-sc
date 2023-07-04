@@ -92,6 +92,17 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         self.raffles_count().set(index);
     }
 
+    // Energy
+    #[only_owner]
+    #[endpoint(claimAllEnergy)]
+    fn claim_all_energy(&self, start: usize, end: usize) {
+        for (i, user) in self.staked_addresses().into_iter().enumerate() {
+            if i >= start && i < end {
+                self.claim_staking_rewards_for_user(&user);
+            }
+        }
+    }
+
     #[only_owner]
     #[endpoint(copyOperatingVector)]
     fn copy_operating_vector(&self, raffle_id: usize) {

@@ -55,19 +55,13 @@ copyHashes() {
     --function="copyHashes"
 }
 
-initializeTrial() {
+claimAllEnergy() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=6000000 \
-    --arguments 1 \
-    --function="initializeTrial"
-}
-
-getTrials() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getTrials"
+    --gas-limit=12000000 \
+    --arguments 0 5 \
+    --function="claimAllEnergy"
 }
 
 getStakedUsersLength() {
