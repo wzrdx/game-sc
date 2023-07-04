@@ -735,6 +735,11 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         rarity_classes
     }
 
+    #[view(getStakedUsersLength)]
+    fn get_staked_users_length(&self) -> usize {
+        self.staked_addresses().len()
+    }
+
     fn get_token_mapper(&self, index: usize) -> FungibleTokenMapper {
         let mapper;
 

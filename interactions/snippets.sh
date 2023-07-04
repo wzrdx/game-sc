@@ -33,10 +33,10 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
-getRafflesStorage() {
+getStakedUsersLength() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getRafflesStorage"
+    --function="getStakedUsersLength"
 }
 
 clearRaffles() {
