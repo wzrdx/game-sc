@@ -1,15 +1,15 @@
 #![no_std]
+// TODO: Standard until claim
+const COMMON_ENERGY_PER_S: u64 = 278 * 3;
+const UNCOMMON_ENERGY_PER_S: u64 = 278 * 4;
+const RARE_ENERGY_PER_S: u64 = 278 * 6;
+const ROYALS_ENERGY_PER_S: u64 = 278 * 8;
+const ONEOFONE_ENERGY_PER_S: u64 = 278 * 10;
 
-const COMMON_ENERGY_PER_S: u64 = 834;
-const UNCOMMON_ENERGY_PER_S: u64 = 834;
-const RARE_ENERGY_PER_S: u64 = 834;
-const ROYALS_ENERGY_PER_S: u64 = 834;
-const ONEOFONE_ENERGY_PER_S: u64 = 834;
+const ELDER_ENERGY_PER_S: u64 = 278 * 9;
 
-const ELDER_ENERGY_PER_S: u64 = 834;
-
-const MULTIPLIER: u64 = 10000000;
-const ENERGY_SWAPPING_THRESHOLD: u64 = 100000;
+// TODO: 4
+const RAFFLE_CAP: u64 = 8;
 
 use core::iter::FromIterator;
 
@@ -63,25 +63,67 @@ pub struct Rarity {
     pub rarity_class: u8,
 }
 
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct CompactRaffle {
+    pub id: usize,
+    pub timestamp: u64,
+    pub vector_size: usize,
+}
+
 #[multiversx_sc::contract]
 pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
     fn init(&self) {}
 
+    // Raffles
     #[only_owner]
-    #[endpoint(copyVector)]
-    fn copy_vector(&self) {
-        for element in self.raffle_vector().into_iter() {
+    #[endpoint(addRaffle)]
+    fn add_raffle(&self, timestamp: u64, participants: ManagedVec<ManagedAddress>) {
+        let mut rand_source = RandomnessSource::new();
+        let index = self.raffles_count().get() + 1;
+
+        for address in participants.into_iter() {
+            if self.raffle_participant_id(&address).is_empty() {
+                let id: u16 = self.raffle_index().update(|i| {
+                    *i += 1;
+                    *i
+                });
+
+                self.raffle_participant_id(&address).set(id);
+                self.raffle_id_participant(id).set(&address);
+            }
+
+            let participant_id = self.raffle_participant_id(&address).get();
+
+            for _ in 0..rand_source.next_usize_in_range(1, 10) {
+                self.raffle_vector(index).push(&participant_id);
+            }
+
+            self.raffle_participants(index).insert(address);
+        }
+
+        for hash in self.tx_hashes().iter() {
+            self.raffle_hashes(index).insert(hash);
+        }
+
+        self.raffle_timestamp(index).set(timestamp);
+        self.raffles_count().set(index);
+    }
+
+    #[only_owner]
+    #[endpoint(copyOperatingVector)]
+    fn copy_operating_vector(&self, raffle_id: usize) {
+        for element in self.raffle_vector(raffle_id).into_iter() {
             self.operating_vector().push(&element);
         }
     }
 
-    #[only_owner]
-    #[endpoint(clearOperatingVector)]
-    fn clear_operating_vector(&self) {
-        self.operating_vector().clear();
+    #[view(getOperatingVectorLength)]
+    fn get_operating_vector_length(&self) -> usize {
+        self.operating_vector().len()
     }
 
+    // Quests
     #[only_owner]
     #[endpoint(setQuests)]
     fn set_quests(&self, quests: ManagedVec<Quest<Self::Api>>) {
@@ -296,16 +338,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     #[only_owner]
-    #[endpoint(setRaffleTimestamp)]
-    fn set_raffle_timestamp(&self, timestamp: u64) {
-        self.raffle_timestamp().set(timestamp);
-    }
-
-    #[only_owner]
     #[endpoint(clearRaffle)]
-    fn clear_raffle(&self) {
-        self.raffle_vector().clear();
-        self.raffle_participants().clear();
+    fn clear_raffle(&self, raffle_id: usize) {
+        self.raffle_vector_size(raffle_id).set(self.raffle_vector(raffle_id).len());
+        self.raffle_vector(raffle_id).clear();
+        self.raffle_participants(raffle_id).clear();
+        self.operating_vector().clear();
     }
 
     #[only_owner]
@@ -317,15 +355,15 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     #[only_owner]
-    #[endpoint(setGamePaused)]
-    fn set_game_paused(&self, value: bool) {
-        self.is_game_paused().set(value);
+    #[endpoint(setTrialTimestamp)]
+    fn set_trial_timestamp(&self, timestamp: u64) {
+        self.trial_timestamp().set(timestamp);
     }
 
     #[only_owner]
-    #[endpoint(setSwappingPaused)]
-    fn set_swapping_paused(&self, value: bool) {
-        self.is_swapping_paused().set(value);
+    #[endpoint(setGamePaused)]
+    fn set_game_paused(&self, value: bool) {
+        self.is_game_paused().set(value);
     }
 
     #[only_user_account]
@@ -428,10 +466,10 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         let quest = self.quests().get(id as usize);
         let quest_duration = quest.duration as u64;
-        let raffle_timestamp = self.raffle_timestamp().get();
+        let trial_timestamp = self.trial_timestamp().get();
 
         require!(
-            quest_duration + current_timestamp < raffle_timestamp,
+            quest_duration + current_timestamp < trial_timestamp,
             "Quest duration exceeds end of Trial"
         );
 
@@ -460,8 +498,6 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
 
         // Add to ongoing quests
-        let current_timestamp = self.blockchain().get_block_timestamp();
-
         self.ongoing_quests(&caller).push(&OngoingQuest {
             id,
             end_timestamp: current_timestamp + (quest.duration as u64),
@@ -525,20 +561,28 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[only_user_account]
     #[payable("*")]
     #[endpoint(joinRaffle)]
-    fn join_raffle(&self) {
+    fn join_raffle(&self, raffle_id: usize) {
         self.require_conditions();
         let current_timestamp = self.blockchain().get_block_timestamp();
-        let raffle_timestamp = self.raffle_timestamp().get();
+        let caller = self.blockchain().get_caller();
 
         require!(
-            current_timestamp <= raffle_timestamp,
+            current_timestamp <= self.raffle_timestamp(raffle_id).get(),
             "Cannot submit tickets after the raffle has ended"
         );
 
         let payment: EsdtTokenPayment = self.call_value().single_esdt();
         self.tickets_mapper().require_same_token(&payment.token_identifier);
 
-        let caller = self.blockchain().get_caller();
+        let payment_amount: u64 = payment.amount.to_u64().unwrap_or_default();
+
+        // Raffle cap
+        let submitted_tickets = self.get_submitted_tickets(raffle_id, &caller);
+
+        require!(
+            (submitted_tickets as u64) + payment_amount <= RAFFLE_CAP,
+            "Payment exceeds raffle tickets cap"
+        );
 
         if self.raffle_participant_id(&caller).is_empty() {
             let id: u16 = self.raffle_index().update(|i| {
@@ -552,77 +596,70 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         let participant_id = self.raffle_participant_id(&caller).get();
 
-        for _ in 0..payment.amount.to_u64().unwrap_or_default() {
-            self.raffle_vector().push(&participant_id);
+        for _ in 0..payment_amount {
+            self.raffle_vector(raffle_id).push(&participant_id);
         }
 
-        self.raffle_participants().insert(caller);
+        self.raffle_participants(raffle_id).insert(caller);
 
         self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
     }
 
-    #[only_user_account]
-    #[payable("*")]
-    #[endpoint(swapEnergy)]
-    fn swap_energy(&self) {
-        self.require_conditions();
-        require!(!self.is_swapping_paused().get(), "Swapping is temporarily paused");
-
-        let payment: EsdtTokenPayment = self.call_value().single_esdt();
-        self.energy_mapper().require_same_token(&payment.token_identifier);
-
-        require!(
-            payment.amount >= BigUint::from(ENERGY_SWAPPING_THRESHOLD),
-            "Amount too small to swap"
-        );
-
-        let caller = self.blockchain().get_caller();
-
-        self.energy_mapper().burn(&payment.amount);
-        self.send().direct_egld(&caller, &(payment.amount * MULTIPLIER));
-    }
-
+    // Raffle
     #[view(getSubmittedTickets)]
-    fn get_submitted_tickets(&self, user: &ManagedAddress) -> usize {
+    fn get_submitted_tickets(&self, raffle_id: usize, user: &ManagedAddress) -> usize {
         if self.raffle_participant_id(user).is_empty() {
             return 0;
         } else {
             let participant_id = self.raffle_participant_id(user).get();
-            let filtered_vec: ManagedVec<u16> = ManagedVec::from_iter(self.raffle_vector().iter().filter(|t| *t == participant_id));
 
-            return filtered_vec.len();
+            let vector = self.raffle_vector(raffle_id);
+            let filter = vector.iter().filter(|t| *t == participant_id);
+            return filter.count();
         }
     }
 
-    #[view(getOperatingVectorLength)]
-    fn get_operating_vector_length(&self) -> usize {
-        self.operating_vector().len()
-    }
-
-    #[view(getSubmittedTicketsTotal)]
-    fn get_submitted_tickets_total(&self) -> usize {
-        self.raffle_vector().len()
-    }
-
     #[view(getParticipantsCount)]
-    fn get_participants_count(&self) -> usize {
-        self.raffle_participants().len()
+    fn get_participants_count(&self, raffle_id: usize) -> usize {
+        self.raffle_participants(raffle_id).len()
     }
 
     #[view(getParticipants)]
-    fn get_participants(&self, start: usize, end: usize) -> ManagedVec<Participant<Self::Api>> {
+    fn get_participants(&self, raffle_id: usize, start: usize, end: usize) -> ManagedVec<Participant<Self::Api>> {
         let mut participants: ManagedVec<Participant<Self::Api>> = ManagedVec::new();
 
-        for (i, address) in self.raffle_participants().iter().enumerate() {
+        for (i, address) in self.raffle_participants(raffle_id).into_iter().enumerate() {
             if i >= start && i < end {
                 participants.push(Participant {
                     address: address.clone(),
-                    tickets_count: self.get_submitted_tickets(&address),
+                    tickets_count: self.get_submitted_tickets(raffle_id, &address),
                 });
             }
         }
 
         participants
+    }
+
+    #[view(getRaffles)]
+    fn get_raffles(&self) -> ManagedVec<CompactRaffle> {
+        let mut raffles: ManagedVec<CompactRaffle> = ManagedVec::new();
+        let count = self.raffles_count().get();
+
+        for index in 1..=count {
+            let vector_size = if self.raffle_vector(index).is_empty() {
+                self.raffle_vector_size(index).get()
+            } else {
+                self.raffle_vector(index).len()
+            };
+
+            raffles.push(CompactRaffle {
+                id: index,
+                timestamp: self.raffle_timestamp(index).get(),
+                vector_size,
+            });
+        }
+
+        raffles
     }
 
     // Tickets stats
@@ -751,14 +788,40 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
         }
 
         let block_diff: u64 = current_timestamp - last_timestamp;
+        let travelers_rewards = BigUint::from(block_diff * self.get_travelers_yield(user));
 
-        let traveler_count: u64 = self.staked_traveler_nonces(user).len() as u64;
         let elder_count: u64 = self.staked_elder_nonces(user).len() as u64;
-
-        let travelers_rewards = BigUint::from(block_diff * COMMON_ENERGY_PER_S * traveler_count);
         let elders_rewards = BigUint::from(block_diff * ELDER_ENERGY_PER_S * elder_count);
 
         travelers_rewards + elders_rewards
+    }
+
+    fn get_travelers_yield(&self, user: &ManagedAddress) -> u64 {
+        let mut travelers_rewards: u64 = 0;
+
+        for nonce in self.staked_traveler_nonces(user).iter() {
+            travelers_rewards += self.get_energy_yield(self.rarity_class(nonce).get());
+        }
+
+        travelers_rewards
+    }
+
+    fn get_energy_yield(&self, rarity_class: u8) -> u64 {
+        let mut energy_yield: u64 = 0;
+
+        if rarity_class == 1 {
+            energy_yield = COMMON_ENERGY_PER_S;
+        } else if rarity_class == 2 {
+            energy_yield = UNCOMMON_ENERGY_PER_S;
+        } else if rarity_class == 3 {
+            energy_yield = RARE_ENERGY_PER_S;
+        } else if rarity_class == 4 {
+            energy_yield = ROYALS_ENERGY_PER_S;
+        } else if rarity_class == 5 {
+            energy_yield = ONEOFONE_ENERGY_PER_S;
+        }
+
+        energy_yield
     }
 
     fn build_uris_vec(&self) -> ManagedVec<ManagedBuffer> {
@@ -859,28 +922,39 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("raffleIdParticipant")]
     fn raffle_id_participant(&self, id: u16) -> SingleValueMapper<ManagedAddress>;
 
+    // Participant index
     #[view(getRaffleIndex)]
     #[storage_mapper("raffleIndex")]
     fn raffle_index(&self) -> SingleValueMapper<u16>;
 
     #[storage_mapper("raffleVector")]
-    fn raffle_vector(&self) -> VecMapper<u16>;
+    fn raffle_vector(&self, raffle_id: usize) -> VecMapper<u16>;
+
+    #[storage_mapper("raffleVectorSize")]
+    fn raffle_vector_size(&self, raffle_id: usize) -> SingleValueMapper<usize>;
+
+    #[storage_mapper("raffleParticipants")]
+    fn raffle_participants(&self, raffle_id: usize) -> UnorderedSetMapper<ManagedAddress>;
+
+    #[view(getRaffleHashes)]
+    #[storage_mapper("raffleHashes")]
+    fn raffle_hashes(&self, raffle_id: usize) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
+
+    #[storage_mapper("raffleTimestamp")]
+    fn raffle_timestamp(&self, raffle_id: usize) -> SingleValueMapper<u64>;
+
+    // Raffle index
+    #[storage_mapper("rafflesCount")]
+    fn raffles_count(&self) -> SingleValueMapper<usize>;
 
     #[storage_mapper("operatingVector")]
     fn operating_vector(&self) -> VecMapper<u16>;
-
-    #[view(getRaffleParticipants)]
-    #[storage_mapper("raffleParticipants")]
-    fn raffle_participants(&self) -> UnorderedSetMapper<ManagedAddress>;
-
-    #[view(getRaffleTimestamp)]
-    #[storage_mapper("raffleTimestamp")]
-    fn raffle_timestamp(&self) -> SingleValueMapper<u64>;
 
     // Trial 1
     #[storage_mapper("txHashes")]
     fn tx_hashes(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
 
+    // Trial 2
     #[view(getTxHashes)]
     #[storage_mapper("txHashesSecondTrial")]
     fn tx_hashes_second_trial(&self) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
@@ -890,7 +964,7 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     #[storage_mapper("isGamePaused")]
     fn is_game_paused(&self) -> SingleValueMapper<bool>;
 
-    #[view(isSwappingPaused)]
-    #[storage_mapper("isSwappingPaused")]
-    fn is_swapping_paused(&self) -> SingleValueMapper<bool>;
+    #[view(getTrialTimestamp)]
+    #[storage_mapper("trialTimestamp")]
+    fn trial_timestamp(&self) -> SingleValueMapper<u64>;
 }

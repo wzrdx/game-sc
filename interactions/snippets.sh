@@ -1,10 +1,10 @@
 ### devnet
-# USER_PEM="~/elrond-wallet/wallet.pem"
-# USER_PEM="~/Crypto/wallet-kzcpl.pem"
-# PROXY="https://devnet-api.multiversx.com"
-# CHAIN_ID="D"
+USER_PEM="~/elrond-wallet/wallet.pem"
+# USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
+PROXY="https://devnet-api.multiversx.com"
+CHAIN_ID="D"
 
-# SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
+SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
 TRAVELERS_ID="TRAVELER-51bdef"
 
@@ -33,22 +33,66 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
+getRafflesStorage() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getRafflesStorage"
+}
+
+clearRaffles() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=9000000 \
+    --function="clearRaffles"
+}
+
+copyHashes() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=9000000 \
+    --function="copyHashes"
+}
+
+initializeTrial() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=6000000 \
+    --arguments 1 \
+    --function="initializeTrial"
+}
+
+getTrials() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getTrials"
+}
+
+getCurrentTrial() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getCurrentTrial"
+}
+
 drawRaffleWinners() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=600000000 \
-    --arguments 6 \
+    --arguments 5 \
     --function="drawRaffleWinners"
 }
 
 # Raffle
-copyVector() {
+copyOperatingVector() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=200000000 \
-    --function="copyVector"
+    --arguments 2 \
+    --function="copyOperatingVector"
 }
 
 clearOperatingVector() {
@@ -199,13 +243,13 @@ getQuests() {
     --function="getQuests"
 }
 
-setRaffleTimestamp() {
+setTrialTimestamp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1688407200 \
-    --function="setRaffleTimestamp"
+    --arguments 1688927833 \
+    --function="setTrialTimestamp"
 }
 
 getRaffleParticipants() {
@@ -245,6 +289,7 @@ clearRaffle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=200000000 \
+    --arguments 1 \
     --function="clearRaffle"
 }
 
