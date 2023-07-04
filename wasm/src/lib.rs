@@ -32,7 +32,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         issueHerbsToken
         issueGemsToken
         issueEssenceToken
-        airdropEnergy
+        airdropResources
         clearOngoingQuests
         drawRaffleWinners
         clearRaffle

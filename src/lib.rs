@@ -69,6 +69,12 @@ pub struct CompactRaffle {
     pub vector_size: usize,
 }
 
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct Airdrop<M: ManagedTypeApi> {
+    pub tickets: usize,
+    pub tokens: ManagedVec<M, u64>,
+}
+
 #[multiversx_sc::contract]
 pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule {
     #[init]
@@ -216,20 +222,22 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
     }
 
     #[only_owner]
-    #[endpoint(airdropTickets)]
-    fn airdrop_tickets(&self, addresses: ManagedVec<ManagedAddress>, alloc_per_addr: ManagedVec<u64>) {
-        for (index, address) in addresses.into_iter().enumerate() {
-            self.tickets_mapper()
-                .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(alloc_per_addr.get(index)));
-        }
-    }
+    #[endpoint(airdropResources)]
+    fn airdrop_resources(&self, users: ManagedVec<ManagedAddress>, alloc: ManagedVec<Airdrop<Self::Api>>) {
+        for (index, address) in users.into_iter().enumerate() {
+            let airdrop = alloc.get(index);
 
-    #[only_owner]
-    #[endpoint(airdropEnergy)]
-    fn airdrop_energy(&self, addresses: ManagedVec<ManagedAddress>, alloc_per_addr: ManagedVec<u64>) {
-        for (index, address) in addresses.into_iter().enumerate() {
-            self.energy_mapper()
-                .mint_and_send(&address, BigUint::from(alloc_per_addr.get(index)));
+            if airdrop.tickets > 0 {
+                self.tickets_mapper()
+                    .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(airdrop.tickets));
+            }
+
+            for (i, amount) in airdrop.tokens.iter().enumerate() {
+                if amount > 0 {
+                    let mapper = self.get_token_mapper(i);
+                    mapper.mint_and_send(&address, BigUint::from(amount));
+                }
+            }
         }
     }
 
