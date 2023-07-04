@@ -1,12 +1,20 @@
 #![no_std]
-// TODO: Standard until claim
 const COMMON_ENERGY_PER_S: u64 = 278 * 3;
-const UNCOMMON_ENERGY_PER_S: u64 = 278 * 4;
-const RARE_ENERGY_PER_S: u64 = 278 * 6;
-const ROYALS_ENERGY_PER_S: u64 = 278 * 8;
-const ONEOFONE_ENERGY_PER_S: u64 = 278 * 10;
+const UNCOMMON_ENERGY_PER_S: u64 = 278 * 3;
+const RARE_ENERGY_PER_S: u64 = 278 * 3;
+const ROYALS_ENERGY_PER_S: u64 = 278 * 3;
+const ONEOFONE_ENERGY_PER_S: u64 = 278 * 3;
 
-const ELDER_ENERGY_PER_S: u64 = 278 * 9;
+const ELDER_ENERGY_PER_S: u64 = 278 * 3;
+
+// TODO:
+// const COMMON_ENERGY_PER_S: u64 = 278 * 3;
+// const UNCOMMON_ENERGY_PER_S: u64 = 278 * 4;
+// const RARE_ENERGY_PER_S: u64 = 278 * 6;
+// const ROYALS_ENERGY_PER_S: u64 = 278 * 8;
+// const ONEOFONE_ENERGY_PER_S: u64 = 278 * 10;
+
+// const ELDER_ENERGY_PER_S: u64 = 278 * 9;
 
 // TODO: 4
 const RAFFLE_CAP: u64 = 8;
