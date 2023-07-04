@@ -1,20 +1,12 @@
 #![no_std]
+
 const COMMON_ENERGY_PER_S: u64 = 278 * 3;
-const UNCOMMON_ENERGY_PER_S: u64 = 278 * 3;
-const RARE_ENERGY_PER_S: u64 = 278 * 3;
-const ROYALS_ENERGY_PER_S: u64 = 278 * 3;
-const ONEOFONE_ENERGY_PER_S: u64 = 278 * 3;
+const UNCOMMON_ENERGY_PER_S: u64 = 278 * 4;
+const RARE_ENERGY_PER_S: u64 = 278 * 6;
+const ROYALS_ENERGY_PER_S: u64 = 278 * 8;
+const ONEOFONE_ENERGY_PER_S: u64 = 278 * 10;
 
-const ELDER_ENERGY_PER_S: u64 = 278 * 3;
-
-// TODO:
-// const COMMON_ENERGY_PER_S: u64 = 278 * 3;
-// const UNCOMMON_ENERGY_PER_S: u64 = 278 * 4;
-// const RARE_ENERGY_PER_S: u64 = 278 * 6;
-// const ROYALS_ENERGY_PER_S: u64 = 278 * 8;
-// const ONEOFONE_ENERGY_PER_S: u64 = 278 * 10;
-
-// const ELDER_ENERGY_PER_S: u64 = 278 * 9;
+const ELDER_ENERGY_PER_S: u64 = 278 * 9;
 
 const RAFFLE_CAP: u64 = 4;
 
@@ -90,6 +82,12 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         self.raffle_timestamp(index).set(timestamp);
         self.raffles_count().set(index);
+    }
+
+    #[only_owner]
+    #[endpoint(setRaffleVectorSize)]
+    fn set_raffle_vector_size(&self, raffle_id: usize, size: usize) {
+        self.raffle_vector_size(raffle_id).set(size);
     }
 
     // Energy
@@ -215,6 +213,15 @@ pub trait GameScContract: multiversx_sc_modules::default_issue_callbacks::Defaul
 
         self.essence_mapper()
             .issue_and_set_all_roles(issue_cost, token_display_name, token_ticker, 6 as usize, None);
+    }
+
+    #[only_owner]
+    #[endpoint(airdropTickets)]
+    fn airdrop_tickets(&self, addresses: ManagedVec<ManagedAddress>, alloc_per_addr: ManagedVec<u64>) {
+        for (index, address) in addresses.into_iter().enumerate() {
+            self.tickets_mapper()
+                .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(alloc_per_addr.get(index)));
+        }
     }
 
     #[only_owner]
