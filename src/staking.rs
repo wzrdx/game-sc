@@ -166,4 +166,17 @@ pub trait Staking: storage::Storage + helpers::Helpers {
     fn get_staked_users_length(&self) -> usize {
         self.staked_addresses().len()
     }
+
+    #[view(getStakedUsers)]
+    fn get_staked_users(&self, start: usize, end: usize) -> ManagedVec<ManagedAddress> {
+        let mut users: ManagedVec<ManagedAddress> = ManagedVec::new();
+
+        for (i, address) in self.staked_addresses().into_iter().enumerate() {
+            if i >= start && i < end {
+                users.push(address);
+            }
+        }
+
+        users
+    }
 }
