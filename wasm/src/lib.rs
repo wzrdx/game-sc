@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           53
+// Endpoints:                           54
 // Async Callback:                       1
-// Total number of exported functions:  55
+// Total number of exported functions:  56
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -71,6 +71,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getRarityClasses
         getStakedUsersLength
         getStakedUsers
+        getStakeOfUser
         callBack
     )
 }

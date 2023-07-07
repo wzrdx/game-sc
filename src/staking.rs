@@ -179,4 +179,9 @@ pub trait Staking: storage::Storage + helpers::Helpers {
 
         users
     }
+
+    #[view(getStakeOfUser)]
+    fn get_stake_of_user(&self, user_address: ManagedAddress) -> usize {
+        self.staked_traveler_nonces(&user_address).len() + self.staked_elder_nonces(&user_address).len()
+    }
 }
