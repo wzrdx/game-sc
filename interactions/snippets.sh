@@ -1,19 +1,19 @@
-### devnet
-# USER_PEM="~/elrond-wallet/wallet.pem"
-# # USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
-# PROXY="https://devnet-api.multiversx.com"
-# CHAIN_ID="D"
-# SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
+## devnet
+USER_PEM="~/elrond-wallet/wallet.pem"
+# USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
+PROXY="https://devnet-api.multiversx.com"
+CHAIN_ID="D"
+SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
 # TRAVELERS_ID="TRAVELER-51bdef"
-OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
+# OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 
-## mainnet
-USER_PEM="~/elrond-wallet/wallet-homex.pem"
-# USER_PEM="~/Crypto/wallets/wallet-homex.pem"
-PROXY="https://api.multiversx.com"
-CHAIN_ID="1"
-SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
+# ## mainnet
+# USER_PEM="~/elrond-wallet/wallet-homex.pem"
+# # USER_PEM="~/Crypto/wallets/wallet-homex.pem"
+# PROXY="https://api.multiversx.com"
+# CHAIN_ID="1"
+# SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
 
 deploy() {
@@ -31,6 +31,12 @@ upgrade() {
     --gas-limit=120000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+getTestVector() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getTestVector"
 }
 
 addBattle() {
@@ -128,74 +134,6 @@ getOperatingVectorLength() {
     --function="getOperatingVectorLength"
 }
 
-setCollectionIds() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=5000000 \
-    --arguments str:${TRAVELERS_ID} str:${ELDERS_ID} \
-    --function="setCollectionIds"
-}
-
-issueTicketsCollection() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=200000000 \
-    --value 50000000000000000 \
-    --arguments str:${TICKETS_COLLECTION_NAME} str:${TICKETS_TICKER} \
-    --function="issueTicketsCollection"
-}
-
-createTicketsToken() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=120000000 \
-    --arguments 1000 \
-    --function="createTicketsToken"
-}
-
-issueEnergyToken() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=90000000 \
-    --value 50000000000000000 \
-    --arguments str:${ENERGY_TOKEN_NAME} str:${ENERGY_TICKER} \
-    --function="issueEnergyToken"
-}
-
-issueHerbsToken() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=90000000 \
-    --value 50000000000000000 \
-    --arguments str:${HERBS_TOKEN_NAME} str:${HERBS_TICKER} \
-    --function="issueHerbsToken"
-}
-
-issueGemsToken() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=90000000 \
-    --value 50000000000000000 \
-    --arguments str:${GEMS_TOKEN_NAME} str:${GEMS_TICKER} \
-    --function="issueGemsToken"
-}
-
-issueEssenceToken() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=90000000 \
-    --value 50000000000000000 \
-    --arguments str:${ESSENCE_TOKEN_NAME} str:${ESSENCE_TICKER} \
-    --function="issueEssenceToken"
-}
-
 setGamePaused() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
@@ -205,69 +143,12 @@ setGamePaused() {
     --function="setGamePaused"
 }
 
-setSwappingPaused() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=6000000 \
-    --arguments false \
-    --function="setSwappingPaused"
-}
-
-getTicketsId() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getTicketsId"
-}
-
-getEnergyTokenId() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getEnergyTokenId"
-}
-
-getHerbsTokenId() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getHerbsTokenId"
-}
-
-getGemsTokenId() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getGemsTokenId"
-}
-
-getEssenceTokenId() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getEssenceTokenId"
-}
-
-getTravelersCollectionId() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getTravelersCollectionId"
-}
-
-getEldersCollectionId() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getEldersCollectionId"
-}
-
-getQuests() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getQuests"
-}
-
 setTrialTimestamp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1689350400 \
+    --arguments 1691514672 \
     --function="setTrialTimestamp"
 }
 

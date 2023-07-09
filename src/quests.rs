@@ -3,6 +3,8 @@ multiversx_sc::imports!();
 use crate::interface::*;
 use crate::{helpers, storage};
 
+use core::iter::FromIterator;
+
 #[multiversx_sc::module]
 pub trait Quests: storage::Storage + helpers::Helpers {
     #[only_owner]
@@ -46,7 +48,7 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             "Quest duration exceeds end of Trial"
         );
 
-        // Payment check & burning of tokens
+        // Payment checking & burning of tokens
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
         let requirements = &quest.requirements;
 
@@ -77,6 +79,71 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         });
 
         self.active_players().insert(caller.clone());
+    }
+
+    #[only_user_account]
+    #[payable("*")]
+    #[endpoint(startQuests)]
+    fn start_quests(&self, ids: ManagedVec<u8>) {
+        self.require_conditions();
+        let caller = self.blockchain().get_caller();
+        let current_timestamp = self.blockchain().get_block_timestamp();
+        let trial_timestamp = self.trial_timestamp().get();
+
+        // TODO:
+        self.test_vector().clear();
+
+        // Ongoing quests checking
+        let ongoing_quests_ids: ManagedVec<u8> = ManagedVec::from_iter(self.ongoing_quests(&caller).iter().map(|q| q.id));
+
+        for id in ids.into_iter() {
+            require!(!ongoing_quests_ids.contains(&id), "Cannot start an already ongoing quest");
+        }
+
+        // Quests duration checking
+        let quests: ManagedVec<Quest<Self::Api>> = ManagedVec::from_iter(self.quests().iter().filter(|q| {
+            let id = q.id;
+            ids.contains(&id)
+        }));
+
+        for quest in quests.into_iter() {
+            require!(
+                (quest.duration as u64) + current_timestamp < trial_timestamp,
+                "At least one quest duration exceeds end of Trial"
+            );
+        }
+
+        // Payment checking & burning of tokens
+        let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
+        let mut total_requirements: ManagedVec<u64> = ManagedVec::new();
+
+        for quest in quests.into_iter() {
+            let requirements = &quest.requirements;
+
+            if requirements.len() > total_requirements.len() {
+                let difference: usize = requirements.len() - total_requirements.len();
+
+                for _i in 0..difference {
+                    total_requirements.push(0);
+                }
+            }
+
+            for (i, amount) in requirements.iter().enumerate() {
+                if amount > 0 {
+                    let value = total_requirements.get(i);
+                    total_requirements.set(i, &(value + amount)).unwrap();
+                }
+            }
+        }
+
+        require!(
+            payments.len() == total_requirements.iter().filter(|&x| x > 0).count(),
+            "Received incorrect number of payments",
+        );
+
+        for req in total_requirements.into_iter() {
+            self.test_vector().push(&req);
+        }
     }
 
     #[only_user_account]
@@ -136,4 +203,8 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             *i += 1;
         });
     }
+
+    #[view(getTestVector)]
+    #[storage_mapper("testVectorU64")]
+    fn test_vector(&self) -> VecMapper<u64>;
 }
