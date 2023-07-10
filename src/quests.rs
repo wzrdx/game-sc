@@ -90,9 +90,6 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         let current_timestamp = self.blockchain().get_block_timestamp();
         let trial_timestamp = self.trial_timestamp().get();
 
-        // TODO:
-        self.test_vector().clear();
-
         // Ongoing quests checking
         let ongoing_quests_ids: ManagedVec<u8> = ManagedVec::from_iter(self.ongoing_quests(&caller).iter().map(|q| q.id));
 
@@ -109,7 +106,7 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         for quest in quests.into_iter() {
             require!(
                 (quest.duration as u64) + current_timestamp < trial_timestamp,
-                "At least one quest duration exceeds end of Trial"
+                "Quests durations exceed end of Trial"
             );
         }
 
@@ -141,9 +138,30 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             "Received incorrect number of payments",
         );
 
-        for req in total_requirements.into_iter() {
-            self.test_vector().push(&req);
+        let mut payment_index: usize = 0;
+
+        for (i, requirement) in total_requirements.iter().enumerate() {
+            if requirement > 0 {
+                let payment = payments.get(payment_index);
+                let mapper = self.get_token_mapper(i);
+
+                mapper.require_same_token(&payment.token_identifier);
+                require!(payment.amount == BigUint::from(requirement), "Incorrect payment");
+                mapper.burn(&payment.amount);
+
+                payment_index += 1;
+            }
         }
+
+        // Add to ongoing quests
+        for quest in quests.into_iter() {
+            self.ongoing_quests(&caller).push(&OngoingQuest {
+                id: quest.id,
+                end_timestamp: current_timestamp + (quest.duration as u64),
+            });
+        }
+
+        self.active_players().insert(caller.clone());
     }
 
     #[only_user_account]
