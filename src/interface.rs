@@ -15,7 +15,7 @@ pub struct Quest<M: ManagedTypeApi> {
     pub rewards: ManagedVec<M, u64>,
 }
 
-#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct OngoingQuest {
     pub id: u8,
     pub end_timestamp: u64,

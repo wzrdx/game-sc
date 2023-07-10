@@ -23,10 +23,6 @@ pub trait Storage {
     #[storage_mapper("travelerRarityClass")]
     fn rarity_class(&self, nonce: u64) -> SingleValueMapper<u8>;
 
-    // Tickets stats
-    #[storage_mapper("ticketsEarned")]
-    fn tickets_earned(&self) -> MapMapper<ManagedAddress, usize>;
-
     // NFT Collections
     #[view(getTravelersCollectionId)]
     #[storage_mapper("travelersMapper")]

@@ -143,12 +143,13 @@ setGamePaused() {
     --function="setGamePaused"
 }
 
+# Next month 1691653497
 setTrialTimestamp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1691514672 \
+    --arguments 1691653497 \
     --function="setTrialTimestamp"
 }
 
@@ -211,12 +212,6 @@ isGamePaused() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="isGamePaused"
-}
-
-getRaffleTimestamp() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getRaffleTimestamp"
 }
 
 getUserTokenNonces() {

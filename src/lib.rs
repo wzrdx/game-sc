@@ -55,14 +55,6 @@ pub trait GameScContract:
     }
 
     #[only_owner]
-    #[endpoint(clearTicketsHistory)]
-    fn clear_tickets_history(&self) {
-        for address in self.tickets_earned().keys() {
-            self.tickets_earned().remove(&address);
-        }
-    }
-
-    #[only_owner]
     #[endpoint(setTrialTimestamp)]
     fn set_trial_timestamp(&self, timestamp: u64) {
         self.trial_timestamp().set(timestamp);
@@ -72,24 +64,5 @@ pub trait GameScContract:
     #[endpoint(setGamePaused)]
     fn set_game_paused(&self, value: bool) {
         self.is_game_paused().set(value);
-    }
-    // Tickets stats
-    #[view(getTicketStats)]
-    fn get_ticket_stats(&self) -> TicketStats {
-        let mut earners_count: usize = 0;
-        let mut tickets_count: usize = 0;
-        let mut most_earned: usize = 0;
-
-        for value in self.tickets_earned().values() {
-            earners_count += 1;
-            tickets_count += &value;
-            most_earned = most_earned.max(value);
-        }
-
-        TicketStats {
-            earners_count,
-            tickets_count,
-            most_earned,
-        }
     }
 }

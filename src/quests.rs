@@ -197,9 +197,6 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             let tickets_amount: u64 = rewards.iter().sum();
             self.tickets_mapper()
                 .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(tickets_amount));
-
-            let tickets_earned: usize = self.tickets_earned().remove(&caller).unwrap_or_default();
-            self.tickets_earned().insert(caller.clone(), tickets_earned + 1);
         } else {
             for (i, reward) in rewards.iter().enumerate() {
                 if reward > 0 {
@@ -222,6 +219,85 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         });
     }
 
+    #[only_user_account]
+    #[endpoint(completeAllQuests)]
+    fn complete_all_quests(&self) {
+        let caller = self.blockchain().get_caller();
+        let current_timestamp = self.blockchain().get_block_timestamp();
+
+        let ongoing_quests: ManagedVec<OngoingQuest> =
+            ManagedVec::from_iter(self.ongoing_quests(&caller).iter().filter(|q| current_timestamp >= q.end_timestamp));
+
+        let ongoing_quests_ids: ManagedVec<u8> = ManagedVec::from_iter(ongoing_quests.iter().map(|q| q.id));
+
+        let quests: ManagedVec<Quest<Self::Api>> = ManagedVec::from_iter(self.quests().iter().filter(|q| {
+            let id = q.id;
+            ongoing_quests_ids.contains(&id)
+        }));
+
+        // Compute total rewards
+        let mut total_rewards: ManagedVec<u64> = ManagedVec::new();
+        let mut total_tickets_amount: u64 = 0;
+
+        for quest in quests.into_iter() {
+            let rewards = &quest.rewards;
+
+            if quest.is_final {
+                let tickets_amount: u64 = rewards.iter().sum();
+                total_tickets_amount += tickets_amount;
+            } else {
+                if rewards.len() > total_rewards.len() {
+                    let difference: usize = rewards.len() - total_rewards.len();
+
+                    for _i in 0..difference {
+                        total_rewards.push(0);
+                    }
+                }
+
+                for (i, amount) in rewards.iter().enumerate() {
+                    if amount > 0 {
+                        let value = total_rewards.get(i);
+                        total_rewards.set(i, &(value + amount)).unwrap();
+                    }
+                }
+            }
+        }
+
+        // Send rewards
+        if total_tickets_amount > 0 {
+            self.tickets_mapper()
+                .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(total_tickets_amount));
+        }
+
+        for (i, reward) in total_rewards.iter().enumerate() {
+            if reward > 0 {
+                let mapper = self.get_token_mapper(i);
+                mapper.mint_and_send(&caller, BigUint::from(reward));
+            }
+        }
+
+        // Set remaining quests
+        let remaining_quests: ManagedVec<OngoingQuest> =
+            ManagedVec::from_iter(self.ongoing_quests(&caller).iter().filter(|q| current_timestamp < q.end_timestamp));
+
+        self.ongoing_quests(&caller).clear();
+
+        for quest in remaining_quests.into_iter() {
+            self.ongoing_quests(&caller).push(&quest);
+        }
+
+        if self.ongoing_quests(&caller).len() == 0 {
+            self.active_players().swap_remove(&caller);
+        }
+
+        let current_battle_id = self.battles_count().get();
+
+        self.completed_quests(current_battle_id, &caller).update(|i| {
+            *i += ongoing_quests.len();
+        });
+    }
+
+    // TODO: Remove
     #[view(getTestVector)]
     #[storage_mapper("testVectorU64")]
     fn test_vector(&self) -> VecMapper<u64>;
