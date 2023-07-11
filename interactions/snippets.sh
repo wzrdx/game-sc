@@ -39,6 +39,15 @@ getTestVector() {
     --function="getTestVector"
 }
 
+addRaffle() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=9000000 \
+    --arguments 1691751948 \
+    --function="addRaffle"
+}
+
 addBattle() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
@@ -149,7 +158,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1691653497 \
+    --arguments 1689096617 \
     --function="setTrialTimestamp"
 }
 
