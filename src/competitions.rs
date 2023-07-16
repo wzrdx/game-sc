@@ -53,73 +53,30 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
 
             if phase == 1 {
                 if index == 1 {
-                    self.send().direct_esdt(
-                        &winner_address,
-                        &self.travelers_mapper().get_token_id(),
-                        1195 as u64,
-                        &BigUint::from(1 as u32),
-                    );
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
                 } else if index == 2 {
-                    self.send().direct_esdt(
-                        &winner_address,
-                        &self.travelers_mapper().get_token_id(),
-                        468 as u64,
-                        &BigUint::from(1 as u32),
-                    );
-                } else if index == 3 {
-                    self.send().direct_esdt(
-                        &winner_address,
-                        &self.travelers_mapper().get_token_id(),
-                        876 as u64,
-                        &BigUint::from(1 as u32),
-                    );
-                } else if index == 4 {
-                    self.send().direct_esdt(
-                        &winner_address,
-                        &self.travelers_mapper().get_token_id(),
-                        465 as u64,
-                        &BigUint::from(1 as u32),
-                    );
-                } else if index == 5 {
-                    self.send().direct_esdt(
-                        &winner_address,
-                        &self.travelers_mapper().get_token_id(),
-                        1959 as u64,
-                        &BigUint::from(1 as u32),
-                    );
+                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+                } else {
+                    self.send().direct_egld(&winner_address, &BigUint::from(500000000000000000 as u64));
+                    self.tickets_mapper()
+                        .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
+                    self.energy_mapper().mint_and_send(&winner_address, BigUint::from(300000000 as u64));
                 }
             } else if phase == 2 {
-                if index == 1 {
-                    self.send().direct_esdt(
-                        &winner_address,
-                        &self.travelers_mapper().get_token_id(),
-                        2600 as u64,
-                        &BigUint::from(1 as u32),
-                    );
-                } else {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
-                    self.essence_mapper()
-                        .mint_and_send(&winner_address, BigUint::from(100000000 as u64));
-                }
+                self.send().direct_egld(&winner_address, &BigUint::from(500000000000000000 as u64));
+                self.tickets_mapper()
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
+                self.energy_mapper().mint_and_send(&winner_address, BigUint::from(300000000 as u64));
             } else if phase == 3 {
-                self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
-                self.essence_mapper()
-                    .mint_and_send(&winner_address, BigUint::from(100000000 as u64));
+                self.send().direct_egld(&winner_address, &BigUint::from(400000000000000000 as u64));
+                self.tickets_mapper()
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
+                self.energy_mapper().mint_and_send(&winner_address, BigUint::from(100000000 as u64));
             } else if phase == 4 {
-                if index == 1 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
-                    self.essence_mapper()
-                        .mint_and_send(&winner_address, BigUint::from(100000000 as u64));
-                } else {
-                    self.tickets_mapper()
-                        .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(3 as u32));
-                }
-            } else if phase == 5 {
+                self.send().direct_egld(&winner_address, &BigUint::from(400000000000000000 as u64));
                 self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
-            } else if phase == 6 {
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
+                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
+                self.energy_mapper().mint_and_send(&winner_address, BigUint::from(100000000 as u64));
             }
 
             vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
