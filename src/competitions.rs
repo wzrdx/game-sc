@@ -1,4 +1,4 @@
-const RAFFLE_CAP: u64 = 4;
+const RAFFLE_CAP: u64 = 5; // TODO: 5
 
 multiversx_sc::imports!();
 
