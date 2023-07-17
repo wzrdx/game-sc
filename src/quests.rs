@@ -296,9 +296,4 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             *i += ongoing_quests.len();
         });
     }
-
-    // TODO: Remove
-    #[view(getTestVector)]
-    #[storage_mapper("testVectorU64")]
-    fn test_vector(&self) -> VecMapper<u64>;
 }
