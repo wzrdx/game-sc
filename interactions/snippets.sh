@@ -70,14 +70,6 @@ getStakedUsersLength() {
     --function="getStakedUsersLength"
 }
 
-clearRaffles() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=9000000 \
-    --function="clearRaffles"
-}
-
 copyHashes() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
@@ -148,7 +140,7 @@ setGamePaused() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments true \
+    --arguments false \
     --function="setGamePaused"
 }
 
@@ -158,7 +150,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1689096617 \
+    --arguments 1690214400 \
     --function="setTrialTimestamp"
 }
 
@@ -186,20 +178,12 @@ getStakedNFTsCount() {
     --function="getStakedNFTsCount"
 }
 
-clearTicketsHistory() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=300000000 \
-    --function="clearTicketsHistory"
-}
-
 clearRaffle() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=200000000 \
-    --arguments 1 \
+    --arguments 3 \
     --function="clearRaffle"
 }
 
