@@ -1,9 +1,11 @@
 ## devnet
-# USER_PEM="~/elrond-wallet/wallet.pem"
-USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
+USER_PEM="~/elrond-wallet/wallet.pem"
+# USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
+# SC_ADDRESS=erd1qqqqqqqqqqqqqpgq9459wl67kadq47jq8xqwp56muskyaajvukrq9xjh8z
+# COLLECTION="HOLYCOWS-90e467"
 
 # TRAVELERS_ID="TRAVELER-51bdef"
 # OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
@@ -32,11 +34,13 @@ upgrade() {
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
-
-getTestVector() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getTestVector"
+setTrial() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=50000000 \
+    --arguments 5 \
+    --function="setTrial"
 }
 
 addRaffle() {
@@ -55,13 +59,6 @@ addBattle() {
     --gas-limit=9000000 \
     --arguments 1691164800 \
     --function="addBattle"
-}
-
-getCompletedQuests() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments 1 ${OWNER} \
-    --function="getCompletedQuests"
 }
 
 getStakedUsersLength() {

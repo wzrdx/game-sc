@@ -66,7 +66,7 @@ pub trait Storage {
     #[storage_mapper("activePlayers")]
     fn active_players(&self) -> UnorderedSetMapper<ManagedAddress>;
 
-    // Rewards
+    // Participants
     #[storage_mapper("raffleParticipantId")]
     fn raffle_participant_id(&self, user: &ManagedAddress) -> SingleValueMapper<u16>;
 
@@ -131,7 +131,20 @@ pub trait Storage {
     #[storage_mapper("isGamePaused")]
     fn is_game_paused(&self) -> SingleValueMapper<bool>;
 
+    // Trial
     #[view(getTrialTimestamp)]
     #[storage_mapper("trialTimestamp")]
     fn trial_timestamp(&self) -> SingleValueMapper<u64>;
+
+    #[view(getCurrentTrial)]
+    #[storage_mapper("currentTrial")]
+    fn current_trial(&self) -> SingleValueMapper<u16>;
+
+    // Rewards
+    /*
+     * The Elder NFT nonces which can be used to claim tickets each Trial.
+     * After claiming rewards for a nonce, it is removed from the set
+     */
+    #[storage_mapper("eldersTicketsNonces")]
+    fn elders_tickets_nonces(&self, trial: u16) -> UnorderedSetMapper<u16>;
 }
