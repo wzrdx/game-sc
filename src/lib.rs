@@ -7,6 +7,7 @@ mod competitions;
 mod helpers;
 mod interface;
 mod quests;
+mod rewards;
 mod staking;
 mod storage;
 
@@ -20,9 +21,21 @@ pub trait GameScContract:
     + competitions::Competitions
     + quests::Quests
     + staking::Staking
+    + rewards::Rewards
 {
     #[init]
     fn init(&self) {}
+
+    #[only_owner]
+    #[endpoint(withdraw)]
+    fn withdraw(&self, start: usize, end: usize, identifier: TokenIdentifier<Self::Api>) {
+        let caller = self.blockchain().get_caller();
+
+        for nonce in start..=end {
+            self.send()
+                .direct_esdt(&caller, &identifier, nonce as u64, &BigUint::from(1 as u32));
+        }
+    }
 
     #[only_owner]
     #[endpoint(claimAllEnergy)]
@@ -58,6 +71,17 @@ pub trait GameScContract:
     #[endpoint(setTrialTimestamp)]
     fn set_trial_timestamp(&self, timestamp: u64) {
         self.trial_timestamp().set(timestamp);
+    }
+
+    #[only_owner]
+    #[endpoint(setTrial)]
+    fn set_trial(&self, trial: u16) {
+        self.current_trial().set(trial);
+        self.elders_tickets_nonces(trial - 1).clear();
+
+        for nonce in 1..=60 {
+            self.elders_tickets_nonces(trial).insert(nonce);
+        }
     }
 
     #[only_owner]

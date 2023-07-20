@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           54
+// Endpoints:                           60
 // Async Callback:                       1
-// Total number of exported functions:  56
+// Total number of exported functions:  62
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -18,9 +18,11 @@ multiversx_sc_wasm_adapter::panic_handler!();
 multiversx_sc_wasm_adapter::endpoints! {
     game_sc
     (
+        withdraw
         claimAllEnergy
         airdropResources
         setTrialTimestamp
+        setTrial
         setGamePaused
         getRarityClass
         getTravelersCollectionId
@@ -39,6 +41,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getCompletedQuests
         isGamePaused
         getTrialTimestamp
+        getCurrentTrial
         addBattle
         addRaffle
         setRaffleVectorSize
@@ -72,6 +75,9 @@ multiversx_sc_wasm_adapter::endpoints! {
         getStakedUsersLength
         getStakedUsers
         getStakeOfUser
+        claimReward
+        getElderRewards
+        getNoncesLeft
         callBack
     )
 }

@@ -9,8 +9,8 @@
 # OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 
 # ## mainnet
-# USER_PEM="~/elrond-wallet/wallet-homex.pem"
-USER_PEM="~/Crypto/wallets/wallet-homex.pem"
+USER_PEM="~/elrond-wallet/wallet-homex.pem"
+# USER_PEM="~/Crypto/wallets/wallet-homex.pem"
 PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
@@ -33,10 +33,13 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
-getTestVector() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getTestVector"
+setTrial() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=50000000 \
+    --arguments 4 \
+    --function="setTrial"
 }
 
 addRaffle() {
@@ -55,13 +58,6 @@ addBattle() {
     --gas-limit=9000000 \
     --arguments 1691164800 \
     --function="addBattle"
-}
-
-getCompletedQuests() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments 1 ${OWNER} \
-    --function="getCompletedQuests"
 }
 
 getStakedUsersLength() {
