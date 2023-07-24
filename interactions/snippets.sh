@@ -33,6 +33,24 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
+drawRaffleWinners() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=150000000 \
+    --arguments 4 1 \
+    --function="drawRaffleWinners"
+}
+
+clearRaffle() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=150000000 \
+    --arguments 4 \
+    --function="clearRaffle"
+}
+
 setTrial() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
@@ -98,16 +116,7 @@ getStakedUsersLength() {
     --function="getStakedUsersLength"
 }
 
-drawRaffleWinners() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=300000000 \
-    --arguments 3 4 \
-    --function="drawRaffleWinners"
-}
-
-# Raffle
+# Operating vector
 copyOperatingVector() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
@@ -172,15 +181,6 @@ getStakedNFTsCount() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="getStakedNFTsCount"
-}
-
-clearRaffle() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=200000000 \
-    --arguments 3 \
-    --function="clearRaffle"
 }
 
 clearOngoingQuests() {
