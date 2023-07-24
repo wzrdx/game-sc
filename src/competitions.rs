@@ -28,12 +28,6 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
     }
 
     #[only_owner]
-    #[endpoint(setRaffleVectorSize)]
-    fn set_raffle_vector_size(&self, raffle_id: usize, size: usize) {
-        self.raffle_vector_size(raffle_id).set(size);
-    }
-
-    #[only_owner]
     #[endpoint(copyOperatingVector)]
     fn copy_operating_vector(&self, raffle_id: usize) {
         for element in self.raffle_vector(raffle_id).into_iter() {
@@ -43,49 +37,23 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
 
     #[only_owner]
     #[endpoint(drawRaffleWinners)]
-    fn draw_raffle_winners(&self, raffle_id: usize, phase: usize) {
+    fn draw_raffle_winners(&self, raffle_id: usize, winners: usize) {
         let mut rand_source = RandomnessSource::new();
-        let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.operating_vector().iter());
+        let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.raffle_vector(raffle_id).iter());
 
-        for index in 1..=5 {
+        for _index in 1..=winners {
             let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
             let winner_address = self.raffle_id_participant(winner_id).get();
 
-            if phase == 1 {
-                if index == 1 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
-                } else if index == 2 {
-                    self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
-                } else {
-                    self.send().direct_egld(&winner_address, &BigUint::from(500000000000000000 as u64));
-                    self.tickets_mapper()
-                        .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
-                    self.energy_mapper().mint_and_send(&winner_address, BigUint::from(300000000 as u64));
-                }
-            } else if phase == 2 {
-                self.send().direct_egld(&winner_address, &BigUint::from(500000000000000000 as u64));
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(2 as u32));
-                self.energy_mapper().mint_and_send(&winner_address, BigUint::from(300000000 as u64));
-            } else if phase == 3 {
-                self.send().direct_egld(&winner_address, &BigUint::from(400000000000000000 as u64));
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
-                self.energy_mapper().mint_and_send(&winner_address, BigUint::from(100000000 as u64));
-            } else if phase == 4 {
-                self.send().direct_egld(&winner_address, &BigUint::from(400000000000000000 as u64));
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
-                self.energy_mapper().mint_and_send(&winner_address, BigUint::from(100000000 as u64));
-            }
+            // TODO: TICKET-a8ad2e
+            let token_id = TokenIdentifier::from(&b"HOMETICKET-9112c2"[..]);
+            self.send()
+                .direct_esdt(&winner_address, &token_id, 1 as u64, &BigUint::from(1 as u32));
+
+            // self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
+            // self.tickets_mapper().nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(1 as u32));
 
             vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
-        }
-
-        self.operating_vector().clear();
-
-        for element in vector.into_iter() {
-            self.operating_vector().push(&element);
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
