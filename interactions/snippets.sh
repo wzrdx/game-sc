@@ -65,7 +65,7 @@ addRaffle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1690214400 \
+    --arguments 1690819200 \
     --function="addRaffle"
 }
 
@@ -155,7 +155,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1690214400 \
+    --arguments 1690819200 \
     --function="setTrialTimestamp"
 }
 
