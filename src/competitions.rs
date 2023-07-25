@@ -45,10 +45,8 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
             let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
             let winner_address = self.raffle_id_participant(winner_id).get();
 
-            // TODO: Test range
             if (4..=6).contains(&raffle_id) {
-                // TODO: TICKET-a8ad2e (send rewards first)
-                let token_id = TokenIdentifier::from(&b"HOMETICKET-9112c2"[..]);
+                let token_id = TokenIdentifier::from(&b"TICKET-a8ad2e"[..]);
                 self.send()
                     .direct_esdt(&winner_address, &token_id, 1 as u64, &BigUint::from(1 as u32));
             } else if (7..=8).contains(&raffle_id) {
@@ -58,7 +56,9 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
                     .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(10 as u32));
             }
 
-            vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
+            if winners > 1 {
+                vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
+            }
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
