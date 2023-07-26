@@ -7,6 +7,7 @@ pub trait Rewards: storage::Storage + helpers::Helpers {
     #[only_user_account]
     #[endpoint(claimReward)]
     fn claim_reward(&self) {
+        self.require_conditions();
         let caller = self.blockchain().get_caller();
 
         let mut tickets_amount: usize = 0;
