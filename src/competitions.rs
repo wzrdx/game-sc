@@ -74,6 +74,24 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
         self.operating_vector().clear();
     }
 
+    #[only_owner]
+    #[endpoint(completeBattle)]
+    fn complete_battle(&self, battle_id: usize, winners: ManagedVec<ManagedAddress<Self::Api>>) {
+        for (_i, address) in winners.into_iter().enumerate() {
+            self.tickets_mapper()
+                .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(1 as u32));
+        }
+
+        for participant in self.battle_participants(battle_id).into_iter() {
+            self.battle_submission(battle_id, &participant).clear();
+        }
+
+        self.battle_participants(battle_id).clear();
+
+        let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
+        self.battle_hashes(battle_id).insert(hash);
+    }
+
     #[only_user_account]
     #[payable("*")]
     #[endpoint(joinRaffle)]
