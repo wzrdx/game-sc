@@ -119,6 +119,7 @@ pub trait Storage {
     #[storage_mapper("battleHashes")]
     fn battle_hashes(&self, battle_id: usize) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
 
+    // Can be used to compute total quests done since the first battle
     #[view(getCompletedQuests)]
     #[storage_mapper("completedQuests")]
     fn completed_quests(&self, battle_id: usize, user: &ManagedAddress) -> SingleValueMapper<usize>;
