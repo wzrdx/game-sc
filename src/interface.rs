@@ -67,3 +67,11 @@ pub struct Airdrop<M: ManagedTypeApi> {
     pub tickets: usize,
     pub tokens: ManagedVec<M, u64>,
 }
+
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct Stake<M: ManagedTypeApi> {
+    pub token_id: TokenIdentifier<M>,
+    pub nonce: u16,
+    pub amount: u16,
+    pub timestamp: Option<u64>,
+}

@@ -1,10 +1,76 @@
 multiversx_sc::imports!();
 
+const UNBONDING_TIME: usize = 3600;
+
 use crate::interface::*;
 use crate::{helpers, storage};
 
 #[multiversx_sc::module]
 pub trait Staking: storage::Storage + helpers::Helpers {
+    #[only_owner]
+    #[endpoint(migrateTokens)]
+    fn migrate_tokens(&self) {
+        let travelers_id = self.travelers_mapper().get_token_id();
+        let elders_id = self.elders_mapper().get_token_id();
+
+        for address in self.staked_addresses().into_iter() {
+            for nonce in self.staked_traveler_nonces(&address).into_iter() {
+                self.staked_nfts(&address).insert(Stake {
+                    token_id: travelers_id.clone(),
+                    nonce: nonce as u16,
+                    amount: 1,
+                    timestamp: None,
+                });
+            }
+
+            for nonce in self.staked_elder_nonces(&address).into_iter() {
+                self.staked_nfts(&address).insert(Stake {
+                    token_id: elders_id.clone(),
+                    nonce: nonce as u16,
+                    amount: 1,
+                    timestamp: None,
+                });
+            }
+        }
+    }
+
+    #[only_user_account]
+    #[endpoint(claimNFTs)]
+    fn claim_nfts(&self, tokens: ManagedVec<Stake<Self::Api>>) {
+        let caller = self.blockchain().get_caller();
+
+        require!(
+            self.staked_nfts(&caller).len() > 0,
+            "Must have at least one staked token in order to unstake"
+        );
+
+        // TODO: Check unbonding timestamps
+        // ! Get unbonding time using get_unbonding_time(token_id)
+
+        let mut payments: ManagedVec<EsdtTokenPayment> = ManagedVec::new();
+
+        for token in tokens.into_iter() {
+            let was_removed = self.staked_nfts(&caller).swap_remove(&token);
+
+            if was_removed {
+                payments.push(EsdtTokenPayment::new(
+                    token.token_id,
+                    token.nonce as u64,
+                    BigUint::from(token.amount),
+                ))
+            }
+        }
+
+        if payments.len() > 0 {
+            self.send().direct_multi(&caller, &payments);
+
+            if self.staked_nfts(&caller).is_empty() {
+                self.last_staking_timestamp(&caller).clear();
+                self.staked_addresses().swap_remove(&caller);
+            }
+        }
+    }
+
     #[only_user_account]
     #[payable("*")]
     #[endpoint(stake)]
