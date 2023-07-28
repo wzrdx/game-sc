@@ -69,12 +69,21 @@ addRaffle() {
     --function="addRaffle"
 }
 
+debug() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=9000000 \
+    --arguments 1692455104 \
+    --function="debug"
+}
+
 addBattle() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1691164800 \
+    --arguments 1692455104 \
     --function="addBattle"
 }
 
