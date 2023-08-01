@@ -9,18 +9,6 @@ use core::iter::FromIterator;
 
 #[multiversx_sc::module]
 pub trait Competitions: storage::Storage + helpers::Helpers {
-    // TODO: Remove
-    #[only_owner]
-    #[endpoint(debug)]
-    fn debug(&self, timestamp: u64) {
-        self.battle_timestamp(1).set(1690295102);
-
-        let index = self.battles_count().get() + 1;
-
-        self.battle_timestamp(index).set(timestamp);
-        self.battles_count().set(index);
-    }
-
     #[only_owner]
     #[endpoint(addBattle)]
     fn add_battle(&self, timestamp: u64) {
