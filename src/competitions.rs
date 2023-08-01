@@ -47,14 +47,14 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
 
             if (4..=6).contains(&raffle_id) {
                 let token_id = TokenIdentifier::from(&b"TICKET-a8ad2e"[..]);
-                self.send()
-                    .direct_esdt(&winner_address, &token_id, 1 as u64, &BigUint::from(1 as u32));
             } else if (7..=8).contains(&raffle_id) {
                 self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
             } else if raffle_id == 9 {
                 self.tickets_mapper()
                     .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(10 as u32));
             }
+
+            // self.send().direct_esdt(&winner_address, &token_id, 1 as u64, &BigUint::from(1 as u32));
 
             if winners > 1 {
                 vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
