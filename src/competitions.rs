@@ -45,15 +45,39 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
             let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
             let winner_address = self.raffle_id_participant(winner_id).get();
 
-            if (4..=6).contains(&raffle_id) {
-                let token_id = TokenIdentifier::from(&b"TICKET-a8ad2e"[..]);
-            } else if (7..=8).contains(&raffle_id) {
-                self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
-            } else if raffle_id == 9 {
+            if raffle_id == 10 {
+                let token_id = TokenIdentifier::from(&b"SUPERVIC-f07785"[..]);
+                self.send()
+                    .direct_esdt(&winner_address, &token_id, 353 as u64, &BigUint::from(1 as u32));
+            } else if raffle_id == 11 {
+                let token_id = TokenIdentifier::from(&b"SUPERVIC-f07785"[..]);
+                self.send()
+                    .direct_esdt(&winner_address, &token_id, 581 as u64, &BigUint::from(1 as u32));
+            } else if raffle_id == 12 {
+                let token_id = TokenIdentifier::from(&b"GIANTS-93cadd"[..]);
+                self.send()
+                    .direct_esdt(&winner_address, &token_id, 7850 as u64, &BigUint::from(1 as u32));
+            } else if raffle_id == 13 {
+                let token_id = TokenIdentifier::from(&b"NERD-794a0d"[..]);
+                self.send()
+                    .direct_esdt(&winner_address, &token_id, 4175 as u64, &BigUint::from(1 as u32));
+            } else if raffle_id == 14 {
+                let token_id = TokenIdentifier::from(&b"NERD-794a0d"[..]);
+                self.send()
+                    .direct_esdt(&winner_address, &token_id, 5382 as u64, &BigUint::from(1 as u32));
+            } else if raffle_id == 15 {
+                self.send().direct_esdt(
+                    &winner_address,
+                    &self.travelers_mapper().get_token_id(),
+                    1534 as u64,
+                    &BigUint::from(1 as u32),
+                );
+            } else if raffle_id == 16 {
                 self.tickets_mapper()
                     .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(10 as u32));
             }
 
+            // if (7..=8).contains(&raffle_id)
             // self.send().direct_esdt(&winner_address, &token_id, 1 as u64, &BigUint::from(1 as u32));
 
             if winners > 1 {
