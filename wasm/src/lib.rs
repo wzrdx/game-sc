@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           62
+// Endpoints:                           59
 // Async Callback:                       1
-// Total number of exported functions:  64
+// Total number of exported functions:  61
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -43,7 +43,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         isGamePaused
         getTrialTimestamp
         getCurrentTrial
-        debug
         addBattle
         addRaffle
         copyOperatingVector

@@ -45,8 +45,8 @@ drawRaffleWinners() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=150000000 \
-    --arguments 4 1 \
+    --gas-limit=30000000 \
+    --arguments 16 5 \
     --function="drawRaffleWinners"
 }
 
@@ -54,8 +54,8 @@ clearRaffle() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=150000000 \
-    --arguments 4 \
+    --gas-limit=25000000 \
+    --arguments 16 \
     --function="clearRaffle"
 }
 
@@ -63,8 +63,8 @@ setTrial() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=50000000 \
-    --arguments 4 \
+    --gas-limit=35000000 \
+    --arguments 6 \
     --function="setTrial"
 }
 
@@ -73,17 +73,8 @@ addRaffle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1690819200 \
+    --arguments 1692201600 \
     --function="addRaffle"
-}
-
-debug() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=9000000 \
-    --arguments 1692455104 \
-    --function="debug"
 }
 
 addBattle() {
@@ -91,7 +82,7 @@ addBattle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1692455104 \
+    --arguments 1692201600 \
     --function="addBattle"
 }
 
@@ -166,13 +157,12 @@ setGamePaused() {
     --function="setGamePaused"
 }
 
-# Next month 1691653497
 setTrialTimestamp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1690819200 \
+    --arguments 1692201600 \
     --function="setTrialTimestamp"
 }
 
@@ -204,7 +194,7 @@ clearOngoingQuests() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=100000000 \
+    --gas-limit=30000000 \
     --function="clearOngoingQuests"
 }
 

@@ -9,18 +9,6 @@ use core::iter::FromIterator;
 
 #[multiversx_sc::module]
 pub trait Competitions: storage::Storage + helpers::Helpers {
-    // TODO: Remove
-    #[only_owner]
-    #[endpoint(debug)]
-    fn debug(&self, timestamp: u64) {
-        self.battle_timestamp(1).set(1690295102);
-
-        let index = self.battles_count().get() + 1;
-
-        self.battle_timestamp(index).set(timestamp);
-        self.battles_count().set(index);
-    }
-
     #[only_owner]
     #[endpoint(addBattle)]
     fn add_battle(&self, timestamp: u64) {
@@ -57,18 +45,44 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
             let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
             let winner_address = self.raffle_id_participant(winner_id).get();
 
-            if (4..=6).contains(&raffle_id) {
-                let token_id = TokenIdentifier::from(&b"HOMETICKET-9112c2"[..]);
+            if raffle_id == 10 {
+                let token_id = TokenIdentifier::from(&b"SUPERVIC-f07785"[..]);
                 self.send()
-                    .direct_esdt(&winner_address, &token_id, 1 as u64, &BigUint::from(1 as u32));
-            } else if (7..=8).contains(&raffle_id) {
-                self.send().direct_egld(&winner_address, &BigUint::from(self.to_egld(1 as u64)));
-            } else if raffle_id == 9 {
+                    .direct_esdt(&winner_address, &token_id, 353 as u64, &BigUint::from(1 as u32));
+            } else if raffle_id == 11 {
+                let token_id = TokenIdentifier::from(&b"SUPERVIC-f07785"[..]);
+                self.send()
+                    .direct_esdt(&winner_address, &token_id, 581 as u64, &BigUint::from(1 as u32));
+            } else if raffle_id == 12 {
+                let token_id = TokenIdentifier::from(&b"GIANTS-93cadd"[..]);
+                self.send()
+                    .direct_esdt(&winner_address, &token_id, 7850 as u64, &BigUint::from(1 as u32));
+            } else if raffle_id == 13 {
+                let token_id = TokenIdentifier::from(&b"NERD-794a0d"[..]);
+                self.send()
+                    .direct_esdt(&winner_address, &token_id, 4175 as u64, &BigUint::from(1 as u32));
+            } else if raffle_id == 14 {
+                let token_id = TokenIdentifier::from(&b"NERD-794a0d"[..]);
+                self.send()
+                    .direct_esdt(&winner_address, &token_id, 5382 as u64, &BigUint::from(1 as u32));
+            } else if raffle_id == 15 {
+                self.send().direct_esdt(
+                    &winner_address,
+                    &self.travelers_mapper().get_token_id(),
+                    1534 as u64,
+                    &BigUint::from(1 as u32),
+                );
+            } else if raffle_id == 16 {
                 self.tickets_mapper()
                     .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(10 as u32));
             }
 
-            vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
+            // if (7..=8).contains(&raffle_id)
+            // self.send().direct_esdt(&winner_address, &token_id, 1 as u64, &BigUint::from(1 as u32));
+
+            if winners > 1 {
+                vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
+            }
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
