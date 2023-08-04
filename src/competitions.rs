@@ -113,34 +113,29 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
         for (i, address) in winners.into_iter().enumerate() {
             if i == 0 {
                 self.send().direct_esdt(&address, &cow, 1117 as u64, &BigUint::from(1 as u32));
-                self.send().direct_egld(&address, &BigUint::from(self.to_egld(10 as u64)));
+                self.send().direct_egld(&address, &BigUint::from(10_000_000_000_000_000_000u128));
             } else if i == 1 {
-                // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
                 self.send().direct_egld(&address, &BigUint::from(self.to_egld(6 as u64)));
                 self.tickets_mapper()
                     .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(10 as u32));
                 self.essence_mapper().mint_and_send(&address, BigUint::from(500000000 as u64));
             } else if i == 2 {
-                // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
                 self.send().direct_esdt(&address, &dreamy, 4395 as u64, &BigUint::from(1 as u32));
                 self.tickets_mapper()
                     .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(10 as u32));
                 self.essence_mapper().mint_and_send(&address, BigUint::from(500000000 as u64));
             } else if i == 3 {
-                // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
                 self.send().direct_esdt(&address, &drifters, 6241 as u64, &BigUint::from(1 as u32));
                 self.send().direct_esdt(&address, &drifters, 536 as u64, &BigUint::from(1 as u32));
                 self.tickets_mapper()
                     .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(7 as u32));
                 self.essence_mapper().mint_and_send(&address, BigUint::from(250000000 as u64));
             } else if i == 4 {
-                // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
                 self.send().direct_esdt(&address, &subject, 310 as u64, &BigUint::from(1 as u32));
                 self.tickets_mapper()
                     .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(5 as u32));
                 self.essence_mapper().mint_and_send(&address, BigUint::from(200000000 as u64));
             } else if i == 5 {
-                // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
                 self.send().direct_esdt(&address, &dragons, 5779 as u64, &BigUint::from(1 as u32));
                 self.tickets_mapper()
                     .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(3 as u32));
