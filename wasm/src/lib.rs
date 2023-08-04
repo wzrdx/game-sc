@@ -42,13 +42,13 @@ multiversx_sc_wasm_adapter::endpoints! {
         isGamePaused
         getTrialTimestamp
         getCurrentTrial
-        debug
         addBattle
         addRaffle
         copyOperatingVector
         drawRaffleWinners
         clearRaffle
-        completeBattle
+        airdropBattlePrizes
+        clearBattle
         joinRaffle
         joinBattle
         getOperatingVectorLength

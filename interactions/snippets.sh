@@ -1,19 +1,19 @@
 ## devnet
-USER_PEM="~/elrond-wallet/wallet.pem"
-USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
+# USER_PEM="~/elrond-wallet/wallet.pem"
+# # USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
 # PROXY="https://devnet-api.multiversx.com"
-CHAIN_ID="D"
-SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
+# CHAIN_ID="D"
+# SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
 # TRAVELERS_ID="TRAVELER-51bdef"
 # OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 
 # ## mainnet
-# USER_PEM="~/elrond-wallet/wallet-homex.pem"
-# # USER_PEM="~/Crypto/wallets/wallet-homex.pem"
-# PROXY="https://api.multiversx.com"
-# CHAIN_ID="1"
-# SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
+USER_PEM="~/elrond-wallet/wallet-homex.pem"
+# USER_PEM="~/Crypto/wallets/wallet-homex.pem"
+PROXY="https://api.multiversx.com"
+CHAIN_ID="1"
+SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
 
 deploy() {
@@ -28,7 +28,7 @@ upgrade() {
     mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
     --bytecode="./output/game-sc.wasm" \
-    --gas-limit=120000000 \
+    --gas-limit=130000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
@@ -37,8 +37,8 @@ drawRaffleWinners() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=150000000 \
-    --arguments 4 1 \
+    --gas-limit=30000000 \
+    --arguments 16 5 \
     --function="drawRaffleWinners"
 }
 
@@ -46,8 +46,8 @@ clearRaffle() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=150000000 \
-    --arguments 4 \
+    --gas-limit=25000000 \
+    --arguments 16 \
     --function="clearRaffle"
 }
 
@@ -55,8 +55,8 @@ setTrial() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=50000000 \
-    --arguments 4 \
+    --gas-limit=35000000 \
+    --arguments 6 \
     --function="setTrial"
 }
 
@@ -65,17 +65,8 @@ addRaffle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1690819200 \
+    --arguments 1692201600 \
     --function="addRaffle"
-}
-
-debug() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=9000000 \
-    --arguments 1692455104 \
-    --function="debug"
 }
 
 addBattle() {
@@ -83,7 +74,7 @@ addBattle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1692455104 \
+    --arguments 1692201600 \
     --function="addBattle"
 }
 
@@ -158,13 +149,12 @@ setGamePaused() {
     --function="setGamePaused"
 }
 
-# Next month 1691653497
 setTrialTimestamp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1690819200 \
+    --arguments 1692201600 \
     --function="setTrialTimestamp"
 }
 
@@ -196,7 +186,7 @@ clearOngoingQuests() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=100000000 \
+    --gas-limit=30000000 \
     --function="clearOngoingQuests"
 }
 

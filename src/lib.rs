@@ -47,6 +47,7 @@ pub trait GameScContract:
         }
     }
 
+    // TODO: Create payments vector and send using multi
     #[only_owner]
     #[endpoint(airdropResources)]
     fn airdrop_resources(&self, users: ManagedVec<ManagedAddress>, alloc: ManagedVec<Airdrop<Self::Api>>) {
