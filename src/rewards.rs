@@ -12,7 +12,7 @@ pub trait Rewards: storage::Storage + helpers::Helpers {
         let mut tickets_amount: usize = 0;
         let mut available_nonces: UnorderedSetMapper<Self::Api, u16> = self.elders_tickets_nonces(self.current_trial().get());
 
-        for nonce in self.staked_elder_nonces(&caller).iter() {
+        for nonce in self.get_staked_nonces(&caller, self.elders_mapper().get_token_id()).iter() {
             if available_nonces.contains(&(nonce as u16)) {
                 tickets_amount += 1;
                 available_nonces.swap_remove(&(nonce as u16));
@@ -28,7 +28,7 @@ pub trait Rewards: storage::Storage + helpers::Helpers {
         let mut tickets_amount: usize = 0;
         let available_nonces: UnorderedSetMapper<Self::Api, u16> = self.elders_tickets_nonces(self.current_trial().get());
 
-        for nonce in self.staked_elder_nonces(user).iter() {
+        for nonce in self.get_staked_nonces(user, self.elders_mapper().get_token_id()).iter() {
             if available_nonces.contains(&(nonce as u16)) {
                 tickets_amount += 1;
             }

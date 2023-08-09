@@ -6,7 +6,7 @@ CHAIN_ID="D"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
 # TRAVELERS_ID="TRAVELER-51bdef"
-# OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
+OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 
 # ## mainnet
 # USER_PEM="~/elrond-wallet/wallet-homex.pem"
@@ -28,7 +28,7 @@ upgrade() {
     mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
     --bytecode="./output/game-sc.wasm" \
-    --gas-limit=120000000 \
+    --gas-limit=150000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
@@ -184,6 +184,12 @@ getStakedAddressesCount() {
     --function="getStakedAddressesCount"
 }
 
+getStakedAddresses() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getStakedAddresses"
+}
+
 getStakedNFTsCount() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
@@ -222,4 +228,11 @@ getRarityClass() {
     --proxy=${PROXY} \
     --arguments 1 \
     --function="getRarityClass"
+}
+
+getStakingInfo() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${OWNER} \
+    --function="getStakingInfo"
 }

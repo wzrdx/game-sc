@@ -25,8 +25,7 @@ pub struct OngoingQuest {
 pub struct StakingInfo<M: ManagedTypeApi> {
     pub rewards: BigUint<M>,
     pub timestamp: u64,
-    pub traveler_nonces: ManagedVec<M, u64>,
-    pub elder_nonces: ManagedVec<M, u64>,
+    pub tokens: ManagedVec<M, Stake<M>>,
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
@@ -68,7 +67,7 @@ pub struct Airdrop<M: ManagedTypeApi> {
     pub tokens: ManagedVec<M, u64>,
 }
 
-#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem, PartialEq)]
 pub struct Stake<M: ManagedTypeApi> {
     pub token_id: TokenIdentifier<M>,
     pub nonce: u16,
