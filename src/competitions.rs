@@ -101,17 +101,16 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
     #[only_owner]
     #[endpoint(airdropBattlePrizes)]
     fn airdrop_battle_prizes(&self, battle_id: usize, winners: ManagedVec<ManagedAddress<Self::Api>>) {
+        let token_id = TokenIdentifier::from(&b"TICKET-a8ad2e"[..]);
+
         for (_i, address) in winners.into_iter().enumerate() {
-            self.energy_mapper().mint_and_send(&address, BigUint::from(500_000_000 as u64));
-            self.gems_mapper().mint_and_send(&address, BigUint::from(50_000_000 as u64));
-            self.herbs_mapper().mint_and_send(&address, BigUint::from(100_000_000 as u64));
+            self.send().direct_esdt(&address, &token_id, 1 as u64, &BigUint::from(1 as u32));
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
         self.battle_hashes(battle_id).insert(hash);
     }
 
-    // TODO: Only call after snapshot
     #[only_owner]
     #[endpoint(clearBattle)]
     fn clear_battle(&self, battle_id: usize) {
