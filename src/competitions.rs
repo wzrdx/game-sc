@@ -37,56 +37,56 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
 
     #[only_owner]
     #[endpoint(drawRaffleWinners)]
-    fn draw_raffle_winners(&self, raffle_id: usize, winners: usize) {
+    fn draw_raffle_winners(&self, raffle_id: usize) {
         let mut rand_source = RandomnessSource::new();
-        let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.raffle_vector(raffle_id).iter());
+        let token_id = TokenIdentifier::from(&b"BHAGENTS-3e9010"[..]);
 
-        for _index in 1..=winners {
-            let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
-            let winner_address = self.raffle_id_participant(winner_id).get();
+        let winner_id: u16 = self
+            .raffle_vector(raffle_id)
+            .get(rand_source.next_usize_in_range(1, self.raffle_vector(raffle_id).len() + 1));
 
-            if raffle_id == 10 {
-                let token_id = TokenIdentifier::from(&b"SUPERVIC-f07785"[..]);
-                self.send()
-                    .direct_esdt(&winner_address, &token_id, 353 as u64, &BigUint::from(1 as u32));
-            } else if raffle_id == 11 {
-                let token_id = TokenIdentifier::from(&b"SUPERVIC-f07785"[..]);
-                self.send()
-                    .direct_esdt(&winner_address, &token_id, 581 as u64, &BigUint::from(1 as u32));
-            } else if raffle_id == 12 {
-                let token_id = TokenIdentifier::from(&b"GIANTS-93cadd"[..]);
-                self.send()
-                    .direct_esdt(&winner_address, &token_id, 7850 as u64, &BigUint::from(1 as u32));
-            } else if raffle_id == 13 {
-                let token_id = TokenIdentifier::from(&b"NERD-794a0d"[..]);
-                self.send()
-                    .direct_esdt(&winner_address, &token_id, 4175 as u64, &BigUint::from(1 as u32));
-            } else if raffle_id == 14 {
-                let token_id = TokenIdentifier::from(&b"NERD-794a0d"[..]);
-                self.send()
-                    .direct_esdt(&winner_address, &token_id, 5382 as u64, &BigUint::from(1 as u32));
-            } else if raffle_id == 15 {
-                self.send().direct_esdt(
-                    &winner_address,
-                    &self.travelers_mapper().get_token_id(),
-                    1534 as u64,
-                    &BigUint::from(1 as u32),
-                );
-            } else if raffle_id == 16 {
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(10 as u32));
-            }
+        let winner_address = self.raffle_id_participant(winner_id).get();
 
-            // if (7..=8).contains(&raffle_id)
-            // self.send().direct_esdt(&winner_address, &token_id, 1 as u64, &BigUint::from(1 as u32));
+        let mut nonce: u64 = 0;
 
-            if winners > 1 {
-                vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
-            }
+        if raffle_id == 17 {
+            nonce = 5482;
+        } else if raffle_id == 18 {
+            nonce = 3640;
+        } else if raffle_id == 19 {
+            nonce = 8838;
+        } else if raffle_id == 20 {
+            nonce = 6808;
+        } else if raffle_id == 21 {
+            nonce = 9968;
+        } else if raffle_id == 22 {
+            nonce = 4417;
+        } else if raffle_id == 23 {
+            nonce = 3765;
+        } else if raffle_id == 24 {
+            nonce = 3766;
+        } else if raffle_id == 25 {
+            nonce = 4928;
+        } else if raffle_id == 26 {
+            nonce = 3538;
+        } else if raffle_id == 27 {
+            nonce = 3768;
+        } else if raffle_id == 28 {
+            nonce = 4690;
+        } else if raffle_id == 29 {
+            nonce = 3990;
+        } else if raffle_id == 30 {
+            nonce = 4328;
+        } else if raffle_id == 31 {
+            nonce = 3706;
         }
+
+        self.send().direct_esdt(&winner_address, &token_id, nonce, &BigUint::from(1 as u32));
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
         self.raffle_hashes(raffle_id).insert(hash);
+
+        self.clear_raffle(raffle_id);
     }
 
     #[only_owner]
@@ -95,7 +95,7 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
         self.raffle_vector_size(raffle_id).set(self.raffle_vector(raffle_id).len());
         self.raffle_vector(raffle_id).clear();
         self.raffle_participants(raffle_id).clear();
-        self.operating_vector().clear();
+        // self.operating_vector().clear();
     }
 
     #[only_owner]
