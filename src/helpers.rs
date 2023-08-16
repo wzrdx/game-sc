@@ -101,7 +101,7 @@ pub trait Helpers: storage::Storage {
     }
 
     fn to_egld(&self, value: u64) -> u64 {
-        value.mul(1000000000000000000 as u64)
+        value.mul(1_000_000_000_000_000_000 as u64)
     }
 
     fn require_conditions(&self) {
