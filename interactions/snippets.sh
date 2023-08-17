@@ -65,7 +65,7 @@ setTrial() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=35000000 \
-    --arguments 6 \
+    --arguments 7 \
     --function="setTrial"
 }
 
@@ -74,7 +74,7 @@ addRaffle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1692201600 \
+    --arguments 1692892800 \
     --function="addRaffle"
 }
 
@@ -154,7 +154,7 @@ setGamePaused() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments true \
+    --arguments false \
     --function="setGamePaused"
 }
 
@@ -163,7 +163,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1692201600 \
+    --arguments 1692892800 \
     --function="setTrialTimestamp"
 }
 
@@ -195,7 +195,7 @@ clearOngoingQuests() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=30000000 \
+    --gas-limit=50000000 \
     --function="clearOngoingQuests"
 }
 
