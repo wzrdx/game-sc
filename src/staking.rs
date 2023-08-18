@@ -25,6 +25,8 @@ pub trait Staking: storage::Storage + helpers::Helpers {
                 });
             }
 
+            self.staked_traveler_nonces(&address).clear();
+
             for nonce in self.staked_elder_nonces(&address).into_iter() {
                 self.staked_nfts(&address).insert(Stake {
                     token_id: elders_id.clone(),
@@ -33,6 +35,8 @@ pub trait Staking: storage::Storage + helpers::Helpers {
                     timestamp: None,
                 });
             }
+
+            self.staked_elder_nonces(&address).clear();
         }
     }
 
