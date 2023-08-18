@@ -224,11 +224,6 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         users
     }
 
-    #[view(getStakeOfUser)]
-    fn get_stake_of_user(&self, user_address: ManagedAddress) -> usize {
-        self.staked_nfts(&user_address).len()
-    }
-
     fn get_staking_token_ids(&self) -> ManagedVec<TokenIdentifier<Self::Api>> {
         let mut vec: ManagedVec<TokenIdentifier<Self::Api>> = ManagedVec::new();
         vec.push(self.travelers_mapper().get_token_id());
