@@ -1,6 +1,6 @@
 multiversx_sc::imports!();
 
-const UNBONDING_TIME: u64 = 3600;
+const UNBONDING_DURATION: u64 = 900_000;
 
 use crate::interface::*;
 use crate::{helpers, storage};
@@ -76,7 +76,7 @@ pub trait Staking: storage::Storage + helpers::Helpers {
 
         require!(staked_tokens.len() == tokens.len(), "Invalid function arguments");
 
-        // Check unbonding periods
+        // Check unbonding durations
         for token in staked_tokens.iter() {
             match token.timestamp {
                 Some(_timestamp) => {
@@ -108,13 +108,13 @@ pub trait Staking: storage::Storage + helpers::Helpers {
 
         require!(staked_tokens.len() == tokens.len(), "Invalid function arguments");
 
-        // Check unbonding periods
+        // Check unbonding durations
         for token in staked_tokens.iter() {
             match token.timestamp {
                 Some(timestamp) => {
                     require!(
-                        timestamp + UNBONDING_TIME >= current_timestamp,
-                        "One or more tokens have not passed the unbonding period"
+                        timestamp + UNBONDING_DURATION <= current_timestamp,
+                        "One or more tokens have not passed the unbonding duration"
                     );
                 }
                 None => sc_panic!("One or more tokens are still staked"),
