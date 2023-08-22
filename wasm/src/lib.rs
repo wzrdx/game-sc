@@ -70,6 +70,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         stake
         unstake
         claim
+        restake
         claimStakingRewards
         getStakedAddressesCount
         getStakedNFTsCount
@@ -78,7 +79,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         getRarityClasses
         getStakedUsersLength
         getStakedUsers
-        getStakeOfUser
         claimReward
         getElderRewards
         callBack

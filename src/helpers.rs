@@ -71,7 +71,7 @@ pub trait Helpers: storage::Storage {
         let nonces: ManagedVec<u64> = ManagedVec::from_iter(
             self.staked_nfts(user_address)
                 .iter()
-                .filter(|token| (*token).token_id == token_id)
+                .filter(|token| (*token).token_id == token_id && (*token).timestamp.is_none())
                 .map(|token| token.nonce as u64),
         );
 

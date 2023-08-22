@@ -1,6 +1,6 @@
 multiversx_sc::imports!();
 
-const UNBONDING_DURATION: u64 = 900_000;
+const UNBONDING_DURATION: u64 = 120;
 
 use crate::interface::*;
 use crate::{helpers, storage};
@@ -150,6 +150,33 @@ pub trait Staking: storage::Storage + helpers::Helpers {
     }
 
     #[only_user_account]
+    #[endpoint(restake)]
+    fn restake(&self, tokens: ManagedVec<Stake<Self::Api>>) {
+        let caller = self.blockchain().get_caller();
+
+        let staked_tokens: ManagedVec<Stake<Self::Api>> =
+            ManagedVec::from_iter(self.staked_nfts(&caller).iter().filter(|token| tokens.contains(token)));
+
+        require!(staked_tokens.len() == tokens.len(), "Invalid function arguments");
+
+        // Check unbonding durations
+        for token in staked_tokens.iter() {
+            match token.timestamp {
+                Some(_timestamp) => {}
+                None => sc_panic!("One or more tokens are still staked"),
+            };
+        }
+
+        for token in staked_tokens.iter() {
+            self.staked_nfts(&caller).swap_remove(&token);
+            let mut updated_token = token;
+            updated_token.timestamp = None;
+
+            self.staked_nfts(&caller).insert(updated_token);
+        }
+    }
+
+    #[only_user_account]
     #[endpoint(claimStakingRewards)]
     fn claim_staking_rewards(&self) {
         let caller = self.blockchain().get_caller();
@@ -173,7 +200,11 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         let mut count: usize = 0;
 
         for address in self.staked_addresses().iter() {
-            count += self.staked_nfts(&address).len();
+            count += self
+                .staked_nfts(&address)
+                .iter()
+                .filter(|token| (*token).timestamp.is_none())
+                .count();
         }
 
         count
