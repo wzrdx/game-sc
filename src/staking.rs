@@ -259,6 +259,11 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         users
     }
 
+    #[view(isMigrationRequired)]
+    fn is_migration_required(&self, user: &ManagedAddress) -> bool {
+        self.staked_traveler_nonces(user).len() + self.staked_elder_nonces(user).len() > 0
+    }
+
     fn get_staking_token_ids(&self) -> ManagedVec<TokenIdentifier<Self::Api>> {
         let mut vec: ManagedVec<TokenIdentifier<Self::Api>> = ManagedVec::new();
         vec.push(self.travelers_mapper().get_token_id());
