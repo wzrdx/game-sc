@@ -7,6 +7,7 @@ SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
 # TRAVELERS_ID="TRAVELER-51bdef"
 OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
+OKLAMA=erd1w79cs7nv35wrkkm8cyaqjq3tkw9xvzvpcdw9prfxw05yj7lagffq5lch25
 
 # ## mainnet
 # USER_PEM="~/elrond-wallet/wallet-homex.pem"
@@ -235,4 +236,31 @@ getStakingInfo() {
     --proxy=${PROXY} \
     --arguments ${OWNER} \
     --function="getStakingInfo"
+}
+
+getStakedTravelerNonces() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${OWNER} \
+    --function="getStakedTravelerNonces"
+}
+
+getStakedElderNonces() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${OWNER} \
+    --function="getStakedElderNonces"
+}
+
+getStakedNFTs() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${OWNER} \
+    --function="getStakedNFTs"
+}
+
+getStakedWallets() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getStakedWallets"
 }

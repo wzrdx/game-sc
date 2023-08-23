@@ -9,9 +9,12 @@ use crate::{
 #[multiversx_sc::module]
 pub trait Storage {
     // Staking
+    // TODO: Remove views
+    #[view(getStakedTravelerNonces)]
     #[storage_mapper("stakedTravelerNonces")]
     fn staked_traveler_nonces(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
 
+    #[view(getStakedElderNonces)]
     #[storage_mapper("stakedElderNonces")]
     fn staked_elder_nonces(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
 
@@ -22,9 +25,15 @@ pub trait Storage {
     #[storage_mapper("lastStakingTimestamp")]
     fn last_staking_timestamp(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
+    // Deprecated staking system
     #[view(getStakedAddresses)]
     #[storage_mapper("stakedAddresses")]
     fn staked_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
+
+    // New staking system
+    #[view(getStakedWallets)]
+    #[storage_mapper("stakedWallets")]
+    fn staked_wallets(&self) -> UnorderedSetMapper<ManagedAddress>;
 
     // Rarity
     #[view(getRarityClass)]

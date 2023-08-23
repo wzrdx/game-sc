@@ -10,8 +10,8 @@ use core::iter::FromIterator;
 #[multiversx_sc::module]
 pub trait Staking: storage::Storage + helpers::Helpers {
     #[only_owner]
-    #[endpoint(migrateTokens)]
-    fn migrate_tokens(&self) {
+    #[endpoint(migrate)]
+    fn migrate(&self) {
         let travelers_id = self.travelers_mapper().get_token_id();
         let elders_id = self.elders_mapper().get_token_id();
 
@@ -38,6 +38,44 @@ pub trait Staking: storage::Storage + helpers::Helpers {
 
             self.staked_elder_nonces(&address).clear();
         }
+    }
+
+    #[only_user_account]
+    #[endpoint(migrateTokens)]
+    fn migrate_tokens(&self) {
+        let caller = self.blockchain().get_caller();
+
+        let travelers_id = self.travelers_mapper().get_token_id();
+        let elders_id = self.elders_mapper().get_token_id();
+
+        if self.staked_traveler_nonces(&caller).len() > 0 {
+            for nonce in self.staked_traveler_nonces(&caller).into_iter() {
+                self.staked_nfts(&caller).insert(Stake {
+                    token_id: travelers_id.clone(),
+                    nonce: nonce as u16,
+                    amount: 1,
+                    timestamp: None,
+                });
+            }
+
+            self.staked_traveler_nonces(&caller).clear();
+        }
+
+        if self.staked_elder_nonces(&caller).len() > 0 {
+            for nonce in self.staked_elder_nonces(&caller).into_iter() {
+                self.staked_nfts(&caller).insert(Stake {
+                    token_id: elders_id.clone(),
+                    nonce: nonce as u16,
+                    amount: 1,
+                    timestamp: None,
+                });
+            }
+
+            self.staked_elder_nonces(&caller).clear();
+        }
+
+        self.staked_addresses().swap_remove(&caller);
+        self.staked_wallets().insert(caller);
     }
 
     #[only_user_account]
@@ -199,7 +237,12 @@ pub trait Staking: storage::Storage + helpers::Helpers {
     fn get_staked_nfts_count(&self) -> usize {
         let mut count: usize = 0;
 
+        // TODO: Remove the counting from old data structures after migration
         for address in self.staked_addresses().iter() {
+            count += self.staked_traveler_nonces(&address).len() + self.staked_elder_nonces(&address).len();
+        }
+
+        for address in self.staked_wallets().iter() {
             count += self
                 .staked_nfts(&address)
                 .iter()
@@ -259,9 +302,9 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         users
     }
 
-    #[view(isMigrationRequired)]
-    fn is_migration_required(&self, user: &ManagedAddress) -> bool {
-        self.staked_traveler_nonces(user).len() + self.staked_elder_nonces(user).len() > 0
+    #[view(getMigrationSize)]
+    fn get_migration_size(&self, user: &ManagedAddress) -> usize {
+        self.staked_traveler_nonces(user).len() + self.staked_elder_nonces(user).len()
     }
 
     fn get_staking_token_ids(&self) -> ManagedVec<TokenIdentifier<Self::Api>> {
