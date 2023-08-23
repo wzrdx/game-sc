@@ -87,10 +87,10 @@ addBattle() {
     --function="addBattle"
 }
 
-getStakedUsersLength() {
+getStakedAddressesLength() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getStakedUsersLength"
+    --function="getStakedAddressesLength"
 }
 
 copyHashes() {
@@ -119,10 +119,10 @@ setRaffleVectorSize() {
     --function="setRaffleVectorSize"
 }
 
-getStakedUsersLength() {
+getStakedAddressesLength() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getStakedUsersLength"
+    --function="getStakedAddressesLength"
 }
 
 # Operating vector

@@ -15,30 +15,39 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         let travelers_id = self.travelers_mapper().get_token_id();
         let elders_id = self.elders_mapper().get_token_id();
 
-        let mut index = 0;
+        let mut gas_left: u64;
+        let mut required_gas: u64;
 
         for address in self.staked_addresses().into_iter() {
-            for nonce in self.staked_traveler_nonces(&address).into_iter() {
-                self.staked_nfts(&address).insert(Stake {
-                    token_id: travelers_id.clone(),
-                    nonce: nonce as u16,
-                    amount: 1,
-                    timestamp: None,
-                });
+            required_gas = (self.staked_traveler_nonces(&address).len() as u64 + self.staked_elder_nonces(&address).len() as u64) * 1500000;
+            gas_left = self.blockchain().get_gas_left();
+
+            if required_gas + 25000000 < gas_left {
+                for nonce in self.staked_traveler_nonces(&address).into_iter() {
+                    self.staked_nfts(&address).insert(Stake {
+                        token_id: travelers_id.clone(),
+                        nonce: nonce as u16,
+                        amount: 1,
+                        timestamp: None,
+                    });
+                }
+
+                self.staked_traveler_nonces(&address).clear();
+
+                for nonce in self.staked_elder_nonces(&address).into_iter() {
+                    self.staked_nfts(&address).insert(Stake {
+                        token_id: elders_id.clone(),
+                        nonce: nonce as u16,
+                        amount: 1,
+                        timestamp: None,
+                    });
+                }
+
+                self.staked_elder_nonces(&address).clear();
+
+                self.staked_addresses().swap_remove(&address);
+                self.staked_wallets().insert(address);
             }
-
-            self.staked_traveler_nonces(&address).clear();
-
-            for nonce in self.staked_elder_nonces(&address).into_iter() {
-                self.staked_nfts(&address).insert(Stake {
-                    token_id: elders_id.clone(),
-                    nonce: nonce as u16,
-                    amount: 1,
-                    timestamp: None,
-                });
-            }
-
-            self.staked_elder_nonces(&address).clear();
         }
     }
 
@@ -253,9 +262,14 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         rarity_classes
     }
 
-    #[view(getStakedUsersLength)]
-    fn get_staked_users_length(&self) -> usize {
+    #[view(getStakedAddressesLength)]
+    fn get_staked_addresses_length(&self) -> usize {
         self.staked_addresses().len()
+    }
+
+    #[view(getStakedWalletsLength)]
+    fn get_staked_wallets_length(&self) -> usize {
+        self.staked_wallets().len()
     }
 
     #[view(getStakedUsers)]
