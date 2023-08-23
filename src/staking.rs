@@ -10,10 +10,12 @@ use core::iter::FromIterator;
 #[multiversx_sc::module]
 pub trait Staking: storage::Storage + helpers::Helpers {
     #[only_owner]
-    #[endpoint(migrate)]
-    fn migrate(&self) {
+    #[endpoint(migrateWallets)]
+    fn migrate_wallets(&self) {
         let travelers_id = self.travelers_mapper().get_token_id();
         let elders_id = self.elders_mapper().get_token_id();
+
+        let mut index = 0;
 
         for address in self.staked_addresses().into_iter() {
             for nonce in self.staked_traveler_nonces(&address).into_iter() {
@@ -169,21 +171,11 @@ pub trait Staking: storage::Storage + helpers::Helpers {
     fn restake(&self, tokens: ManagedVec<Stake<Self::Api>>) {
         let caller = self.blockchain().get_caller();
 
-        let staked_tokens: ManagedVec<Stake<Self::Api>> =
-            ManagedVec::from_iter(self.staked_nfts(&caller).iter().filter(|token| tokens.contains(token)));
+        for token in tokens.iter() {
+            require!(token.timestamp.is_some(), "One or more tokens are still staked");
 
-        require!(staked_tokens.len() == tokens.len(), "Invalid function arguments");
-
-        // Check unbonding durations
-        for token in staked_tokens.iter() {
-            match token.timestamp {
-                Some(_timestamp) => {}
-                None => sc_panic!("One or more tokens are still staked"),
-            };
-        }
-
-        for token in staked_tokens.iter() {
             self.staked_nfts(&caller).swap_remove(&token);
+
             let mut updated_token = token;
             updated_token.timestamp = None;
 
