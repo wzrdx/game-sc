@@ -113,25 +113,14 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         let caller = self.blockchain().get_caller();
         let current_timestamp = self.blockchain().get_block_timestamp();
 
-        let staked_tokens: ManagedVec<Stake<Self::Api>> =
-            ManagedVec::from_iter(self.staked_nfts(&caller).iter().filter(|token| tokens.contains(token)));
-
-        require!(staked_tokens.len() == tokens.len(), "Invalid function arguments");
-
-        // Check unbonding durations
-        for token in staked_tokens.iter() {
-            match token.timestamp {
-                Some(_timestamp) => {
-                    sc_panic!("One or more tokens are already unstaked")
-                }
-                None => {}
-            };
-        }
-
         self.claim_staking_rewards_for_user(&caller);
 
-        for token in staked_tokens.iter() {
-            self.staked_nfts(&caller).swap_remove(&token);
+        for token in tokens.iter() {
+            require!(token.timestamp.is_none(), "One or more tokens are already unstaked");
+
+            let was_removed = self.staked_nfts(&caller).swap_remove(&token);
+            require!(was_removed == true, "Invalid function arguments");
+
             let mut updated_token = token;
             updated_token.timestamp = Some(current_timestamp);
 
@@ -145,28 +134,16 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         let caller = self.blockchain().get_caller();
         let current_timestamp = self.blockchain().get_block_timestamp();
 
-        let staked_tokens: ManagedVec<Stake<Self::Api>> =
-            ManagedVec::from_iter(self.staked_nfts(&caller).iter().filter(|token| tokens.contains(token)));
-
-        require!(staked_tokens.len() == tokens.len(), "Invalid function arguments");
-
-        // Check unbonding durations
-        for token in staked_tokens.iter() {
-            match token.timestamp {
-                Some(timestamp) => {
-                    require!(
-                        timestamp + UNBONDING_DURATION <= current_timestamp,
-                        "One or more tokens have not passed the unbonding duration"
-                    );
-                }
-                None => sc_panic!("One or more tokens are still staked"),
-            };
-        }
-
         let mut payments: ManagedVec<EsdtTokenPayment> = ManagedVec::new();
 
         for token in tokens.into_iter() {
+            require!(
+                token.timestamp.is_some() && token.timestamp.unwrap() + UNBONDING_DURATION <= current_timestamp,
+                "One or more tokens have not passed the unbonding duration"
+            );
+
             let was_removed = self.staked_nfts(&caller).swap_remove(&token);
+            require!(was_removed == true, "Invalid function arguments");
 
             if was_removed {
                 payments.push(EsdtTokenPayment::new(
