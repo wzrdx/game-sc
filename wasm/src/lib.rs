@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           68
+// Endpoints:                           69
 // Async Callback:                       1
-// Total number of exported functions:  70
+// Total number of exported functions:  71
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -69,7 +69,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         startQuests
         completeQuest
         completeAllQuests
-        migrate
+        migrateWallets
         migrateTokens
         stake
         unstake
@@ -81,7 +81,8 @@ multiversx_sc_wasm_adapter::endpoints! {
         getStakingInfo
         getUserTokenNonces
         getRarityClasses
-        getStakedUsersLength
+        getStakedAddressesLength
+        getStakedWalletsLength
         getStakedUsers
         getMigrationSize
         claimReward
