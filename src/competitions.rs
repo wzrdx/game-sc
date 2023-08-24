@@ -5,8 +5,6 @@ multiversx_sc::imports!();
 use crate::interface::*;
 use crate::{helpers, storage};
 
-use core::iter::FromIterator;
-
 #[multiversx_sc::module]
 pub trait Competitions: storage::Storage + helpers::Helpers {
     #[only_owner]
@@ -39,7 +37,9 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
     #[endpoint(drawRaffleWinners)]
     fn draw_raffle_winners(&self, raffle_id: usize) {
         let mut rand_source = RandomnessSource::new();
-        let token_id = TokenIdentifier::from(&b"BHAGENTS-3e9010"[..]);
+        let chest = TokenIdentifier::from(&b"CPA-7cc2d2"[..]);
+        let cpa_founder = TokenIdentifier::from(&b"CPA-76d979"[..]);
+        let cpa_token = TokenIdentifier::from(&b"CPA-97530a"[..]);
 
         let winner_id: u16 = self
             .raffle_vector(raffle_id)
@@ -47,41 +47,24 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
 
         let winner_address = self.raffle_id_participant(winner_id).get();
 
-        let mut nonce: u64 = 0;
-
-        if raffle_id == 17 {
-            nonce = 5482;
-        } else if raffle_id == 18 {
-            nonce = 3640;
-        } else if raffle_id == 19 {
-            nonce = 8838;
-        } else if raffle_id == 20 {
-            nonce = 6808;
-        } else if raffle_id == 21 {
-            nonce = 9968;
-        } else if raffle_id == 22 {
-            nonce = 4417;
-        } else if raffle_id == 23 {
-            nonce = 3765;
-        } else if raffle_id == 24 {
-            nonce = 3766;
-        } else if raffle_id == 25 {
-            nonce = 4928;
-        } else if raffle_id == 26 {
-            nonce = 3538;
-        } else if raffle_id == 27 {
-            nonce = 3768;
-        } else if raffle_id == 28 {
-            nonce = 4690;
-        } else if raffle_id == 29 {
-            nonce = 3990;
-        } else if raffle_id == 30 {
-            nonce = 4328;
-        } else if raffle_id == 31 {
-            nonce = 3706;
+        if (32..=51).contains(&raffle_id) {
+            self.send().direct_esdt(&winner_address, &chest, 1 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 52 {
+            self.send()
+                .direct_esdt(&winner_address, &cpa_founder, 380 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 53 {
+            self.send()
+                .direct_esdt(&winner_address, &cpa_founder, 382 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 54 {
+            self.send()
+                .direct_esdt(&winner_address, &cpa_founder, 404 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 55 {
+            self.send()
+                .direct_esdt(&winner_address, &cpa_founder, 306 as u64, &BigUint::from(1 as u32));
+        } else if (56..=57).contains(&raffle_id) {
+            self.send()
+                .direct_esdt(&winner_address, &cpa_token, 0 as u64, &BigUint::from(200_000_000_000 as u64));
         }
-
-        self.send().direct_esdt(&winner_address, &token_id, nonce, &BigUint::from(1 as u32));
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
         self.raffle_hashes(raffle_id).insert(hash);
@@ -95,7 +78,6 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
         self.raffle_vector_size(raffle_id).set(self.raffle_vector(raffle_id).len());
         self.raffle_vector(raffle_id).clear();
         self.raffle_participants(raffle_id).clear();
-        // self.operating_vector().clear();
     }
 
     #[only_owner]

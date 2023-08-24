@@ -9,8 +9,8 @@
 # OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 
 # ## mainnet
-USER_PEM="~/elrond-wallet/wallet-homex.pem"
-# USER_PEM="~/Crypto/wallets/wallet-homex.pem"
+# USER_PEM="~/elrond-wallet/wallet-homex.pem"
+USER_PEM="~/Crypto/wallets/wallet-homex.pem"
 PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
