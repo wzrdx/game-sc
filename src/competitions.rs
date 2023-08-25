@@ -37,9 +37,9 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
     #[endpoint(drawRaffleWinners)]
     fn draw_raffle_winners(&self, raffle_id: usize) {
         let mut rand_source = RandomnessSource::new();
-        let chest = TokenIdentifier::from(&b"CPA-7cc2d2"[..]);
-        let cpa_founder = TokenIdentifier::from(&b"CPA-76d979"[..]);
-        let cpa_token = TokenIdentifier::from(&b"CPA-97530a"[..]);
+
+        let dw_nft = TokenIdentifier::from(&b"WHALES-f14e05"[..]);
+        let dw_boop = TokenIdentifier::from(&b"BOOPPASS-d7885d"[..]);
 
         let winner_id: u16 = self
             .raffle_vector(raffle_id)
@@ -47,23 +47,18 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
 
         let winner_address = self.raffle_id_participant(winner_id).get();
 
-        if (32..=51).contains(&raffle_id) {
-            self.send().direct_esdt(&winner_address, &chest, 1 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 52 {
+        if raffle_id == 58 {
             self.send()
-                .direct_esdt(&winner_address, &cpa_founder, 380 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 53 {
+                .direct_esdt(&winner_address, &dw_nft, 5889 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 59 {
             self.send()
-                .direct_esdt(&winner_address, &cpa_founder, 382 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 54 {
+                .direct_esdt(&winner_address, &dw_nft, 5888 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 60 {
             self.send()
-                .direct_esdt(&winner_address, &cpa_founder, 404 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 55 {
-            self.send()
-                .direct_esdt(&winner_address, &cpa_founder, 306 as u64, &BigUint::from(1 as u32));
-        } else if (56..=57).contains(&raffle_id) {
-            self.send()
-                .direct_esdt(&winner_address, &cpa_token, 0 as u64, &BigUint::from(200_000_000_000 as u64));
+                .direct_esdt(&winner_address, &dw_boop, 98 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 61 {
+            self.essence_mapper()
+                .mint_and_send(&winner_address, BigUint::from(1_000_000_000 as u64));
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
