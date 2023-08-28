@@ -1,10 +1,94 @@
 multiversx_sc::imports!();
 
+const UNBONDING_DURATION: u64 = 604_800;
+
 use crate::interface::*;
 use crate::{helpers, storage};
 
+use core::iter::FromIterator;
+
 #[multiversx_sc::module]
 pub trait Staking: storage::Storage + helpers::Helpers {
+    #[only_owner]
+    #[endpoint(migrateWallets)]
+    fn migrate_wallets(&self) {
+        let travelers_id = self.travelers_mapper().get_token_id();
+        let elders_id = self.elders_mapper().get_token_id();
+
+        let mut gas_left: u64;
+        let mut required_gas: u64;
+
+        for address in self.staked_addresses().into_iter() {
+            required_gas = (self.staked_traveler_nonces(&address).len() as u64 + self.staked_elder_nonces(&address).len() as u64) * 1500000;
+            gas_left = self.blockchain().get_gas_left();
+
+            if required_gas + 25000000 < gas_left {
+                for nonce in self.staked_traveler_nonces(&address).into_iter() {
+                    self.staked_nfts(&address).insert(Stake {
+                        token_id: travelers_id.clone(),
+                        nonce: nonce as u16,
+                        amount: 1,
+                        timestamp: None,
+                    });
+                }
+
+                self.staked_traveler_nonces(&address).clear();
+
+                for nonce in self.staked_elder_nonces(&address).into_iter() {
+                    self.staked_nfts(&address).insert(Stake {
+                        token_id: elders_id.clone(),
+                        nonce: nonce as u16,
+                        amount: 1,
+                        timestamp: None,
+                    });
+                }
+
+                self.staked_elder_nonces(&address).clear();
+
+                self.staked_addresses().swap_remove(&address);
+                self.staked_wallets().insert(address);
+            }
+        }
+    }
+
+    #[only_user_account]
+    #[endpoint(migrateTokens)]
+    fn migrate_tokens(&self) {
+        let caller = self.blockchain().get_caller();
+
+        let travelers_id = self.travelers_mapper().get_token_id();
+        let elders_id = self.elders_mapper().get_token_id();
+
+        if self.staked_traveler_nonces(&caller).len() > 0 {
+            for nonce in self.staked_traveler_nonces(&caller).into_iter() {
+                self.staked_nfts(&caller).insert(Stake {
+                    token_id: travelers_id.clone(),
+                    nonce: nonce as u16,
+                    amount: 1,
+                    timestamp: None,
+                });
+            }
+
+            self.staked_traveler_nonces(&caller).clear();
+        }
+
+        if self.staked_elder_nonces(&caller).len() > 0 {
+            for nonce in self.staked_elder_nonces(&caller).into_iter() {
+                self.staked_nfts(&caller).insert(Stake {
+                    token_id: elders_id.clone(),
+                    nonce: nonce as u16,
+                    amount: 1,
+                    timestamp: None,
+                });
+            }
+
+            self.staked_elder_nonces(&caller).clear();
+        }
+
+        self.staked_addresses().swap_remove(&caller);
+        self.staked_wallets().insert(caller);
+    }
+
     #[only_user_account]
     #[payable("*")]
     #[endpoint(stake)]
@@ -12,25 +96,22 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
         require!(payments.len() > 0, "Must stake at least one NFT");
 
+        let token_ids: ManagedVec<TokenIdentifier<Self::Api>> = self.get_staking_token_ids();
+
         for payment in payments.into_iter() {
-            require!(
-                payment.token_identifier == self.travelers_mapper().get_token_id()
-                    || payment.token_identifier == self.elders_mapper().get_token_id(),
-                "NFT/s must be from the Home X collections"
-            );
+            require!(token_ids.contains(&payment.token_identifier), "Invalid type of token");
         }
 
         let caller = self.blockchain().get_caller();
         self.claim_staking_rewards_for_user(&caller);
 
         for payment in payments.into_iter() {
-            if payment.token_identifier == self.travelers_mapper().get_token_id() {
-                self.staked_traveler_nonces(&caller).insert(payment.token_nonce);
-            }
-
-            if payment.token_identifier == self.elders_mapper().get_token_id() {
-                self.staked_elder_nonces(&caller).insert(payment.token_nonce);
-            }
+            self.staked_nfts(&caller).insert(Stake {
+                token_id: payment.token_identifier,
+                nonce: payment.token_nonce as u16,
+                amount: payment.amount.to_u64().unwrap_or_default() as u16,
+                timestamp: None,
+            });
         }
 
         self.staked_addresses().insert(caller);
@@ -38,43 +119,77 @@ pub trait Staking: storage::Storage + helpers::Helpers {
 
     #[only_user_account]
     #[endpoint(unstake)]
-    fn unstake(&self, traveler_nonces: ManagedVec<u64>, elder_nonces: ManagedVec<u64>) {
+    fn unstake(&self, tokens: ManagedVec<Stake<Self::Api>>) {
         let caller = self.blockchain().get_caller();
-
-        require!(
-            (self.staked_traveler_nonces(&caller).len() + self.staked_elder_nonces(&caller).len()) > 0,
-            "Must have at least one staked NFT in order to unstake"
-        );
+        let current_timestamp = self.blockchain().get_block_timestamp();
 
         self.claim_staking_rewards_for_user(&caller);
 
-        let mut payments: ManagedVec<EsdtTokenPayment> = ManagedVec::new();
-        let travelers_id = self.travelers_mapper().get_token_id();
-        let elders_id = self.elders_mapper().get_token_id();
+        for token in tokens.iter() {
+            require!(token.timestamp.is_none(), "One or more tokens are already unstaked");
 
-        for nonce in traveler_nonces.into_iter() {
-            let was_removed = self.staked_traveler_nonces(&caller).swap_remove(&nonce);
+            let was_removed = self.staked_nfts(&caller).swap_remove(&token);
+            require!(was_removed == true, "Invalid function arguments");
 
-            if was_removed {
-                payments.push(EsdtTokenPayment::new(travelers_id.clone(), nonce, BigUint::from(1 as u32)))
-            }
+            let mut updated_token = token;
+            updated_token.timestamp = Some(current_timestamp);
+
+            self.staked_nfts(&caller).insert(updated_token);
         }
+    }
 
-        for nonce in elder_nonces.into_iter() {
-            let was_removed = self.staked_elder_nonces(&caller).swap_remove(&nonce);
+    #[only_user_account]
+    #[endpoint(claim)]
+    fn claim(&self, tokens: ManagedVec<Stake<Self::Api>>) {
+        let caller = self.blockchain().get_caller();
+        let current_timestamp = self.blockchain().get_block_timestamp();
+
+        let mut payments: ManagedVec<EsdtTokenPayment> = ManagedVec::new();
+
+        for token in tokens.into_iter() {
+            require!(
+                token.timestamp.is_some() && token.timestamp.unwrap() + UNBONDING_DURATION <= current_timestamp,
+                "One or more tokens have not passed the unbonding duration"
+            );
+
+            let was_removed = self.staked_nfts(&caller).swap_remove(&token);
+            require!(was_removed == true, "Invalid function arguments");
 
             if was_removed {
-                payments.push(EsdtTokenPayment::new(elders_id.clone(), nonce, BigUint::from(1 as u32)))
+                payments.push(EsdtTokenPayment::new(
+                    token.token_id,
+                    token.nonce as u64,
+                    BigUint::from(token.amount),
+                ))
             }
         }
 
         if payments.len() > 0 {
             self.send().direct_multi(&caller, &payments);
-        }
 
-        if self.staked_traveler_nonces(&caller).is_empty() && self.staked_elder_nonces(&caller).is_empty() {
-            self.last_staking_timestamp(&caller).clear();
-            self.staked_addresses().swap_remove(&caller);
+            if self.staked_nfts(&caller).is_empty() {
+                self.last_staking_timestamp(&caller).clear();
+                self.staked_addresses().swap_remove(&caller);
+            }
+        }
+    }
+
+    #[only_user_account]
+    #[endpoint(restake)]
+    fn restake(&self, tokens: ManagedVec<Stake<Self::Api>>) {
+        let caller = self.blockchain().get_caller();
+
+        self.claim_staking_rewards_for_user(&caller);
+
+        for token in tokens.iter() {
+            require!(token.timestamp.is_some(), "One or more tokens are still staked");
+
+            self.staked_nfts(&caller).swap_remove(&token);
+
+            let mut updated_token = token;
+            updated_token.timestamp = None;
+
+            self.staked_nfts(&caller).insert(updated_token);
         }
     }
 
@@ -84,7 +199,7 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         let caller = self.blockchain().get_caller();
 
         require!(
-            (self.staked_traveler_nonces(&caller).len() + self.staked_elder_nonces(&caller).len()) > 0,
+            self.staked_nfts(&caller).len() > 0,
             "Must have at least one staked NFT in order to claim rewards"
         );
 
@@ -101,8 +216,17 @@ pub trait Staking: storage::Storage + helpers::Helpers {
     fn get_staked_nfts_count(&self) -> usize {
         let mut count: usize = 0;
 
+        // TODO: Remove the counting from old data structures after migration
         for address in self.staked_addresses().iter() {
             count += self.staked_traveler_nonces(&address).len() + self.staked_elder_nonces(&address).len();
+        }
+
+        for address in self.staked_wallets().iter() {
+            count += self
+                .staked_nfts(&address)
+                .iter()
+                .filter(|token| (*token).timestamp.is_none())
+                .count();
         }
 
         count
@@ -110,41 +234,18 @@ pub trait Staking: storage::Storage + helpers::Helpers {
 
     #[view(getStakingInfo)]
     fn get_staking_info(&self, user: &ManagedAddress) -> StakingInfo<Self::Api> {
-        let mut traveler_nonces: ManagedVec<u64> = ManagedVec::new();
-        let mut elder_nonces: ManagedVec<u64> = ManagedVec::new();
-
-        for nonce in self.staked_traveler_nonces(user).iter() {
-            traveler_nonces.push(nonce)
-        }
-
-        for nonce in self.staked_elder_nonces(user).iter() {
-            elder_nonces.push(nonce)
-        }
+        let tokens: ManagedVec<Stake<Self::Api>> = ManagedVec::from_iter(self.staked_nfts(user).iter());
 
         StakingInfo {
             rewards: self.get_staking_rewards(user),
             timestamp: self.last_staking_timestamp(user).get(),
-            traveler_nonces,
-            elder_nonces,
+            tokens,
         }
     }
 
     #[view(getUserTokenNonces)]
-    fn get_all_user_nonces(&self, user_address: ManagedAddress, token_id: TokenIdentifier) -> ManagedVec<u64> {
-        let mut nonces: ManagedVec<u64> = ManagedVec::new();
-
-        if token_id == self.travelers_mapper().get_token_id() {
-            for nonce in self.staked_traveler_nonces(&user_address).iter() {
-                nonces.push(nonce)
-            }
-        }
-
-        if token_id == self.elders_mapper().get_token_id() {
-            for nonce in self.staked_elder_nonces(&user_address).iter() {
-                nonces.push(nonce)
-            }
-        }
-
+    fn get_user_token_nonces(&self, user_address: ManagedAddress, token_id: TokenIdentifier) -> ManagedVec<u64> {
+        let nonces: ManagedVec<u64> = self.get_staked_nonces(&user_address, token_id);
         nonces
     }
 
@@ -162,9 +263,14 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         rarity_classes
     }
 
-    #[view(getStakedUsersLength)]
-    fn get_staked_users_length(&self) -> usize {
+    #[view(getStakedAddressesLength)]
+    fn get_staked_addresses_length(&self) -> usize {
         self.staked_addresses().len()
+    }
+
+    #[view(getStakedWalletsLength)]
+    fn get_staked_wallets_length(&self) -> usize {
+        self.staked_wallets().len()
     }
 
     #[view(getStakedUsers)]
@@ -180,8 +286,16 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         users
     }
 
-    #[view(getStakeOfUser)]
-    fn get_stake_of_user(&self, user_address: ManagedAddress) -> usize {
-        self.staked_traveler_nonces(&user_address).len() + self.staked_elder_nonces(&user_address).len()
+    #[view(getMigrationSize)]
+    fn get_migration_size(&self, user: &ManagedAddress) -> usize {
+        self.staked_traveler_nonces(user).len() + self.staked_elder_nonces(user).len()
+    }
+
+    fn get_staking_token_ids(&self) -> ManagedVec<TokenIdentifier<Self::Api>> {
+        let mut vec: ManagedVec<TokenIdentifier<Self::Api>> = ManagedVec::new();
+        vec.push(self.travelers_mapper().get_token_id());
+        vec.push(self.elders_mapper().get_token_id());
+
+        vec
     }
 }

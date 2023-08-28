@@ -1,7 +1,10 @@
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
-use crate::{interface::OngoingQuest, interface::Quest};
+use crate::{
+    interface::OngoingQuest,
+    interface::{Quest, Stake},
+};
 
 #[multiversx_sc::module]
 pub trait Storage {
@@ -12,11 +15,21 @@ pub trait Storage {
     #[storage_mapper("stakedElderNonces")]
     fn staked_elder_nonces(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
 
+    #[storage_mapper("stakedNFTs")]
+    fn staked_nfts(&self, user: &ManagedAddress) -> UnorderedSetMapper<Stake<Self::Api>>;
+
     #[storage_mapper("lastStakingTimestamp")]
     fn last_staking_timestamp(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
+    // Deprecated staking system
+    #[view(getStakedAddresses)]
     #[storage_mapper("stakedAddresses")]
     fn staked_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
+
+    // New staking system
+    #[view(getStakedWallets)]
+    #[storage_mapper("stakedWallets")]
+    fn staked_wallets(&self) -> UnorderedSetMapper<ManagedAddress>;
 
     // Rarity
     #[view(getRarityClass)]

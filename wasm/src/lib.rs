@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           60
+// Endpoints:                           66
 // Async Callback:                       1
-// Total number of exported functions:  62
+// Total number of exported functions:  68
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -24,6 +24,8 @@ multiversx_sc_wasm_adapter::endpoints! {
         setTrialTimestamp
         setTrial
         setGamePaused
+        getStakedAddresses
+        getStakedWallets
         getRarityClass
         getTravelersCollectionId
         getEldersCollectionId
@@ -65,17 +67,22 @@ multiversx_sc_wasm_adapter::endpoints! {
         startQuests
         completeQuest
         completeAllQuests
+        migrateWallets
+        migrateTokens
         stake
         unstake
+        claim
+        restake
         claimStakingRewards
         getStakedAddressesCount
         getStakedNFTsCount
         getStakingInfo
         getUserTokenNonces
         getRarityClasses
-        getStakedUsersLength
+        getStakedAddressesLength
+        getStakedWalletsLength
         getStakedUsers
-        getStakeOfUser
+        getMigrationSize
         claimReward
         getElderRewards
         callBack
