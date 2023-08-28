@@ -1,6 +1,6 @@
 multiversx_sc::imports!();
 
-const UNBONDING_DURATION: u64 = 120;
+const UNBONDING_DURATION: u64 = 604_800;
 
 use crate::interface::*;
 use crate::{helpers, storage};
@@ -96,11 +96,10 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
         require!(payments.len() > 0, "Must stake at least one NFT");
 
+        let token_ids: ManagedVec<TokenIdentifier<Self::Api>> = self.get_staking_token_ids();
+
         for payment in payments.into_iter() {
-            require!(
-                self.get_staking_token_ids().contains(&payment.token_identifier),
-                "Invalid type of token"
-            );
+            require!(token_ids.contains(&payment.token_identifier), "Invalid type of token");
         }
 
         let caller = self.blockchain().get_caller();
@@ -179,6 +178,8 @@ pub trait Staking: storage::Storage + helpers::Helpers {
     #[endpoint(restake)]
     fn restake(&self, tokens: ManagedVec<Stake<Self::Api>>) {
         let caller = self.blockchain().get_caller();
+
+        self.claim_staking_rewards_for_user(&caller);
 
         for token in tokens.iter() {
             require!(token.timestamp.is_some(), "One or more tokens are still staked");

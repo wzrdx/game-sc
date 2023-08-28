@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           69
+// Endpoints:                           66
 // Async Callback:                       1
-// Total number of exported functions:  71
+// Total number of exported functions:  68
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -24,9 +24,6 @@ multiversx_sc_wasm_adapter::endpoints! {
         setTrialTimestamp
         setTrial
         setGamePaused
-        getStakedTravelerNonces
-        getStakedElderNonces
-        getStakedNFTs
         getStakedAddresses
         getStakedWallets
         getRarityClass
