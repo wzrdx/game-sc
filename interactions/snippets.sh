@@ -96,12 +96,6 @@ addBattle() {
     --function="addBattle"
 }
 
-getStakedAddressesLength() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getStakedAddressesLength"
-}
-
 copyHashes() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
@@ -268,8 +262,15 @@ getStakedNFTs() {
     --function="getStakedNFTs"
 }
 
-getStakedWallets() {
+getStakedWalletsLength() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getStakedWallets"
+    --function="getStakedWalletsLength"
+}
+
+
+getStakedAddressesLength() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getStakedAddressesLength"
 }
