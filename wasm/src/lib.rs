@@ -5,9 +5,9 @@
 ////////////////////////////////////////////////////
 
 // Init:                                 1
-// Endpoints:                           66
+// Endpoints:                           67
 // Async Callback:                       1
-// Total number of exported functions:  68
+// Total number of exported functions:  69
 
 #![no_std]
 #![feature(alloc_error_handler, lang_items)]
@@ -82,6 +82,7 @@ multiversx_sc_wasm_adapter::endpoints! {
         getStakedWalletsLength
         getStakedUsers
         getMigrationSize
+        isWalletStaked
         claimReward
         getElderRewards
         callBack

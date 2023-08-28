@@ -291,6 +291,14 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         self.staked_traveler_nonces(user).len() + self.staked_elder_nonces(user).len()
     }
 
+    #[view(isWalletStaked)]
+    fn is_wallet_staked(&self, user: &ManagedAddress) -> bool {
+        let is_staked: bool =
+            self.staked_traveler_nonces(user).len() + self.staked_elder_nonces(user).len() + self.staked_nfts(user).len() > 0;
+
+        is_staked
+    }
+
     fn get_staking_token_ids(&self) -> ManagedVec<TokenIdentifier<Self::Api>> {
         let mut vec: ManagedVec<TokenIdentifier<Self::Api>> = ManagedVec::new();
         vec.push(self.travelers_mapper().get_token_id());
