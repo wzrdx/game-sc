@@ -9,16 +9,12 @@ use crate::{
 #[multiversx_sc::module]
 pub trait Storage {
     // Staking
-    // TODO: Remove views
-    #[view(getStakedTravelerNonces)]
     #[storage_mapper("stakedTravelerNonces")]
     fn staked_traveler_nonces(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
 
-    #[view(getStakedElderNonces)]
     #[storage_mapper("stakedElderNonces")]
     fn staked_elder_nonces(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
 
-    #[view(getStakedNFTs)]
     #[storage_mapper("stakedNFTs")]
     fn staked_nfts(&self, user: &ManagedAddress) -> UnorderedSetMapper<Stake<Self::Api>>;
 
