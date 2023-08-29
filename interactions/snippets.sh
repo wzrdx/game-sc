@@ -92,7 +92,7 @@ addBattle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1692201600 \
+    --arguments 1696694400 \
     --function="addBattle"
 }
 
