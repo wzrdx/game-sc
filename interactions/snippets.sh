@@ -1,6 +1,6 @@
 ## devnet
-# USER_PEM="~/elrond-wallet/wallet.pem"
-USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
+USER_PEM="~/elrond-wallet/wallet.pem"
+# USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
@@ -166,7 +166,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1694188800 \
+    --arguments 1693426798 \
     --function="setTrialTimestamp"
 }
 
