@@ -13,3 +13,4 @@ wasm
 
 deploy.interaction.json
 upgrade.interaction.json
+wasm/src/lib.rs
