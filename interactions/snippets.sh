@@ -6,7 +6,8 @@ CHAIN_ID="D"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
 # TRAVELERS_ID="TRAVELER-51bdef"
-# OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
+OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
+OKLAMA=erd1w79cs7nv35wrkkm8cyaqjq3tkw9xvzvpcdw9prfxw05yj7lagffq5lch25
 
 # ## mainnet
 # USER_PEM="~/elrond-wallet/wallet-homex.pem"
@@ -28,17 +29,25 @@ upgrade() {
     mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
     --bytecode="./output/game-sc.wasm" \
-    --gas-limit=130000000 \
+    --gas-limit=140000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+migrateTokens() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=32000000 \
+    --function="migrateTokens"
 }
 
 drawRaffleWinners() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=30000000 \
-    --arguments 16 5 \
+    --gas-limit=15000000 \
+    --arguments 17 \
     --function="drawRaffleWinners"
 }
 
@@ -51,12 +60,21 @@ clearRaffle() {
     --function="clearRaffle"
 }
 
+clearBattle() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=60000000 \
+    --arguments 1 \
+    --function="clearBattle"
+}
+
 setTrial() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=35000000 \
-    --arguments 6 \
+    --arguments 8 \
     --function="setTrial"
 }
 
@@ -65,7 +83,7 @@ addRaffle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1692201600 \
+    --arguments 1692892800 \
     --function="addRaffle"
 }
 
@@ -74,14 +92,8 @@ addBattle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1692201600 \
+    --arguments 1696694400 \
     --function="addBattle"
-}
-
-getStakedUsersLength() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getStakedUsersLength"
 }
 
 copyHashes() {
@@ -110,10 +122,10 @@ setRaffleVectorSize() {
     --function="setRaffleVectorSize"
 }
 
-getStakedUsersLength() {
+getStakedAddressesLength() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getStakedUsersLength"
+    --function="getStakedAddressesLength"
 }
 
 # Operating vector
@@ -154,7 +166,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1692201600 \
+    --arguments 1694188800 \
     --function="setTrialTimestamp"
 }
 
@@ -176,6 +188,12 @@ getStakedAddressesCount() {
     --function="getStakedAddressesCount"
 }
 
+getStakedAddresses() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getStakedAddresses"
+}
+
 getStakedNFTsCount() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
@@ -186,7 +204,7 @@ clearOngoingQuests() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=30000000 \
+    --gas-limit=50000000 \
     --function="clearOngoingQuests"
 }
 
@@ -214,4 +232,45 @@ getRarityClass() {
     --proxy=${PROXY} \
     --arguments 1 \
     --function="getRarityClass"
+}
+
+getStakingInfo() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${OWNER} \
+    --function="getStakingInfo"
+}
+
+getStakedTravelerNonces() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${OWNER} \
+    --function="getStakedTravelerNonces"
+}
+
+getStakedElderNonces() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${OWNER} \
+    --function="getStakedElderNonces"
+}
+
+getStakedNFTs() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${OWNER} \
+    --function="getStakedNFTs"
+}
+
+getStakedWalletsLength() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getStakedWalletsLength"
+}
+
+
+getStakedAddressesLength() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getStakedAddressesLength"
 }

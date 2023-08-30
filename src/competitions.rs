@@ -5,8 +5,6 @@ multiversx_sc::imports!();
 use crate::interface::*;
 use crate::{helpers, storage};
 
-use core::iter::FromIterator;
-
 #[multiversx_sc::module]
 pub trait Competitions: storage::Storage + helpers::Helpers {
     #[only_owner]
@@ -37,56 +35,36 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
 
     #[only_owner]
     #[endpoint(drawRaffleWinners)]
-    fn draw_raffle_winners(&self, raffle_id: usize, winners: usize) {
+    fn draw_raffle_winners(&self, raffle_id: usize) {
         let mut rand_source = RandomnessSource::new();
-        let mut vector: ManagedVec<u16> = ManagedVec::from_iter(self.raffle_vector(raffle_id).iter());
 
-        for _index in 1..=winners {
-            let winner_id: u16 = vector.get(rand_source.next_usize_in_range(0, vector.len()));
-            let winner_address = self.raffle_id_participant(winner_id).get();
+        let dw_nft = TokenIdentifier::from(&b"WHALES-f14e05"[..]);
+        let dw_boop = TokenIdentifier::from(&b"BOOPPASS-d7885d"[..]);
 
-            if raffle_id == 10 {
-                let token_id = TokenIdentifier::from(&b"SUPERVIC-f07785"[..]);
-                self.send()
-                    .direct_esdt(&winner_address, &token_id, 353 as u64, &BigUint::from(1 as u32));
-            } else if raffle_id == 11 {
-                let token_id = TokenIdentifier::from(&b"SUPERVIC-f07785"[..]);
-                self.send()
-                    .direct_esdt(&winner_address, &token_id, 581 as u64, &BigUint::from(1 as u32));
-            } else if raffle_id == 12 {
-                let token_id = TokenIdentifier::from(&b"GIANTS-93cadd"[..]);
-                self.send()
-                    .direct_esdt(&winner_address, &token_id, 7850 as u64, &BigUint::from(1 as u32));
-            } else if raffle_id == 13 {
-                let token_id = TokenIdentifier::from(&b"NERD-794a0d"[..]);
-                self.send()
-                    .direct_esdt(&winner_address, &token_id, 4175 as u64, &BigUint::from(1 as u32));
-            } else if raffle_id == 14 {
-                let token_id = TokenIdentifier::from(&b"NERD-794a0d"[..]);
-                self.send()
-                    .direct_esdt(&winner_address, &token_id, 5382 as u64, &BigUint::from(1 as u32));
-            } else if raffle_id == 15 {
-                self.send().direct_esdt(
-                    &winner_address,
-                    &self.travelers_mapper().get_token_id(),
-                    1534 as u64,
-                    &BigUint::from(1 as u32),
-                );
-            } else if raffle_id == 16 {
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&winner_address, 1 as u64, BigUint::from(10 as u32));
-            }
+        let winner_id: u16 = self
+            .raffle_vector(raffle_id)
+            .get(rand_source.next_usize_in_range(1, self.raffle_vector(raffle_id).len() + 1));
 
-            // if (7..=8).contains(&raffle_id)
-            // self.send().direct_esdt(&winner_address, &token_id, 1 as u64, &BigUint::from(1 as u32));
+        let winner_address = self.raffle_id_participant(winner_id).get();
 
-            if winners > 1 {
-                vector = ManagedVec::from_iter(vector.iter().filter(|id| *id != winner_id));
-            }
+        if raffle_id == 58 {
+            self.send()
+                .direct_esdt(&winner_address, &dw_nft, 5889 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 59 {
+            self.send()
+                .direct_esdt(&winner_address, &dw_nft, 5888 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 60 {
+            self.send()
+                .direct_esdt(&winner_address, &dw_boop, 98 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 61 {
+            self.essence_mapper()
+                .mint_and_send(&winner_address, BigUint::from(1_000_000_000 as u64));
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
         self.raffle_hashes(raffle_id).insert(hash);
+
+        self.clear_raffle(raffle_id);
     }
 
     #[only_owner]
@@ -95,159 +73,21 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
         self.raffle_vector_size(raffle_id).set(self.raffle_vector(raffle_id).len());
         self.raffle_vector(raffle_id).clear();
         self.raffle_participants(raffle_id).clear();
-        self.operating_vector().clear();
     }
 
     #[only_owner]
     #[endpoint(airdropBattlePrizes)]
     fn airdrop_battle_prizes(&self, battle_id: usize, winners: ManagedVec<ManagedAddress<Self::Api>>) {
-        // let exo = TokenIdentifier::from(&b"TICKET-a8ad2e"[..]);
-        let cow = TokenIdentifier::from(&b"COW-cd463d"[..]);
-        let dreamy = TokenIdentifier::from(&b"WHALES-f14e05"[..]);
-        let subject = TokenIdentifier::from(&b"SUBJECTX-2c184d"[..]);
-        let drifters = TokenIdentifier::from(&b"DRIFTERS-efd96c"[..]);
+        let token_id = TokenIdentifier::from(&b"TICKET-a8ad2e"[..]);
 
-        let dragons = TokenIdentifier::from(&b"DRG-875e1a"[..]);
-        let bears = TokenIdentifier::from(&b"SRB-61daf7"[..]);
-
-        for (i, address) in winners.into_iter().enumerate() {
-            if i == 0 {
-                self.send().direct_esdt(&address, &cow, 1117 as u64, &BigUint::from(1 as u32));
-                self.send().direct_egld(&address, &BigUint::from(self.to_egld(10 as u64)));
-            } else if i == 1 {
-                // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
-                self.send().direct_egld(&address, &BigUint::from(self.to_egld(6 as u64)));
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(10 as u32));
-                self.essence_mapper().mint_and_send(&address, BigUint::from(500000000 as u64));
-            } else if i == 2 {
-                // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
-                self.send().direct_esdt(&address, &dreamy, 4395 as u64, &BigUint::from(1 as u32));
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(10 as u32));
-                self.essence_mapper().mint_and_send(&address, BigUint::from(500000000 as u64));
-            } else if i == 3 {
-                // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
-                self.send().direct_esdt(&address, &drifters, 6241 as u64, &BigUint::from(1 as u32));
-                self.send().direct_esdt(&address, &drifters, 536 as u64, &BigUint::from(1 as u32));
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(7 as u32));
-                self.essence_mapper().mint_and_send(&address, BigUint::from(250000000 as u64));
-            } else if i == 4 {
-                // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
-                self.send().direct_esdt(&address, &subject, 310 as u64, &BigUint::from(1 as u32));
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(5 as u32));
-                self.essence_mapper().mint_and_send(&address, BigUint::from(200000000 as u64));
-            } else if i == 5 {
-                // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
-                self.send().direct_esdt(&address, &dragons, 5779 as u64, &BigUint::from(1 as u32));
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(3 as u32));
-                self.essence_mapper().mint_and_send(&address, BigUint::from(150000000 as u64));
-            } else if i == 6 {
-                self.send().direct_esdt(&address, &bears, 6885 as u64, &BigUint::from(1 as u32));
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(3 as u32));
-                self.essence_mapper().mint_and_send(&address, BigUint::from(100000000 as u64));
-            } else if i == 7 {
-                self.send().direct_esdt(&address, &subject, 1400 as u64, &BigUint::from(1 as u32));
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(2 as u32));
-                self.essence_mapper().mint_and_send(&address, BigUint::from(100000000 as u64));
-            } else if i == 8 {
-                self.send().direct_esdt(&address, &dragons, 5839 as u64, &BigUint::from(1 as u32));
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(2 as u32));
-                self.essence_mapper().mint_and_send(&address, BigUint::from(100000000 as u64));
-            } else if i == 9 {
-                self.send().direct_esdt(
-                    &address,
-                    &self.travelers_mapper().get_token_id(),
-                    993 as u64,
-                    &BigUint::from(1 as u32),
-                );
-                self.tickets_mapper()
-                    .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(1 as u32));
-                self.gems_mapper().mint_and_send(&address, BigUint::from(300000000 as u64));
-            }
+        for (_i, address) in winners.into_iter().enumerate() {
+            self.send().direct_esdt(&address, &token_id, 1 as u64, &BigUint::from(1 as u32));
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
         self.battle_hashes(battle_id).insert(hash);
     }
 
-    // #[only_owner]
-    // #[endpoint(airdropBattlePrizesAlt)]
-    // fn airdrop_battle_prizes_alt(&self, battle_id: usize, winners: ManagedVec<ManagedAddress<Self::Api>>) {
-    //     let giants = TokenIdentifier::from(&b"GIANTS-93cadd"[..]);
-    //     let gnogons = TokenIdentifier::from(&b"GNOGONS-d6b12a"[..]);
-
-    //     for (i, address) in winners.into_iter().enumerate() {
-    //         if i == 0 {
-    //             self.send().direct_esdt(&address, &giants, 3022 as u64, &BigUint::from(1 as u32));
-    //             self.gems_mapper().mint_and_send(&address, BigUint::from(300_000_000 as u64));
-    //         } else if i == 1 {
-    //             self.send().direct_esdt(&address, &gnogons, 3885 as u64, &BigUint::from(1 as u32));
-    //             self.gems_mapper().mint_and_send(&address, BigUint::from(300_000_000 as u64));
-    //         } else if i == 2 {
-    //             // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
-    //             self.send().direct_esdt(&address, &dreamy, 4395 as u64, &BigUint::from(1 as u32));
-    //             self.tickets_mapper()
-    //                 .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(10 as u32));
-    //             self.essence_mapper().mint_and_send(&address, BigUint::from(500000000 as u64));
-    //         } else if i == 3 {
-    //             // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
-    //             self.send().direct_esdt(&address, &drifters, 6241 as u64, &BigUint::from(1 as u32));
-    //             self.send().direct_esdt(&address, &drifters, 536 as u64, &BigUint::from(1 as u32));
-    //             self.tickets_mapper()
-    //                 .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(7 as u32));
-    //             self.essence_mapper().mint_and_send(&address, BigUint::from(250000000 as u64));
-    //         } else if i == 4 {
-    //             // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
-    //             self.send().direct_esdt(&address, &subject, 310 as u64, &BigUint::from(1 as u32));
-    //             self.tickets_mapper()
-    //                 .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(5 as u32));
-    //             self.essence_mapper().mint_and_send(&address, BigUint::from(200_000_000 as u64));
-    //         } else if i == 5 {
-    //             // self.send().direct_esdt(&address, &exo, 1 as u64, &BigUint::from(1 as u32));
-    //             self.send().direct_esdt(&address, &dragons, 5779 as u64, &BigUint::from(1 as u32));
-    //             self.tickets_mapper()
-    //                 .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(3 as u32));
-    //             self.essence_mapper().mint_and_send(&address, BigUint::from(150_000_000 as u64));
-    //         } else if i == 6 {
-    //             self.send().direct_esdt(&address, &bears, 6885 as u64, &BigUint::from(1 as u32));
-    //             self.tickets_mapper()
-    //                 .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(3 as u32));
-    //             self.essence_mapper().mint_and_send(&address, BigUint::from(100000000 as u64));
-    //         } else if i == 7 {
-    //             self.send().direct_esdt(&address, &subject, 1400 as u64, &BigUint::from(1 as u32));
-    //             self.tickets_mapper()
-    //                 .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(2 as u32));
-    //             self.essence_mapper().mint_and_send(&address, BigUint::from(100000000 as u64));
-    //         } else if i == 8 {
-    //             self.send().direct_esdt(&address, &dragons, 5839 as u64, &BigUint::from(1 as u32));
-    //             self.tickets_mapper()
-    //                 .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(2 as u32));
-    //             self.essence_mapper().mint_and_send(&address, BigUint::from(100000000 as u64));
-    //         } else if i == 9 {
-    //             self.send().direct_esdt(
-    //                 &address,
-    //                 &self.travelers_mapper().get_token_id(),
-    //                 993 as u64,
-    //                 &BigUint::from(1 as u32),
-    //             );
-    //             self.tickets_mapper()
-    //                 .nft_add_quantity_and_send(&address, 1 as u64, BigUint::from(1 as u32));
-    //             self.gems_mapper().mint_and_send(&address, BigUint::from(300_000_000 as u64));
-    //         }
-    //     }
-
-    //     let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
-    //     self.battle_hashes(battle_id).insert(hash);
-    // }
-
-    // TODO: Do not call until data is saved
     #[only_owner]
     #[endpoint(clearBattle)]
     fn clear_battle(&self, battle_id: usize) {

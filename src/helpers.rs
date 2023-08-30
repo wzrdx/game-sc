@@ -9,6 +9,8 @@ multiversx_sc::imports!();
 
 use crate::storage;
 
+use core::iter::FromIterator;
+
 #[multiversx_sc::module]
 pub trait Helpers: storage::Storage {
     fn get_token_mapper(&self, index: usize) -> FungibleTokenMapper {
@@ -48,7 +50,7 @@ pub trait Helpers: storage::Storage {
         let block_diff: u64 = current_timestamp - last_timestamp;
         let travelers_rewards = BigUint::from(block_diff * self.get_travelers_yield(user));
 
-        let elder_count: u64 = self.staked_elder_nonces(user).len() as u64;
+        let elder_count: u64 = self.get_staked_nonces(user, self.elders_mapper().get_token_id()).len() as u64;
         let elders_rewards = BigUint::from(block_diff * ELDER_ENERGY_PER_S * elder_count);
 
         travelers_rewards + elders_rewards
@@ -56,12 +58,24 @@ pub trait Helpers: storage::Storage {
 
     fn get_travelers_yield(&self, user: &ManagedAddress) -> u64 {
         let mut travelers_rewards: u64 = 0;
+        let traveler_nonces: ManagedVec<u64> = self.get_staked_nonces(user, self.travelers_mapper().get_token_id());
 
-        for nonce in self.staked_traveler_nonces(user).iter() {
+        for nonce in traveler_nonces.into_iter() {
             travelers_rewards += self.get_energy_yield(self.rarity_class(nonce).get());
         }
 
         travelers_rewards
+    }
+
+    fn get_staked_nonces(&self, user_address: &ManagedAddress, token_id: TokenIdentifier) -> ManagedVec<u64> {
+        let nonces: ManagedVec<u64> = ManagedVec::from_iter(
+            self.staked_nfts(user_address)
+                .iter()
+                .filter(|token| (*token).token_id == token_id && (*token).timestamp.is_none())
+                .map(|token| token.nonce as u64),
+        );
+
+        nonces
     }
 
     fn get_energy_yield(&self, rarity_class: u8) -> u64 {
@@ -101,7 +115,7 @@ pub trait Helpers: storage::Storage {
     }
 
     fn to_egld(&self, value: u64) -> u64 {
-        value.mul(1000000000000000000 as u64)
+        value.mul(1_000_000_000_000_000_000 as u64)
     }
 
     fn require_conditions(&self) {
