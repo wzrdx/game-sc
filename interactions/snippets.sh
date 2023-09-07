@@ -78,6 +78,12 @@ setTrial() {
     --function="setTrial"
 }
 
+getCurrentTrial() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getCurrentTrial"
+}
+
 addRaffle() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
