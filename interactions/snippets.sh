@@ -73,9 +73,15 @@ setTrial() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=35000000 \
-    --arguments 8 \
+    --gas-limit=75000000 \
+    --arguments 7 \
     --function="setTrial"
+}
+
+getCurrentTrial() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getCurrentTrial"
 }
 
 addRaffle() {
