@@ -7,9 +7,12 @@
 /output*/
 
 wasm
-/wasm/*
+/wasm*/
 /wasm
+wasm/src
+/wasm/src
 /wasm/src/lib.rs
 
 deploy.interaction.json
 upgrade.interaction.json
+wasm/src/lib.rs
