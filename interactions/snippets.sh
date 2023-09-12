@@ -18,15 +18,16 @@ SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
 
 deploy() {
-    mxpy --verbose contract deploy --project=${PROJECT} --metadata-payable --metadata-payable-by-sc \
+    mxpy --verbose contract deploy --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
+    --bytecode="./output/game-sc.wasm" \
     --gas-limit=100000000 \
     --send --outfile="deploy.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
 upgrade() {
-    mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
+    mxpy contract build && mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
     --bytecode="./output/game-sc.wasm" \
     --gas-limit=140000000 \
@@ -74,7 +75,7 @@ setTrial() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=35000000 \
-    --arguments 8 \
+    --arguments 9 \
     --function="setTrial"
 }
 
@@ -172,7 +173,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1694188800 \
+    --arguments 1695463200 \
     --function="setTrialTimestamp"
 }
 
@@ -210,7 +211,7 @@ clearOngoingQuests() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=50000000 \
+    --gas-limit=60000000 \
     --function="clearOngoingQuests"
 }
 
