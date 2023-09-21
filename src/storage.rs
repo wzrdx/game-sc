@@ -22,7 +22,6 @@ pub trait Storage {
     fn last_staking_timestamp(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
     // Deprecated staking system
-    #[view(getStakedAddresses)]
     #[storage_mapper("stakedAddresses")]
     fn staked_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
 
@@ -161,4 +160,9 @@ pub trait Storage {
      */
     #[storage_mapper("eldersTicketsNonces")]
     fn elders_tickets_nonces(&self, trial: u16) -> UnorderedSetMapper<u16>;
+
+    // Stats
+    #[view(getMintedTickets)]
+    #[storage_mapper("mintedTickets")]
+    fn minted_tickets(&self) -> SingleValueMapper<usize>;
 }
