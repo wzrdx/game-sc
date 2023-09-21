@@ -27,13 +27,29 @@ pub trait GameScContract:
     fn init(&self) {}
 
     #[only_owner]
+    #[endpoint(addSpecialRole)]
+    fn add_special_role(&self, sc_addr: &ManagedAddress) {
+        let token_id = TokenIdentifier::from(&b"HOMETICKET-257a32"[..]);
+        self.send()
+            .esdt_system_sc_proxy()
+            .set_special_roles(sc_addr, &token_id, (&[EsdtLocalRole::NftAddQuantity][..]).into_iter().cloned())
+            .async_call()
+            .call_and_exit();
+    }
+
+    #[only_owner]
+    #[endpoint(transferMirageFaire)]
+    fn transfer_mirage_faire(&self, sc_addr: &ManagedAddress) {
+        self.tickets_mapper().nft_add_quantity_and_send(sc_addr, 1 as u64, BigUint::from(1 as usize));
+    }
+
+    #[only_owner]
     #[endpoint(withdraw)]
     fn withdraw(&self, start: usize, end: usize, identifier: TokenIdentifier<Self::Api>) {
         let caller = self.blockchain().get_caller();
 
         for nonce in start..=end {
-            self.send()
-                .direct_esdt(&caller, &identifier, nonce as u64, &BigUint::from(1 as u32));
+            self.send().direct_esdt(&caller, &identifier, nonce as u64, &BigUint::from(1 as u32));
         }
     }
 
