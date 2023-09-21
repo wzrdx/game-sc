@@ -29,7 +29,7 @@ pub trait GameScContract:
     #[only_owner]
     #[endpoint(addSpecialRole)]
     fn add_special_role(&self, sc_addr: &ManagedAddress) {
-        let token_id = TokenIdentifier::from(&b"HOMETICKET-257a32"[..]);
+        let token_id = TokenIdentifier::from(&b"HOMETICKET-9112c2"[..]);
         self.send()
             .esdt_system_sc_proxy()
             .set_special_roles(sc_addr, &token_id, (&[EsdtLocalRole::NftAddQuantity][..]).into_iter().cloned())
