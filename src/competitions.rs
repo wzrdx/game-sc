@@ -38,8 +38,7 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
     fn draw_raffle_winners(&self, raffle_id: usize) {
         let mut rand_source = RandomnessSource::new();
 
-        let dw_nft = TokenIdentifier::from(&b"WHALES-f14e05"[..]);
-        let dw_boop = TokenIdentifier::from(&b"BOOPPASS-d7885d"[..]);
+        let eco_id = TokenIdentifier::from(&b"ECOBOTTLE-e5e2a6"[..]);
 
         let winner_id: u16 = self
             .raffle_vector(raffle_id)
@@ -47,18 +46,14 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
 
         let winner_address = self.raffle_id_participant(winner_id).get();
 
-        if raffle_id == 58 {
+        if let 62..=69 = raffle_id {
+            self.send().direct_esdt(&winner_address, &eco_id, 1 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 70 {
             self.send()
-                .direct_esdt(&winner_address, &dw_nft, 5889 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 59 {
+                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 118 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 71 {
             self.send()
-                .direct_esdt(&winner_address, &dw_nft, 5888 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 60 {
-            self.send()
-                .direct_esdt(&winner_address, &dw_boop, 98 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 61 {
-            self.essence_mapper()
-                .mint_and_send(&winner_address, BigUint::from(1_000_000_000 as u64));
+                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 1456 as u64, &BigUint::from(1 as u32));
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
@@ -119,10 +114,7 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
         // Raffle cap
         let submitted_tickets = self.get_raffle_submitted_tickets(raffle_id, &caller);
 
-        require!(
-            (submitted_tickets as u64) + payment_amount <= RAFFLE_CAP,
-            "Payment exceeds raffle tickets cap"
-        );
+        require!((submitted_tickets as u64) + payment_amount <= RAFFLE_CAP, "Payment exceeds raffle tickets cap");
 
         if self.raffle_participant_id(&caller).is_empty() {
             let id: u16 = self.raffle_index().update(|i| {
