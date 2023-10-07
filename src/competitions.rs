@@ -8,6 +8,12 @@ use crate::{helpers, storage};
 #[multiversx_sc::module]
 pub trait Competitions: storage::Storage + helpers::Helpers {
     #[only_owner]
+    #[endpoint(changeBattleTimestamp)]
+    fn change_battle_timestamp(&self, index: usize, timestamp: u64) {
+        self.battle_timestamp(index).set(timestamp);
+    }
+
+    #[only_owner]
     #[endpoint(addBattle)]
     fn add_battle(&self, timestamp: u64) {
         let index = self.battles_count().get() + 1;
@@ -38,7 +44,7 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
     fn draw_raffle_winners(&self, raffle_id: usize) {
         let mut rand_source = RandomnessSource::new();
 
-        let eco_id = TokenIdentifier::from(&b"ECOBOTTLE-e5e2a6"[..]);
+        let sponsor_token_id = TokenIdentifier::from(&b"HERO-6271d1"[..]);
 
         let winner_id: u16 = self
             .raffle_vector(raffle_id)
@@ -46,14 +52,38 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
 
         let winner_address = self.raffle_id_participant(winner_id).get();
 
-        if let 62..=69 = raffle_id {
-            self.send().direct_esdt(&winner_address, &eco_id, 1 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 70 {
+        // if let 1..=5 = raffle_id
+
+        if raffle_id == 72 {
             self.send()
-                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 118 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 71 {
+                .direct_esdt(&winner_address, &sponsor_token_id, 4208 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 73 {
             self.send()
-                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 1456 as u64, &BigUint::from(1 as u32));
+                .direct_esdt(&winner_address, &sponsor_token_id, 4213 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 74 {
+            self.send()
+                .direct_esdt(&winner_address, &sponsor_token_id, 4261 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 75 {
+            self.send()
+                .direct_esdt(&winner_address, &sponsor_token_id, 4265 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 76 {
+            self.send()
+                .direct_esdt(&winner_address, &sponsor_token_id, 4267 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 77 {
+            self.send()
+                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 608 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 78 {
+            self.send()
+                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 3219 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 79 {
+            self.send()
+                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 3223 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 80 {
+            self.send()
+                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 3297 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 81 {
+            self.send()
+                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 3333 as u64, &BigUint::from(1 as u32));
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();

@@ -83,8 +83,8 @@ setTrial() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=75000000 \
-    --arguments 7 \
+    --gas-limit=35000000 \
+    --arguments 11 \
     --function="setTrial"
 }
 
@@ -182,7 +182,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments 1695463200 \
+    --arguments 1697551200 \
     --function="setTrialTimestamp"
 }
 
@@ -296,4 +296,10 @@ getBattleParticipants() {
     --proxy=${PROXY} \
     --arguments 1 0 3 \
     --function="getBattleParticipants"
+}
+
+getMintedTickets() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getMintedTickets"
 }
