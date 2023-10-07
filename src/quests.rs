@@ -192,11 +192,10 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         // Ticket
         if quest.is_final {
             let tickets_amount: u64 = rewards.iter().sum();
+            self.increase_minted_tickets(tickets_amount);
+
             self.tickets_mapper()
                 .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(tickets_amount));
-            self.minted_tickets().update(|i| {
-                *i += tickets_amount as usize;
-            });
         } else {
             for (i, reward) in rewards.iter().enumerate() {
                 if reward > 0 {
@@ -265,6 +264,8 @@ pub trait Quests: storage::Storage + helpers::Helpers {
 
         // Send rewards
         if total_tickets_amount > 0 {
+            self.increase_minted_tickets(total_tickets_amount);
+
             self.tickets_mapper()
                 .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(total_tickets_amount));
         }
@@ -294,6 +295,12 @@ pub trait Quests: storage::Storage + helpers::Helpers {
 
         self.completed_quests(current_battle_id, &caller).update(|i| {
             *i += ongoing_quests.len();
+        });
+    }
+
+    fn increase_minted_tickets(&self, amount: u64) {
+        self.minted_tickets().update(|i| {
+            *i += amount;
         });
     }
 }
