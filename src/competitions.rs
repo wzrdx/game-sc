@@ -103,15 +103,7 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
     #[only_owner]
     #[endpoint(airdropBattlePrizes)]
     fn airdrop_battle_prizes(&self, battle_id: usize, winners: ManagedVec<ManagedAddress<Self::Api>>) {
-        let cow = TokenIdentifier::from(&b"COW-cd463d"[..]);
-        let boop = TokenIdentifier::from(&b"BOOPPASS-d7885d"[..]);
-        let dw = TokenIdentifier::from(&b"WHALES-f14e05"[..]);
-        let project_x = TokenIdentifier::from(&b"SUBJECTX-2c184d"[..]);
-        let drg = TokenIdentifier::from(&b"DRG-875e1a"[..]);
         let cpa = TokenIdentifier::from(&b"CPA-76d979"[..]);
-        let hs_wolf = TokenIdentifier::from(&b"HSWOLF-76e8bf"[..]);
-        let cantina = TokenIdentifier::from(&b"GSPACEAPE-08bc2b"[..]);
-        let drifters = TokenIdentifier::from(&b"DRIFTERS-efd96c"[..]);
 
         for (i, address) in winners.into_iter().enumerate() {
             if i == 0 {
