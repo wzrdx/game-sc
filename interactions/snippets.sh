@@ -224,6 +224,15 @@ clearOngoingQuests() {
     --function="clearOngoingQuests"
 }
 
+changeBattleTimestamp() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --arguments 2 1696759200 \
+    --gas-limit=6000000 \
+    --function="changeBattleTimestamp"
+}
+
 isSwappingPaused() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
@@ -303,3 +312,4 @@ getMintedTickets() {
     --proxy=${PROXY} \
     --function="getMintedTickets"
 }
+

@@ -103,10 +103,35 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
     #[only_owner]
     #[endpoint(airdropBattlePrizes)]
     fn airdrop_battle_prizes(&self, battle_id: usize, winners: ManagedVec<ManagedAddress<Self::Api>>) {
-        let token_id = TokenIdentifier::from(&b"TICKET-a8ad2e"[..]);
+        let cow = TokenIdentifier::from(&b"COW-cd463d"[..]);
+        let boop = TokenIdentifier::from(&b"BOOPPASS-d7885d"[..]);
+        let dw = TokenIdentifier::from(&b"WHALES-f14e05"[..]);
+        let project_x = TokenIdentifier::from(&b"SUBJECTX-2c184d"[..]);
+        let drg = TokenIdentifier::from(&b"DRG-875e1a"[..]);
+        let cpa = TokenIdentifier::from(&b"CPA-76d979"[..]);
+        let hs_wolf = TokenIdentifier::from(&b"HSWOLF-76e8bf"[..]);
+        let cantina = TokenIdentifier::from(&b"GSPACEAPE-08bc2b"[..]);
+        let drifters = TokenIdentifier::from(&b"DRIFTERS-efd96c"[..]);
 
-        for (_i, address) in winners.into_iter().enumerate() {
-            self.send().direct_esdt(&address, &token_id, 1 as u64, &BigUint::from(1 as u32));
+        for (i, address) in winners.into_iter().enumerate() {
+            if i == 0 {
+                self.send_nft(&address, &cpa, 413);
+                self.send().direct_egld(&address, &BigUint::from(500_000_000_000_000_000 as u64));
+                self.essence_mapper().mint_and_send(&address, BigUint::from(800_000_000 as u64));
+            } else if i == 1 {
+                self.send_nft(&address, &cpa, 489);
+                self.send().direct_egld(&address, &BigUint::from(300_000_000_000_000_000 as u64));
+                self.essence_mapper().mint_and_send(&address, BigUint::from(500_000_000 as u64));
+            } else if i == 2 {
+                self.send().direct_egld(&address, &BigUint::from(500_000_000_000_000_000 as u64));
+                self.essence_mapper().mint_and_send(&address, BigUint::from(300_000_000 as u64));
+            } else if i == 3 {
+                self.send().direct_egld(&address, &BigUint::from(400_000_000_000_000_000 as u64));
+                self.essence_mapper().mint_and_send(&address, BigUint::from(200_000_000 as u64));
+            } else if i == 4 {
+                self.send().direct_egld(&address, &BigUint::from(300_000_000_000_000_000 as u64));
+                self.essence_mapper().mint_and_send(&address, BigUint::from(100_000_000 as u64));
+            }
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();
