@@ -121,4 +121,8 @@ pub trait Helpers: storage::Storage {
     fn require_conditions(&self) {
         require!(!self.is_game_paused().get(), "The game is temporarily paused");
     }
+
+    fn send_nft(&self, to: &ManagedAddress, token_identifier: &TokenIdentifier, nonce: u64) {
+        self.send().direct_esdt(to, token_identifier, nonce, &BigUint::from(1 as u32));
+    }
 }
