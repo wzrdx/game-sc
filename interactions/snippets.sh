@@ -16,6 +16,8 @@ PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
+AFK=erd173pgmrpt3vxmev0spfjmunw85jra5fysr2v0740k3tke37ywa2vqqu39tw
+
 
 upgrade() {
     mxpy contract build && mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
@@ -33,6 +35,14 @@ addSpecialRole() {
     --arguments ${MF_ADDRESS} \
     --gas-limit=600000000 \
     --function="addSpecialRole"
+}
+
+cleanMigratedWallets() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=60000000 \
+    --function="cleanMigratedWallets"
 }
 
 transferMirageFaire() {
@@ -293,11 +303,16 @@ getStakedWalletsLength() {
     --function="getStakedWalletsLength"
 }
 
-
 getStakedAddressesLength() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="getStakedAddressesLength"
+}
+
+getCleanupAddressesCount() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getCleanupAddressesCount"
 }
 
 getBattleParticipants() {
@@ -313,3 +328,9 @@ getMintedTickets() {
     --function="getMintedTickets"
 }
 
+getMigrationSize() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${AFK} \
+    --function="getMigrationSize"
+}

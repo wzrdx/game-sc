@@ -10,6 +10,15 @@ use core::iter::FromIterator;
 #[multiversx_sc::module]
 pub trait Staking: storage::Storage + helpers::Helpers {
     #[only_owner]
+    #[endpoint(cleanMigratedWallets)]
+    fn clean_migrated_wallets(&self) {
+        for address in self.cleanup_addresses().into_iter() {
+            self.staked_addresses().swap_remove(&address);
+            self.staked_wallets().insert(address);
+        }
+    }
+
+    #[only_owner]
     #[endpoint(migrateWallets)]
     fn migrate_wallets(&self) {
         let travelers_id = self.travelers_mapper().get_token_id();
@@ -156,11 +165,7 @@ pub trait Staking: storage::Storage + helpers::Helpers {
             require!(was_removed == true, "Invalid function arguments");
 
             if was_removed {
-                payments.push(EsdtTokenPayment::new(
-                    token.token_id,
-                    token.nonce as u64,
-                    BigUint::from(token.amount),
-                ))
+                payments.push(EsdtTokenPayment::new(token.token_id, token.nonce as u64, BigUint::from(token.amount)))
             }
         }
 
@@ -212,6 +217,12 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         self.staked_addresses().len()
     }
 
+    // TODO:
+    #[view(getCleanupAddressesCount)]
+    fn get_cleanup_addresses_count(&self) -> usize {
+        self.cleanup_addresses().len()
+    }
+
     #[view(getStakedNFTsCount)]
     fn get_staked_nfts_count(&self) -> usize {
         let mut count: usize = 0;
@@ -222,11 +233,7 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         }
 
         for address in self.staked_wallets().iter() {
-            count += self
-                .staked_nfts(&address)
-                .iter()
-                .filter(|token| (*token).timestamp.is_none())
-                .count();
+            count += self.staked_nfts(&address).iter().filter(|token| (*token).timestamp.is_none()).count();
         }
 
         count
@@ -293,8 +300,7 @@ pub trait Staking: storage::Storage + helpers::Helpers {
 
     #[view(isWalletStaked)]
     fn is_wallet_staked(&self, user: &ManagedAddress) -> bool {
-        let is_staked: bool =
-            self.staked_traveler_nonces(user).len() + self.staked_elder_nonces(user).len() + self.staked_nfts(user).len() > 0;
+        let is_staked: bool = self.staked_traveler_nonces(user).len() + self.staked_elder_nonces(user).len() + self.staked_nfts(user).len() > 0;
 
         is_staked
     }
