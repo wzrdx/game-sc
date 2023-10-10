@@ -1,6 +1,6 @@
 ## devnet
-# USER_PEM="~/elrond-wallet/wallet.pem"
-USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
+USER_PEM="~/elrond-wallet/wallet.pem"
+# USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
@@ -8,7 +8,6 @@ SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 # TRAVELERS_ID="TRAVELER-51bdef"
 OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 OKLAMA=erd1w79cs7nv35wrkkm8cyaqjq3tkw9xvzvpcdw9prfxw05yj7lagffq5lch25
-MF_ADDRESS=erd1qqqqqqqqqqqqqpgqweurk03vuhwwzsmtd334jdn6eksr0sclukrqspjv6p
 
 # ## mainnet
 # USER_PEM="~/elrond-wallet/wallet-homex.pem"
@@ -24,40 +23,6 @@ upgrade() {
     --gas-limit=140000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
-}
-
-addSpecialRole() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --arguments ${MF_ADDRESS} \
-    --gas-limit=600000000 \
-    --function="addSpecialRole"
-}
-
-cleanMigratedWallets() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=60000000 \
-    --function="cleanMigratedWallets"
-}
-
-transferMirageFaire() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --arguments ${MF_ADDRESS} \
-    --gas-limit=12000000 \
-    --function="transferMirageFaire"
-}
-
-migrateTokens() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=32000000 \
-    --function="migrateTokens"
 }
 
 drawRaffleWinners() {
