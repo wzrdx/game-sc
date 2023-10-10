@@ -35,6 +35,14 @@ addSpecialRole() {
     --function="addSpecialRole"
 }
 
+cleanMigratedWallets() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=60000000 \
+    --function="cleanMigratedWallets"
+}
+
 transferMirageFaire() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
@@ -293,11 +301,16 @@ getStakedWalletsLength() {
     --function="getStakedWalletsLength"
 }
 
-
 getStakedAddressesLength() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="getStakedAddressesLength"
+}
+
+getCleanupAddressesCount() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getCleanupAddressesCount"
 }
 
 getBattleParticipants() {
@@ -313,3 +326,9 @@ getMintedTickets() {
     --function="getMintedTickets"
 }
 
+getMigrationSize() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments ${AFK} \
+    --function="getMigrationSize"
+}
