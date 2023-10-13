@@ -1,3 +1,5 @@
+const AURORA_PRICE: usize = 2;
+
 multiversx_sc::imports!();
 
 use crate::{helpers, storage};
@@ -10,8 +12,19 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
 
     #[only_user_account]
     #[payable("*")]
-    #[endpoint(stub)]
-    fn stub(&self) {}
+    #[endpoint(mint)]
+    fn mint(&self, amount: usize) {
+        let caller = self.blockchain().get_caller();
+
+        let payment: EsdtTokenPayment = self.call_value().single_esdt();
+        self.tickets_mapper().require_same_token(&payment.token_identifier);
+
+        let payment_amount: u64 = payment.amount.to_u64().unwrap_or_default();
+
+        require!(payment_amount == (amount * AURORA_PRICE) as u64, "Invalid payment");
+
+        self.art_mapper().nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(amount));
+    }
 
     #[only_owner]
     #[payable("EGLD")]

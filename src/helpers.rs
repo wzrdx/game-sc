@@ -107,4 +107,13 @@ pub trait Helpers: storage::Storage {
     fn send_nft(&self, to: &ManagedAddress, token_identifier: &TokenIdentifier, nonce: u64) {
         self.send().direct_esdt(to, token_identifier, nonce, &BigUint::from(1 as u32));
     }
+
+    fn build_uris_vec(&self) -> ManagedVec<ManagedBuffer> {
+        let mut uris = ManagedVec::new();
+        uris.push(ManagedBuffer::new_from_bytes(
+            "https://ipfs.io/ipfs/QmauxSjxt1GXFgmwTprxxgpgo52qW5TSsCPxzqQxKHpUCu".as_bytes(),
+        ));
+
+        uris
+    }
 }

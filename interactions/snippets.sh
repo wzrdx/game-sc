@@ -5,7 +5,6 @@ PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
-# TRAVELERS_ID="TRAVELER-51bdef"
 OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 OKLAMA=erd1w79cs7nv35wrkkm8cyaqjq3tkw9xvzvpcdw9prfxw05yj7lagffq5lch25
 
@@ -17,7 +16,8 @@ OKLAMA=erd1w79cs7nv35wrkkm8cyaqjq3tkw9xvzvpcdw9prfxw05yj7lagffq5lch25
 # SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
 ART_COLLECTION_NAME="ArtOfMenhir"
-ART_TICKER="ARTOFMENHIR"
+ART_TICKER="AOM"
+
 
 upgrade() {
     mxpy contract build && mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
@@ -318,4 +318,10 @@ createArtToken() {
     --gas-limit=20000000 \
     --arguments 1000 \
     --function="createArtToken"
+}
+
+getArtCollectionId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getArtCollectionId"
 }
