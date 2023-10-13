@@ -45,6 +45,10 @@ pub trait Storage {
     fn elders_mapper(&self) -> NonFungibleTokenMapper;
 
     // Tokens
+    #[view(getArtCollectionId)]
+    #[storage_mapper("artMapper")]
+    fn art_mapper(&self) -> NonFungibleTokenMapper;
+
     #[view(getTicketsId)]
     #[storage_mapper("sftTicketsMapper")]
     fn tickets_mapper(&self) -> NonFungibleTokenMapper;

@@ -16,6 +16,9 @@ OKLAMA=erd1w79cs7nv35wrkkm8cyaqjq3tkw9xvzvpcdw9prfxw05yj7lagffq5lch25
 # CHAIN_ID="1"
 # SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
+ART_COLLECTION_NAME="ArtOfMenhir"
+ART_TICKER="ARTOFMENHIR"
+
 upgrade() {
     mxpy contract build && mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
@@ -296,4 +299,23 @@ getMigrationSize() {
     --proxy=${PROXY} \
     --arguments ${AFK} \
     --function="getMigrationSize"
+}
+
+issueSFTCollection() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=200000000 \
+    --value 50000000000000000 \
+    --arguments str:${ART_COLLECTION_NAME} str:${ART_TICKER} \
+    --function="issueSFTCollection"
+}
+
+createArtToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=20000000 \
+    --arguments 1000 \
+    --function="createArtToken"
 }
