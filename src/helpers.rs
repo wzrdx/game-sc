@@ -96,24 +96,6 @@ pub trait Helpers: storage::Storage {
         energy_yield
     }
 
-    fn build_uris_vec(&self) -> ManagedVec<ManagedBuffer> {
-        let mut uris = ManagedVec::new();
-        uris.push(ManagedBuffer::new_from_bytes(
-            "https://ipfs.io/ipfs/bafybeiezcv3mihkkzoug3swhfghwoggc5i7kuocbekeyndiensdlqagoyy".as_bytes(),
-        ));
-
-        uris
-    }
-
-    fn build_attributes_buffer(&self) -> ManagedBuffer {
-        let mut attributes = ManagedBuffer::new();
-        attributes.append(&ManagedBuffer::new_from_bytes(
-            "tags:Home X;metadata:bafkreigrkib7uq72s2j232x3pbj34gs6sbtg2vaotv2433tsljfjevx3zu".as_bytes(),
-        ));
-
-        attributes
-    }
-
     fn to_egld(&self, value: u64) -> u64 {
         value.mul(1_000_000_000_000_000_000 as u64)
     }

@@ -10,15 +10,6 @@ use core::iter::FromIterator;
 #[multiversx_sc::module]
 pub trait Staking: storage::Storage + helpers::Helpers {
     #[only_owner]
-    #[endpoint(cleanMigratedWallets)]
-    fn clean_migrated_wallets(&self) {
-        for address in self.cleanup_addresses().into_iter() {
-            self.staked_addresses().swap_remove(&address);
-            self.staked_wallets().insert(address);
-        }
-    }
-
-    #[only_owner]
     #[endpoint(migrateWallets)]
     fn migrate_wallets(&self) {
         let travelers_id = self.travelers_mapper().get_token_id();
@@ -215,12 +206,6 @@ pub trait Staking: storage::Storage + helpers::Helpers {
     #[view(getStakedAddressesCount)]
     fn get_staked_addresses_count(&self) -> usize {
         self.staked_addresses().len()
-    }
-
-    // TODO:
-    #[view(getCleanupAddressesCount)]
-    fn get_cleanup_addresses_count(&self) -> usize {
-        self.cleanup_addresses().len()
     }
 
     #[view(getStakedNFTsCount)]

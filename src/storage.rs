@@ -25,10 +25,6 @@ pub trait Storage {
     #[storage_mapper("stakedAddresses")]
     fn staked_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
 
-    // TODO: Addresses contained by staked_addresses with a 0 migration size
-    #[storage_mapper("cleanupAddresses")]
-    fn cleanup_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
-
     // New staking system
     #[view(getStakedWallets)]
     #[storage_mapper("stakedWallets")]

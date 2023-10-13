@@ -8,6 +8,7 @@ mod helpers;
 mod interface;
 mod quests;
 mod rewards;
+mod shop;
 mod staking;
 mod storage;
 
@@ -22,6 +23,7 @@ pub trait GameScContract:
     + quests::Quests
     + staking::Staking
     + rewards::Rewards
+    + shop::Shop
 {
     #[init]
     fn init(&self) {}
