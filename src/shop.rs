@@ -1,4 +1,5 @@
 const AURORA_PRICE: usize = 2;
+const AURORA_XP: usize = 500;
 
 multiversx_sc::imports!();
 
@@ -24,6 +25,9 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
         require!(payment_amount == (amount * AURORA_PRICE) as u64, "Invalid payment");
 
         self.art_mapper().nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(amount));
+        self.player_xp(&caller).update(|i| {
+            *i += amount * AURORA_XP;
+        });
     }
 
     #[only_owner]

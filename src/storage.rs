@@ -169,4 +169,9 @@ pub trait Storage {
     #[view(getMintedTickets)]
     #[storage_mapper("u64mintedTickets")]
     fn minted_tickets(&self) -> SingleValueMapper<u64>;
+
+    // XP
+    #[view(getPlayerXp)]
+    #[storage_mapper("playerXp")]
+    fn player_xp(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
 }
