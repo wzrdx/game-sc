@@ -114,12 +114,6 @@ setRaffleVectorSize() {
     --function="setRaffleVectorSize"
 }
 
-getStakedAddressesLength() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getStakedAddressesLength"
-}
-
 # Operating vector
 copyOperatingVector() {
     mxpy --verbose contract call ${SC_ADDRESS} \
@@ -320,8 +314,9 @@ createArtToken() {
     --function="createArtToken"
 }
 
-getArtCollectionId() {
+getBattleParticipantsCount() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getArtCollectionId"
+    --arguments 2 \
+    --function="getBattleParticipantsCount"
 }

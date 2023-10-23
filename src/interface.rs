@@ -74,3 +74,9 @@ pub struct Stake<M: ManagedTypeApi> {
     pub amount: u16,
     pub timestamp: Option<u64>,
 }
+
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem, PartialEq)]
+pub struct PlayerXp<M: ManagedTypeApi> {
+    pub address: ManagedAddress<M>,
+    pub xp: usize,
+}
