@@ -44,8 +44,17 @@ pub trait GameScContract:
     }
 
     #[only_owner]
-    #[endpoint(withdraw)]
-    fn withdraw(&self, start: usize, end: usize, identifier: TokenIdentifier<Self::Api>) {
+    #[endpoint(withdrawEgld)]
+    fn withdraw_egld(&self) {
+        let caller = self.blockchain().get_caller();
+        let amount = self.blockchain().get_sc_balance(&EgldOrEsdtTokenIdentifier::egld(), 0);
+
+        self.send().direct_egld(&caller, &amount);
+    }
+
+    #[only_owner]
+    #[endpoint(withdrawNFTs)]
+    fn withdraw_nfts(&self, start: usize, end: usize, identifier: TokenIdentifier<Self::Api>) {
         let caller = self.blockchain().get_caller();
 
         for nonce in start..=end {

@@ -10,8 +10,8 @@ OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 OKLAMA=erd1w79cs7nv35wrkkm8cyaqjq3tkw9xvzvpcdw9prfxw05yj7lagffq5lch25
 
 # ## mainnet
-USER_PEM="~/elrond-wallet/wallet-homex.pem"
-# USER_PEM="~/Crypto/wallets/wallet-homex.pem"
+# USER_PEM="~/elrond-wallet/wallet-homex.pem"
+USER_PEM="~/Crypto/wallets/wallet-homex.pem"
 PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
@@ -28,38 +28,12 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
-addSpecialRole() {
+withdrawEgld() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --arguments ${MF_ADDRESS} \
-    --gas-limit=600000000 \
-    --function="addSpecialRole"
-}
-
-cleanMigratedWallets() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=60000000 \
-    --function="cleanMigratedWallets"
-}
-
-transferMirageFaire() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --arguments ${MF_ADDRESS} \
-    --gas-limit=12000000 \
-    --function="transferMirageFaire"
-}
-
-migrateTokens() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=32000000 \
-    --function="migrateTokens"
+    --gas-limit=6000000 \
+    --function="withdrawEgld"
 }
 
 drawRaffleWinners() {
