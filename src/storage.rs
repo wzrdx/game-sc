@@ -156,6 +156,10 @@ pub trait Storage {
     #[storage_mapper("isGamePaused")]
     fn is_game_paused(&self) -> SingleValueMapper<bool>;
 
+    #[view(getArtDropTimestamp)]
+    #[storage_mapper("artDropTimestamp")]
+    fn art_drop_timestamp(&self) -> SingleValueMapper<u64>;
+
     // Trial
     #[view(getTrialTimestamp)]
     #[storage_mapper("trialTimestamp")]

@@ -172,6 +172,15 @@ setTrialTimestamp() {
     --function="setTrialTimestamp"
 }
 
+setArtDropTimestamp() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=9000000 \
+    --arguments 1698516000 \
+    --function="setArtDropTimestamp"
+}
+
 getRaffleParticipants() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \

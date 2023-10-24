@@ -8,14 +8,19 @@ use crate::{helpers, storage};
 #[multiversx_sc::module]
 pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule + storage::Storage + helpers::Helpers {
     #[only_owner]
-    #[endpoint(debug)]
-    fn debug(&self) {}
+    #[endpoint(setArtDropTimestamp)]
+    fn set_art_drop_timestamp(&self, timestamp: u64) {
+        self.art_drop_timestamp().set(timestamp);
+    }
 
     #[only_user_account]
     #[payable("*")]
     #[endpoint(mint)]
     fn mint(&self, amount: usize) {
         let caller = self.blockchain().get_caller();
+        let current_timestamp = self.blockchain().get_block_timestamp();
+
+        require!(current_timestamp <= self.art_drop_timestamp().get(), "The art drop has ended");
 
         let payment: EsdtTokenPayment = self.call_value().single_esdt();
         self.tickets_mapper().require_same_token(&payment.token_identifier);
