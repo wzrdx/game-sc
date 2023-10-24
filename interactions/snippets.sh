@@ -6,7 +6,7 @@
 # SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
 OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
-OKLAMA=erd1w79cs7nv35wrkkm8cyaqjq3tkw9xvzvpcdw9prfxw05yj7lagffq5lch25
+PLAYER=erd1dk208lgp5nsv986phed4zpl47wdm4508pyuug53dyegx8mgg7qlqdd0pdf
 
 # ## mainnet
 USER_PEM="~/elrond-wallet/wallet-homex.pem"
@@ -23,7 +23,7 @@ upgrade() {
     mxpy contract build && mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
     --bytecode="./output/game-sc.wasm" \
-    --gas-limit=160000000 \
+    --gas-limit=190000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
@@ -40,7 +40,7 @@ airdropXp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=10000000 \
+    --gas-limit=200000000 \
     --function="airdropXp"
 }
 
@@ -304,11 +304,11 @@ getMintedTickets() {
     --function="getMintedTickets"
 }
 
-getMigrationSize() {
+getPlayerXp() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --arguments ${AFK} \
-    --function="getMigrationSize"
+    --arguments ${PLAYER} \
+    --function="getPlayerXp"
 }
 
 issueSFTCollection() {

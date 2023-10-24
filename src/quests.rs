@@ -211,11 +211,11 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             self.active_players().swap_remove(&caller);
         }
 
-        let current_battle_id = self.battles_count().get();
+        // let current_battle_id = self.battles_count().get();
 
-        self.completed_quests(current_battle_id, &caller).update(|i| {
-            *i += 1;
-        });
+        // self.completed_quests(current_battle_id, &caller).update(|i| {
+        //     *i += 1;
+        // });
     }
 
     #[only_user_account]
@@ -291,11 +291,11 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             self.active_players().swap_remove(&caller);
         }
 
-        let current_battle_id = self.battles_count().get();
+        // let current_battle_id = self.battles_count().get();
 
-        self.completed_quests(current_battle_id, &caller).update(|i| {
-            *i += ongoing_quests.len();
-        });
+        // self.completed_quests(current_battle_id, &caller).update(|i| {
+        //     *i += ongoing_quests.len();
+        // });
     }
 
     fn increase_minted_tickets(&self, amount: u64) {

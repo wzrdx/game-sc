@@ -1,8 +1,8 @@
-const LEADERBOARD_SIZE: usize = 10;
+const XP_THRESHOLD: usize = 1000;
 
 multiversx_sc::imports!();
 
-use multiversx_sc::types::heap::Vec;
+use core::iter::FromIterator;
 
 use crate::interface::*;
 use crate::{helpers, storage};
@@ -12,33 +12,57 @@ pub trait Player: storage::Storage + helpers::Helpers {
     #[only_owner]
     #[endpoint(airdropXp)]
     fn airdrop_xp(&self) {
-        let mut rand_source = RandomnessSource::new();
-
-        for address in self.staked_addresses().into_iter() {
-            self.player_xp(&address).set(rand_source.next_usize_in_range(1, 10000));
+        for address in self.staked_wallets().into_iter() {
+            self.player_xp(&address)
+                .set(self.completed_quests(1, &address).get() + self.completed_quests(2, &address).get());
         }
     }
 
-    #[view(getXpLeaderboard)]
-    fn get_xp_leaderboard(&self) -> Vec<PlayerXp<Self::Api>> {
+    #[view(getXpLeaderboardSize)]
+    fn get_xp_leaderboard_size(&self) -> usize {
         let mut players: ManagedVec<PlayerXp<Self::Api>> = ManagedVec::new();
 
-        for address in self.staked_addresses().into_iter() {
+        for address in self.staked_wallets().into_iter() {
             players.push(PlayerXp {
                 address: address.clone(),
                 xp: self.player_xp(&address).get(),
             });
         }
 
-        let mut vector: Vec<PlayerXp<Self::Api>> = Vec::new();
+        players.iter().filter(|player| player.xp > XP_THRESHOLD).count()
+    }
 
-        for item in players.into_iter() {
-            vector.push(item);
+    #[view(getXpLeaderboard)]
+    fn get_xp_leaderboard(&self, start: usize, end: usize) -> ManagedVec<PlayerXp<Self::Api>> {
+        let mut players: ManagedVec<PlayerXp<Self::Api>> = ManagedVec::new();
+
+        for address in self.staked_wallets().into_iter() {
+            players.push(PlayerXp {
+                address: address.clone(),
+                xp: self.player_xp(&address).get(),
+            });
         }
 
-        vector.sort_by(|a, b| b.xp.cmp(&a.xp));
-        let splice: Vec<PlayerXp<Self::Api>> = vector.splice(0..LEADERBOARD_SIZE.min(vector.len()), []).collect();
+        let filtered_players: ManagedVec<PlayerXp<Self::Api>> = ManagedVec::from_iter(players.iter().filter(|player| player.xp > XP_THRESHOLD));
+        let mut chunk_players: ManagedVec<PlayerXp<Self::Api>> = ManagedVec::new();
 
-        splice
+        for (i, player) in filtered_players.into_iter().enumerate() {
+            if i >= start && i < end {
+                chunk_players.push(player);
+            }
+        }
+
+        // let mut vector: Vec<PlayerXp<Self::Api>> = Vec::new();
+
+        // for item in players.into_iter() {
+        //     vector.push(item);
+        // }
+
+        // vector.sort_by(|a, b| b.xp.cmp(&a.xp));
+        // let splice: Vec<PlayerXp<Self::Api>> = vector.splice(0..LEADERBOARD_SIZE.min(vector.len()), []).collect();
+
+        // splice
+
+        chunk_players
     }
 }
