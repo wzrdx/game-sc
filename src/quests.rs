@@ -18,6 +18,27 @@ pub trait Quests: storage::Storage + helpers::Helpers {
     }
 
     #[only_owner]
+    #[endpoint(setQuestsXp)]
+    fn set_quests_xp(&self) {
+        self.quests_xp().push(&10);
+        self.quests_xp().push(&10);
+        self.quests_xp().push(&10);
+        self.quests_xp().push(&10);
+        self.quests_xp().push(&10);
+        self.quests_xp().push(&10);
+        self.quests_xp().push(&10);
+        self.quests_xp().push(&10);
+        self.quests_xp().push(&40);
+        self.quests_xp().push(&40);
+        self.quests_xp().push(&40);
+        self.quests_xp().push(&40);
+        self.quests_xp().push(&80);
+        self.quests_xp().push(&80);
+        self.quests_xp().push(&100);
+        self.quests_xp().push(&200);
+    }
+
+    #[only_owner]
     #[endpoint(clearOngoingQuests)]
     fn clear_ongoing_quests(&self) {
         for address in self.active_players().iter() {
@@ -205,17 +226,16 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             }
         }
 
+        // XP
+        self.player_xp(&caller).update(|i| {
+            *i += self.quests_xp().get(id as usize);
+        });
+
         self.ongoing_quests(&caller).swap_remove(index_to_remove);
 
         if self.ongoing_quests(&caller).len() == 0 {
             self.active_players().swap_remove(&caller);
         }
-
-        // let current_battle_id = self.battles_count().get();
-
-        // self.completed_quests(current_battle_id, &caller).update(|i| {
-        //     *i += 1;
-        // });
     }
 
     #[only_user_account]
@@ -224,14 +244,14 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         let caller = self.blockchain().get_caller();
         let current_timestamp = self.blockchain().get_block_timestamp();
 
-        let ongoing_quests: ManagedVec<OngoingQuest> =
+        let completed_quests: ManagedVec<OngoingQuest> =
             ManagedVec::from_iter(self.ongoing_quests(&caller).iter().filter(|q| current_timestamp >= q.end_timestamp));
 
-        let ongoing_quests_ids: ManagedVec<u8> = ManagedVec::from_iter(ongoing_quests.iter().map(|q| q.id));
+        let completed_quests_ids: ManagedVec<u8> = ManagedVec::from_iter(completed_quests.iter().map(|q| q.id));
 
         let quests: ManagedVec<Quest<Self::Api>> = ManagedVec::from_iter(self.quests().iter().filter(|q| {
             let id = q.id;
-            ongoing_quests_ids.contains(&id)
+            completed_quests_ids.contains(&id)
         }));
 
         // Compute total rewards
@@ -277,6 +297,13 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             }
         }
 
+        // XP
+        let xp_gain: usize = completed_quests_ids.iter().map(|id| self.quests_xp().get(id as usize)).sum();
+
+        self.player_xp(&caller).update(|i| {
+            *i += xp_gain;
+        });
+
         // Set remaining quests
         let remaining_quests: ManagedVec<OngoingQuest> =
             ManagedVec::from_iter(self.ongoing_quests(&caller).iter().filter(|q| current_timestamp < q.end_timestamp));
@@ -290,12 +317,6 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         if self.ongoing_quests(&caller).len() == 0 {
             self.active_players().swap_remove(&caller);
         }
-
-        // let current_battle_id = self.battles_count().get();
-
-        // self.completed_quests(current_battle_id, &caller).update(|i| {
-        //     *i += ongoing_quests.len();
-        // });
     }
 
     fn increase_minted_tickets(&self, amount: u64) {

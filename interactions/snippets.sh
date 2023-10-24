@@ -36,12 +36,12 @@ withdrawEgld() {
     --function="withdrawEgld"
 }
 
-airdropXp() {
+setQuestsXp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=200000000 \
-    --function="airdropXp"
+    --gas-limit=26000000 \
+    --function="setQuestsXp"
 }
 
 drawRaffleWinners() {
@@ -167,8 +167,8 @@ setTrialTimestamp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=6000000 \
-    --arguments 1698847200 \
+    --gas-limit=9000000 \
+    --arguments 1699847200 \
     --function="setTrialTimestamp"
 }
 
@@ -302,13 +302,6 @@ getMintedTickets() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="getMintedTickets"
-}
-
-getPlayerXp() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments ${PLAYER} \
-    --function="getPlayerXp"
 }
 
 issueSFTCollection() {

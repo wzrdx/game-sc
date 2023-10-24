@@ -78,6 +78,10 @@ pub trait Storage {
     #[storage_mapper("quests")]
     fn quests(&self) -> VecMapper<Quest<Self::Api>>;
 
+    #[view(getQuestsXp)]
+    #[storage_mapper("questsXp")]
+    fn quests_xp(&self) -> VecMapper<usize>;
+
     #[view(getOngoingQuests)]
     #[storage_mapper("ongoingQuests")]
     fn ongoing_quests(&self, user: &ManagedAddress) -> VecMapper<OngoingQuest>;
@@ -178,4 +182,8 @@ pub trait Storage {
     #[view(getPlayerXp)]
     #[storage_mapper("playerXp")]
     fn player_xp(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
+
+    // Achievements
+    #[storage_mapper("legendaryCharAuroraMint")]
+    fn legendary_char_aurora(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
 }

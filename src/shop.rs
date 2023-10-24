@@ -28,6 +28,10 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
         self.player_xp(&caller).update(|i| {
             *i += amount * AURORA_XP;
         });
+
+        self.legendary_char_aurora(&caller).update(|i| {
+            *i += amount;
+        });
     }
 
     #[only_owner]
