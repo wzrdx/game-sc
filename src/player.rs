@@ -1,4 +1,4 @@
-const XP_THRESHOLD: usize = 1000;
+const XP_THRESHOLD: usize = 3333;
 
 multiversx_sc::imports!();
 
@@ -9,15 +9,6 @@ use crate::{helpers, storage};
 
 #[multiversx_sc::module]
 pub trait Player: storage::Storage + helpers::Helpers {
-    #[only_owner]
-    #[endpoint(airdropXp)]
-    fn airdrop_xp(&self) {
-        for address in self.staked_wallets().into_iter() {
-            self.player_xp(&address)
-                .set(self.completed_quests(1, &address).get() + self.completed_quests(2, &address).get());
-        }
-    }
-
     #[view(getXpLeaderboardSize)]
     fn get_xp_leaderboard_size(&self) -> usize {
         let mut players: ManagedVec<PlayerXp<Self::Api>> = ManagedVec::new();
@@ -51,17 +42,6 @@ pub trait Player: storage::Storage + helpers::Helpers {
                 chunk_players.push(player);
             }
         }
-
-        // let mut vector: Vec<PlayerXp<Self::Api>> = Vec::new();
-
-        // for item in players.into_iter() {
-        //     vector.push(item);
-        // }
-
-        // vector.sort_by(|a, b| b.xp.cmp(&a.xp));
-        // let splice: Vec<PlayerXp<Self::Api>> = vector.splice(0..LEADERBOARD_SIZE.min(vector.len()), []).collect();
-
-        // splice
 
         chunk_players
     }

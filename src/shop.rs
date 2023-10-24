@@ -1,5 +1,5 @@
 const AURORA_PRICE: usize = 2;
-const AURORA_XP: usize = 500;
+const AURORA_XP: usize = 750;
 
 multiversx_sc::imports!();
 
