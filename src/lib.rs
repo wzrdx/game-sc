@@ -6,8 +6,10 @@ multiversx_sc::derive_imports!();
 mod competitions;
 mod helpers;
 mod interface;
+mod player;
 mod quests;
 mod rewards;
+mod shop;
 mod staking;
 mod storage;
 
@@ -22,6 +24,8 @@ pub trait GameScContract:
     + quests::Quests
     + staking::Staking
     + rewards::Rewards
+    + shop::Shop
+    + player::Player
 {
     #[init]
     fn init(&self) {}
@@ -29,7 +33,7 @@ pub trait GameScContract:
     #[only_owner]
     #[endpoint(addSpecialRole)]
     fn add_special_role(&self, sc_addr: &ManagedAddress) {
-        let token_id = TokenIdentifier::from(&b"HOMETICKET-257a32"[..]);
+        let token_id = TokenIdentifier::from(&b"HOMETICKET-9112c2"[..]);
         self.send()
             .esdt_system_sc_proxy()
             .set_special_roles(sc_addr, &token_id, (&[EsdtLocalRole::NftAddQuantity][..]).into_iter().cloned())

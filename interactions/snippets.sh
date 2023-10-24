@@ -5,25 +5,25 @@
 # CHAIN_ID="D"
 # SC_ADDRESS=erd1qqqqqqqqqqqqqpgq03qfld7ypk27r2k0wgux89573pw2htq8ukrqze9mpw
 
-# TRAVELERS_ID="TRAVELER-51bdef"
 OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 OKLAMA=erd1w79cs7nv35wrkkm8cyaqjq3tkw9xvzvpcdw9prfxw05yj7lagffq5lch25
 
 # ## mainnet
-# USER_PEM="~/elrond-wallet/wallet-homex.pem"
-USER_PEM="~/Crypto/wallets/wallet-homex.pem"
+USER_PEM="~/elrond-wallet/wallet-homex.pem"
+# USER_PEM="~/Crypto/wallets/wallet-homex.pem"
 PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
-AFK=erd173pgmrpt3vxmev0spfjmunw85jra5fysr2v0740k3tke37ywa2vqqu39tw
+ART_COLLECTION_NAME="ArtOfMenhir"
+ART_TICKER="AOM"
 
 
 upgrade() {
     mxpy contract build && mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
     --bytecode="./output/game-sc.wasm" \
-    --gas-limit=140000000 \
+    --gas-limit=160000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
@@ -34,6 +34,14 @@ withdrawEgld() {
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
     --function="withdrawEgld"
+}
+
+airdropXp() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=10000000 \
+    --function="airdropXp"
 }
 
 drawRaffleWinners() {
@@ -120,12 +128,6 @@ setRaffleVectorSize() {
     --gas-limit=6000000 \
     --arguments 2 322 \
     --function="setRaffleVectorSize"
-}
-
-getStakedAddressesLength() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getStakedAddressesLength"
 }
 
 # Operating vector
@@ -307,4 +309,23 @@ getMigrationSize() {
     --proxy=${PROXY} \
     --arguments ${AFK} \
     --function="getMigrationSize"
+}
+
+issueSFTCollection() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=200000000 \
+    --value 50000000000000000 \
+    --arguments str:${ART_COLLECTION_NAME} str:${ART_TICKER} \
+    --function="issueSFTCollection"
+}
+
+createArtToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=20000000 \
+    --arguments 1000 \
+    --function="createArtToken"
 }

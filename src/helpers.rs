@@ -96,24 +96,6 @@ pub trait Helpers: storage::Storage {
         energy_yield
     }
 
-    fn build_uris_vec(&self) -> ManagedVec<ManagedBuffer> {
-        let mut uris = ManagedVec::new();
-        uris.push(ManagedBuffer::new_from_bytes(
-            "https://ipfs.io/ipfs/bafybeiezcv3mihkkzoug3swhfghwoggc5i7kuocbekeyndiensdlqagoyy".as_bytes(),
-        ));
-
-        uris
-    }
-
-    fn build_attributes_buffer(&self) -> ManagedBuffer {
-        let mut attributes = ManagedBuffer::new();
-        attributes.append(&ManagedBuffer::new_from_bytes(
-            "tags:Home X;metadata:bafkreigrkib7uq72s2j232x3pbj34gs6sbtg2vaotv2433tsljfjevx3zu".as_bytes(),
-        ));
-
-        attributes
-    }
-
     fn to_egld(&self, value: u64) -> u64 {
         value.mul(1_000_000_000_000_000_000 as u64)
     }
@@ -124,5 +106,14 @@ pub trait Helpers: storage::Storage {
 
     fn send_nft(&self, to: &ManagedAddress, token_identifier: &TokenIdentifier, nonce: u64) {
         self.send().direct_esdt(to, token_identifier, nonce, &BigUint::from(1 as u32));
+    }
+
+    fn build_uris_vec(&self) -> ManagedVec<ManagedBuffer> {
+        let mut uris = ManagedVec::new();
+        uris.push(ManagedBuffer::new_from_bytes(
+            "https://ipfs.io/ipfs/QmauxSjxt1GXFgmwTprxxgpgo52qW5TSsCPxzqQxKHpUCu".as_bytes(),
+        ));
+
+        uris
     }
 }
