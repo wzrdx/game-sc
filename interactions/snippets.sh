@@ -177,7 +177,7 @@ setArtDropTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1698516000 \
+    --arguments 1698512400 \
     --function="setArtDropTimestamp"
 }
 
@@ -300,11 +300,10 @@ getCleanupAddressesCount() {
     --function="getCleanupAddressesCount"
 }
 
-getBattleParticipants() {
+getQuestsXp() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --arguments 1 0 3 \
-    --function="getBattleParticipants"
+    --function="getQuestsXp"
 }
 
 getMintedTickets() {

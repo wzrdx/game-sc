@@ -44,7 +44,7 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
     fn draw_raffle_winners(&self, raffle_id: usize) {
         let mut rand_source = RandomnessSource::new();
 
-        let token_id = TokenIdentifier::from(&b"DRG-875e1a"[..]);
+        let token_id = TokenIdentifier::from(&b"GSPACEAPE-08bc2b"[..]);
 
         let winner_id: u16 = self
             .raffle_vector(raffle_id)
