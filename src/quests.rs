@@ -1,3 +1,5 @@
+const XP_MULTIPLIER: usize = 20;
+
 multiversx_sc::imports!();
 
 use crate::interface::*;
@@ -20,22 +22,22 @@ pub trait Quests: storage::Storage + helpers::Helpers {
     #[only_owner]
     #[endpoint(setQuestsXp)]
     fn set_quests_xp(&self) {
-        self.quests_xp().push(&10);
-        self.quests_xp().push(&10);
-        self.quests_xp().push(&10);
-        self.quests_xp().push(&10);
-        self.quests_xp().push(&10);
-        self.quests_xp().push(&10);
-        self.quests_xp().push(&10);
-        self.quests_xp().push(&10);
-        self.quests_xp().push(&40);
-        self.quests_xp().push(&40);
-        self.quests_xp().push(&40);
-        self.quests_xp().push(&40);
-        self.quests_xp().push(&80);
-        self.quests_xp().push(&80);
-        self.quests_xp().push(&100);
-        self.quests_xp().push(&200);
+        self.quests_xp().push(&XP_MULTIPLIER);
+        self.quests_xp().push(&XP_MULTIPLIER);
+        self.quests_xp().push(&XP_MULTIPLIER);
+        self.quests_xp().push(&XP_MULTIPLIER);
+        self.quests_xp().push(&XP_MULTIPLIER);
+        self.quests_xp().push(&XP_MULTIPLIER);
+        self.quests_xp().push(&XP_MULTIPLIER);
+        self.quests_xp().push(&XP_MULTIPLIER);
+        self.quests_xp().push(&(4 * XP_MULTIPLIER));
+        self.quests_xp().push(&(4 * XP_MULTIPLIER));
+        self.quests_xp().push(&(4 * XP_MULTIPLIER));
+        self.quests_xp().push(&(4 * XP_MULTIPLIER));
+        self.quests_xp().push(&(8 * XP_MULTIPLIER));
+        self.quests_xp().push(&(8 * XP_MULTIPLIER));
+        self.quests_xp().push(&(10 * XP_MULTIPLIER));
+        self.quests_xp().push(&(20 * XP_MULTIPLIER));
     }
 
     #[only_owner]
