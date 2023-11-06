@@ -1,4 +1,4 @@
-const XP_MULTIPLIER: usize = 20;
+const XP_MULTIPLIER: usize = 10;
 
 multiversx_sc::imports!();
 
