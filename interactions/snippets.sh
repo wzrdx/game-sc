@@ -36,6 +36,15 @@ withdrawEgld() {
     --function="withdrawEgld"
 }
 
+burnTickets() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --arguments 56 \
+    --gas-limit=6000000 \
+    --function="burnTickets"
+}
+
 setQuestsXp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
