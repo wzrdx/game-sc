@@ -67,13 +67,9 @@ pub trait GameScContract:
     }
 
     #[only_owner]
-    #[endpoint(claimAllEnergy)]
-    fn claim_all_energy(&self, start: usize, end: usize) {
-        for (i, user) in self.staked_addresses().into_iter().enumerate() {
-            if i >= start && i < end {
-                self.claim_staking_rewards_for_user(&user);
-            }
-        }
+    #[endpoint(burnTickets)]
+    fn burn_tickets(&self, amount: u64) {
+        self.tickets_mapper().nft_burn(1 as u64, &BigUint::from(amount));
     }
 
     // TODO: Create payments vector and send using multi
