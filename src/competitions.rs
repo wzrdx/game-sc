@@ -54,19 +54,21 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
 
         // if let 1..=5 = raffle_id
 
-        if raffle_id == 82 {
-            self.send().direct_esdt(&winner_address, &token_id, 5850 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 83 {
-            self.send().direct_esdt(&winner_address, &token_id, 5871 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 84 {
+        if raffle_id == 87 {
             self.send()
-                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 993 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 85 {
+                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 618 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 88 {
             self.send()
-                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 2294 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 86 {
+                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 615 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 89 {
             self.send()
-                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 84 as u64, &BigUint::from(1 as u32));
+                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 2537 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 90 {
+            self.send()
+                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 2338 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 91 {
+            self.send()
+                .direct_esdt(&winner_address, &self.travelers_mapper().get_token_id(), 614 as u64, &BigUint::from(1 as u32));
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();

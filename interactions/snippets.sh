@@ -9,8 +9,8 @@ OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 PLAYER=erd1dk208lgp5nsv986phed4zpl47wdm4508pyuug53dyegx8mgg7qlqdd0pdf
 
 ## mainnet
-USER_PEM="~/elrond-wallet/wallet-homex.pem"
-# USER_PEM="~/Crypto/wallets/wallet-homex.pem"
+# USER_PEM="~/elrond-wallet/wallet-homex.pem"
+USER_PEM="~/Crypto/wallets/wallet-homex.pem"
 PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
@@ -76,7 +76,7 @@ setTrial() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=35000000 \
-    --arguments 12 \
+    --arguments 13 \
     --function="setTrial"
 }
 
@@ -159,7 +159,7 @@ setGamePaused() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments false \
+    --arguments true \
     --function="setGamePaused"
 }
 
@@ -168,7 +168,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1699847200 \
+    --arguments 1700143200 \
     --function="setTrialTimestamp"
 }
 
