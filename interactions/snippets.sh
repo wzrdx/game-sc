@@ -85,7 +85,7 @@ setTrial() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=35000000 \
-    --arguments 13 \
+    --arguments 14 \
     --function="setTrial"
 }
 
@@ -177,7 +177,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1700143200 \
+    --arguments 1701439200 \
     --function="setTrialTimestamp"
 }
 
