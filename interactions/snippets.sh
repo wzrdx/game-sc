@@ -18,6 +18,9 @@ PLAYER=
 ART_COLLECTION_NAME="ArtOfMenhir"
 ART_TICKER="AOM"
 
+TRAVELERS_ID=TRAVELERS-659fa7
+ELDERS_ID=ELDERS-dd9aab
+
 
 upgrade() {
     mxpy contract build && mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
@@ -338,4 +341,103 @@ createArtToken() {
     --gas-limit=20000000 \
     --arguments 1000 \
     --function="createArtToken"
+}
+
+# Init
+setCollectionIds() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=5000000 \
+    --arguments str:${TRAVELERS_ID} str:${ELDERS_ID} \
+    --function="setCollectionIds"
+}
+
+issueTicketsCollection() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=200000000 \
+    --value 50000000000000000 \
+    --arguments str:${TICKETS_COLLECTION_NAME} str:${TICKETS_TICKER} \
+    --function="issueTicketsCollection"
+}
+
+createTicketsToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=120000000 \
+    --arguments 1000 \
+    --function="createTicketsToken"
+}
+
+issueEnergyToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=90000000 \
+    --value 50000000000000000 \
+    --arguments str:${ENERGY_TOKEN_NAME} str:${ENERGY_TICKER} \
+    --function="issueEnergyToken"
+}
+
+issueHerbsToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=90000000 \
+    --value 50000000000000000 \
+    --arguments str:${HERBS_TOKEN_NAME} str:${HERBS_TICKER} \
+    --function="issueHerbsToken"
+}
+
+issueGemsToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=90000000 \
+    --value 50000000000000000 \
+    --arguments str:${GEMS_TOKEN_NAME} str:${GEMS_TICKER} \
+    --function="issueGemsToken"
+}
+
+issueEssenceToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=90000000 \
+    --value 50000000000000000 \
+    --arguments str:${ESSENCE_TOKEN_NAME} str:${ESSENCE_TICKER} \
+    --function="issueEssenceToken"
+}
+
+getTicketsId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getTicketsId"
+}
+
+getEnergyTokenId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getEnergyTokenId"
+}
+
+getHerbsTokenId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getHerbsTokenId"
+}
+
+getGemsTokenId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getGemsTokenId"
+}
+
+getEssenceTokenId() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getEssenceTokenId"
 }

@@ -5,6 +5,7 @@ multiversx_sc::derive_imports!();
 
 mod competitions;
 mod helpers;
+mod init;
 mod interface;
 mod player;
 mod quests;
@@ -26,6 +27,7 @@ pub trait GameScContract:
     + rewards::Rewards
     + shop::Shop
     + player::Player
+    + init::Init
 {
     #[init]
     fn init(&self) {}
