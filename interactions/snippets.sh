@@ -36,6 +36,15 @@ withdrawEgld() {
     --function="withdrawEgld"
 }
 
+burnTickets() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --arguments 56 \
+    --gas-limit=6000000 \
+    --function="burnTickets"
+}
+
 setQuestsXp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
@@ -76,7 +85,7 @@ setTrial() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=35000000 \
-    --arguments 13 \
+    --arguments 14 \
     --function="setTrial"
 }
 
@@ -168,7 +177,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1700143200 \
+    --arguments 1701439200 \
     --function="setTrialTimestamp"
 }
 
@@ -215,7 +224,7 @@ clearOngoingQuests() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=60000000 \
+    --gas-limit=90000000 \
     --function="clearOngoingQuests"
 }
 
