@@ -3,7 +3,7 @@
 USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
 PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
-SC_ADDRESS=
+SC_ADDRESS=erd1qqqqqqqqqqqqqpgqc8s6t5594e4en4ffl60r6hn52hajkpkkukrqww29av
 
 OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
 PLAYER=
@@ -17,15 +17,6 @@ PLAYER=
 
 ART_COLLECTION_NAME="ArtOfMenhir"
 ART_TICKER="AOM"
-
-TRAVELERS_ID=TRAVELERS-659fa7
-ELDERS_ID=ELDERS-dd9aab
-
-TICKETS_TICKER=HOMETICKET
-TICKETS_NAME=HomeXTickets
-
-ENERGY_TOKEN_NAME=Energy
-ENERGY_TICKER=ENERGY
 
 
 upgrade() {
@@ -109,7 +100,7 @@ addRaffle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1692892800 \
+    --arguments 1703505600 \
     --function="addRaffle"
 }
 
@@ -118,7 +109,7 @@ addBattle() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1696694400 \
+    --arguments 1703505600 \
     --function="addBattle"
 }
 
@@ -137,39 +128,6 @@ claimAllEnergy() {
     --gas-limit=110000000 \
     --arguments 0 30 \
     --function="claimAllEnergy"
-}
-
-setRaffleVectorSize() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=6000000 \
-    --arguments 2 322 \
-    --function="setRaffleVectorSize"
-}
-
-# Operating vector
-copyOperatingVector() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=200000000 \
-    --arguments 3 \
-    --function="copyOperatingVector"
-}
-
-clearOperatingVector() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=150000000 \
-    --function="clearOperatingVector"
-}
-
-getOperatingVectorLength() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getOperatingVectorLength"
 }
 
 setGamePaused() {
@@ -237,15 +195,6 @@ clearOngoingQuests() {
     --function="clearOngoingQuests"
 }
 
-changeBattleTimestamp() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --arguments 2 1696759200 \
-    --gas-limit=6000000 \
-    --function="changeBattleTimestamp"
-}
-
 isSwappingPaused() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
@@ -263,13 +212,6 @@ getUserTokenNonces() {
     --proxy=${PROXY} \
     --arguments ${USER} str:${TRAVELERS_ID} \
     --function="getUserTokenNonces"
-}
-
-getRarityClass() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments 1 \
-    --function="getRarityClass"
 }
 
 getStakingInfo() {
@@ -330,6 +272,7 @@ getMintedTickets() {
     --function="getMintedTickets"
 }
 
+# Art Drop
 issueSFTCollection() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
@@ -350,11 +293,20 @@ createArtToken() {
 }
 
 # Init
+deploy() {
+    mxpy --verbose contract deploy --metadata-payable --metadata-payable-by-sc \
+    --recall-nonce --pem=${USER_PEM} \
+    --bytecode="./output/game-sc.wasm" \
+    --gas-limit=200000000 \
+    --send --outfile="upgrade.interaction.json" \
+    --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
 setCollectionIds() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=5000000 \
+    --gas-limit=10000000 \
     --arguments str:${TRAVELERS_ID} str:${ELDERS_ID} \
     --function="setCollectionIds"
 }
