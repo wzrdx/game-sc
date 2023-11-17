@@ -28,6 +28,14 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
+achievement() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=8000000 \
+    --function="achievement"
+}
+
 withdrawEgld() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \

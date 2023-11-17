@@ -80,3 +80,8 @@ pub struct PlayerXp<M: ManagedTypeApi> {
     pub address: ManagedAddress<M>,
     pub xp: usize,
 }
+
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct LegendaryArtPage {
+    pub aurora: usize,
+}

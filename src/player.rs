@@ -9,6 +9,15 @@ use crate::{helpers, storage};
 
 #[multiversx_sc::module]
 pub trait Player: storage::Storage + helpers::Helpers {
+    #[only_owner]
+    #[endpoint(achievement)]
+    fn achievement(&self) {
+        let caller = self.blockchain().get_caller();
+        self.legendary_char_aurora(&caller).set(4);
+
+        self.page_legendary_art(&caller).set(LegendaryArtPage { aurora: 4 });
+    }
+
     #[view(getXpLeaderboardSize)]
     fn get_xp_leaderboard_size(&self) -> usize {
         let mut players: ManagedVec<PlayerXp<Self::Api>> = ManagedVec::new();

@@ -1,10 +1,7 @@
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
-use crate::{
-    interface::OngoingQuest,
-    interface::{Quest, Stake},
-};
+use crate::interface::{LegendaryArtPage, OngoingQuest, Quest, Stake};
 
 #[multiversx_sc::module]
 pub trait Storage {
@@ -190,4 +187,9 @@ pub trait Storage {
     // Achievements
     #[storage_mapper("legendaryCharAuroraMint")]
     fn legendary_char_aurora(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
+
+    // Traveler's Log
+    #[view(getPageLegendaryArt)]
+    #[storage_mapper("pageLegendaryArt")]
+    fn page_legendary_art(&self, user: &ManagedAddress) -> SingleValueMapper<LegendaryArtPage>;
 }
