@@ -21,6 +21,12 @@ ART_TICKER="AOM"
 TRAVELERS_ID=TRAVELERS-659fa7
 ELDERS_ID=ELDERS-dd9aab
 
+TICKETS_TICKER=HOMETICKET
+TICKETS_NAME=HomeXTickets
+
+ENERGY_TOKEN_NAME=Energy
+ENERGY_TICKER=ENERGY
+
 
 upgrade() {
     mxpy contract build && mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
@@ -359,7 +365,7 @@ issueTicketsCollection() {
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=200000000 \
     --value 50000000000000000 \
-    --arguments str:${TICKETS_COLLECTION_NAME} str:${TICKETS_TICKER} \
+    --arguments str:${TICKETS_NAME} str:${TICKETS_TICKER} \
     --function="issueTicketsCollection"
 }
 

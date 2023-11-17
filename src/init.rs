@@ -1,6 +1,5 @@
 multiversx_sc::imports!();
 
-use crate::interface::*;
 use crate::{helpers, storage};
 
 #[multiversx_sc::module]
