@@ -224,7 +224,7 @@ clearOngoingQuests() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=60000000 \
+    --gas-limit=90000000 \
     --function="clearOngoingQuests"
 }
 
