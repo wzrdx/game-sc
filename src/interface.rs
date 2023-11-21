@@ -84,4 +84,5 @@ pub struct PlayerXp<M: ManagedTypeApi> {
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct LegendaryArtPage {
     pub aurora: usize,
+    pub verdant: usize,
 }

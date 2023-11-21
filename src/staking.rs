@@ -123,7 +123,9 @@ pub trait Staking: storage::Storage + helpers::Helpers {
             });
         }
 
-        self.staked_addresses().insert(caller);
+        // TODO: Deprecated
+        self.staked_addresses().insert(caller.clone());
+        self.staked_wallets().insert(caller.clone());
     }
 
     #[only_user_account]
@@ -174,7 +176,9 @@ pub trait Staking: storage::Storage + helpers::Helpers {
 
             if self.staked_nfts(&caller).is_empty() {
                 self.last_staking_timestamp(&caller).clear();
+                // TODO: Deprecated
                 self.staked_addresses().swap_remove(&caller);
+                self.staked_wallets().swap_remove(&caller);
             }
         }
     }
@@ -211,13 +215,7 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         self.claim_staking_rewards_for_user(&caller);
     }
 
-    // Staking
-    #[view(getStakedAddressesCount)]
-    fn get_staked_addresses_count(&self) -> usize {
-        self.staked_addresses().len()
-    }
-
-    // TODO:
+    // TODO: Deprecated
     #[view(getCleanupAddressesCount)]
     fn get_cleanup_addresses_count(&self) -> usize {
         self.cleanup_addresses().len()
@@ -270,6 +268,7 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         rarity_classes
     }
 
+    // TODO: Deprecated
     #[view(getStakedAddressesLength)]
     fn get_staked_addresses_length(&self) -> usize {
         self.staked_addresses().len()

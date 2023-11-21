@@ -1,7 +1,7 @@
 multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
-use crate::interface::{LegendaryArtPage, OngoingQuest, Quest, Stake};
+use crate::interface::{OngoingQuest, Quest, Stake};
 
 #[multiversx_sc::module]
 pub trait Storage {
@@ -46,10 +46,6 @@ pub trait Storage {
     fn elders_mapper(&self) -> NonFungibleTokenMapper;
 
     // Tokens
-    #[view(getArtCollectionId)]
-    #[storage_mapper("artMapper")]
-    fn art_mapper(&self) -> NonFungibleTokenMapper;
-
     #[view(getTicketsId)]
     #[storage_mapper("sftTicketsMapper")]
     fn tickets_mapper(&self) -> NonFungibleTokenMapper;
@@ -69,6 +65,10 @@ pub trait Storage {
     #[view(getEssenceTokenId)]
     #[storage_mapper("essenceMapper")]
     fn essence_mapper(&self) -> FungibleTokenMapper;
+
+    // Art tokens
+    #[storage_mapper("artMapper")]
+    fn art_mapper(&self) -> NonFungibleTokenMapper;
 
     // Quests
     #[view(getQuests)]
@@ -188,8 +188,8 @@ pub trait Storage {
     #[storage_mapper("legendaryCharAuroraMint")]
     fn legendary_char_aurora(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
 
+    #[storage_mapper("legendaryCharVerdantMint")]
+    fn legendary_char_verdant(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
+
     // Traveler's Log
-    #[view(getPageLegendaryArt)]
-    #[storage_mapper("pageLegendaryArt")]
-    fn page_legendary_art(&self, user: &ManagedAddress) -> SingleValueMapper<LegendaryArtPage>;
 }

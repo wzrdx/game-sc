@@ -161,7 +161,7 @@ setArtDropTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1698512400 \
+    --arguments 1700820000 \
     --function="setArtDropTimestamp"
 }
 

@@ -11,11 +11,16 @@ use crate::{helpers, storage};
 pub trait Player: storage::Storage + helpers::Helpers {
     #[only_owner]
     #[endpoint(achievement)]
-    fn achievement(&self) {
-        let caller = self.blockchain().get_caller();
-        self.legendary_char_aurora(&caller).set(4);
+    fn achievement(&self) {}
 
-        self.page_legendary_art(&caller).set(LegendaryArtPage { aurora: 4 });
+    #[view(getPageCelestialsCustodian)]
+    fn get_page_celestials_custodian(&self, user: &ManagedAddress) -> LegendaryArtPage {
+        let page = LegendaryArtPage {
+            aurora: self.legendary_char_aurora(user).get(),
+            verdant: self.legendary_char_verdant(user).get(),
+        };
+
+        page
     }
 
     #[view(getXpLeaderboardSize)]

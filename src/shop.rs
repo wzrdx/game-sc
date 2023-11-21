@@ -1,5 +1,5 @@
-const AURORA_PRICE: usize = 2;
-const AURORA_XP: usize = 750;
+const ART_DROP_PRICE: usize = 3;
+const ART_DROP_XP: usize = 1500;
 
 multiversx_sc::imports!();
 
@@ -27,16 +27,16 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
 
         let payment_amount: u64 = payment.amount.to_u64().unwrap_or_default();
 
-        require!(payment_amount == (amount * AURORA_PRICE) as u64, "Invalid payment");
+        require!(payment_amount == (amount * ART_DROP_PRICE) as u64, "Invalid payment");
 
         self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
 
-        self.art_mapper().nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(amount));
+        self.art_mapper().nft_add_quantity_and_send(&caller, 2 as u64, BigUint::from(amount));
         self.player_xp(&caller).update(|i| {
-            *i += amount * AURORA_XP;
+            *i += amount * ART_DROP_XP;
         });
 
-        self.legendary_char_aurora(&caller).update(|i| {
+        self.legendary_char_verdant(&caller).update(|i| {
             *i += amount;
         });
     }
@@ -60,7 +60,7 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
         self.send().esdt_nft_create(
             &self.art_mapper().get_token_id(),
             &BigUint::from(1 as u32),
-            &ManagedBuffer::new_from_bytes("Aurora".as_bytes()),
+            &ManagedBuffer::new_from_bytes("Verdant".as_bytes()),
             &royalties,
             &buffer,
             &buffer,
