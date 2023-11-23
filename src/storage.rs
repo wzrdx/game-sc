@@ -190,6 +190,4 @@ pub trait Storage {
 
     #[storage_mapper("legendaryCharVerdantMint")]
     fn legendary_char_verdant(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
-
-    // Traveler's Log
 }
