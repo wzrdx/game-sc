@@ -233,6 +233,10 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             *i += self.quests_xp().get(id as usize);
         });
 
+        self.ecobottle_xp(&caller).update(|i| {
+            *i += self.quests_xp().get(id as usize);
+        });
+
         self.ongoing_quests(&caller).swap_remove(index_to_remove);
 
         if self.ongoing_quests(&caller).len() == 0 {
@@ -303,6 +307,10 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         let xp_gain: usize = completed_quests_ids.iter().map(|id| self.quests_xp().get(id as usize)).sum();
 
         self.player_xp(&caller).update(|i| {
+            *i += xp_gain;
+        });
+
+        self.ecobottle_xp(&caller).update(|i| {
             *i += xp_gain;
         });
 

@@ -9,8 +9,8 @@
 # PLAYER=
 
 # ## mainnet
-# USER_PEM="~/elrond-wallet/wallet-homex.pem"
-USER_PEM="~/Crypto/wallets/wallet-homex.pem"
+USER_PEM="~/elrond-wallet/wallet-homex.pem"
+# USER_PEM="~/Crypto/wallets/wallet-homex.pem"
 PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
@@ -28,12 +28,12 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
-achievement() {
+test() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=8000000 \
-    --function="achievement"
+    --function="test"
 }
 
 withdrawEgld() {

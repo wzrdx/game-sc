@@ -184,6 +184,10 @@ pub trait Storage {
     #[storage_mapper("playerXp")]
     fn player_xp(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
 
+    #[view(getEcobottleXp)]
+    #[storage_mapper("ecobottleXp")]
+    fn ecobottle_xp(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
+
     // Achievements
     #[storage_mapper("legendaryCharAuroraMint")]
     fn legendary_char_aurora(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
