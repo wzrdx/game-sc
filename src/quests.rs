@@ -233,9 +233,9 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             *i += self.quests_xp().get(id as usize);
         });
 
-        self.ecobottle_xp(&caller).update(|i| {
-            *i += self.quests_xp().get(id as usize);
-        });
+        // self.ecobottle_xp(&caller).update(|i| {
+        //     *i += self.quests_xp().get(id as usize);
+        // });
 
         self.ongoing_quests(&caller).swap_remove(index_to_remove);
 
@@ -310,9 +310,9 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             *i += xp_gain;
         });
 
-        self.ecobottle_xp(&caller).update(|i| {
-            *i += xp_gain;
-        });
+        // self.ecobottle_xp(&caller).update(|i| {
+        //     *i += xp_gain;
+        // });
 
         // Set remaining quests
         let remaining_quests: ManagedVec<OngoingQuest> =
