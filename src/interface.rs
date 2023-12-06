@@ -85,4 +85,5 @@ pub struct PlayerXp<M: ManagedTypeApi> {
 pub struct LegendaryArtPage {
     pub aurora: usize,
     pub verdant: usize,
+    pub solara: usize,
 }

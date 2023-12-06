@@ -179,4 +179,7 @@ pub trait Storage {
 
     #[storage_mapper("legendaryCharVerdantMint")]
     fn legendary_char_verdant(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
+
+    #[storage_mapper("legendaryCharSolaraMint")]
+    fn legendary_char_solara(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
 }

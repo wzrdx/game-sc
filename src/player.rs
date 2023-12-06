@@ -1,4 +1,4 @@
-const XP_THRESHOLD: usize = 3333;
+const XP_THRESHOLD: usize = 8000;
 
 multiversx_sc::imports!();
 
@@ -9,15 +9,12 @@ use crate::{helpers, storage};
 
 #[multiversx_sc::module]
 pub trait Player: storage::Storage + helpers::Helpers {
-    #[only_owner]
-    #[endpoint(test)]
-    fn test(&self) {}
-
-    #[view(getPageCelestialsCustodian)]
-    fn get_page_celestials_custodian(&self, user: &ManagedAddress) -> LegendaryArtPage {
+    #[view(getPageCelestials)]
+    fn get_page_celestials(&self, user: &ManagedAddress) -> LegendaryArtPage {
         let page = LegendaryArtPage {
             aurora: self.legendary_char_aurora(user).get(),
             verdant: self.legendary_char_verdant(user).get(),
+            solara: self.legendary_char_solara(user).get(),
         };
 
         page

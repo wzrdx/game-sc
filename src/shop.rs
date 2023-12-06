@@ -1,5 +1,5 @@
 const ART_DROP_PRICE: usize = 3;
-const ART_DROP_XP: usize = 1500;
+const ART_DROP_XP: usize = 3000;
 
 multiversx_sc::imports!();
 
@@ -47,13 +47,13 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
 
         self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
 
-        self.art_mapper().nft_add_quantity_and_send(&caller, 2 as u64, BigUint::from(amount));
+        self.art_mapper().nft_add_quantity_and_send(&caller, 3 as u64, BigUint::from(amount));
 
         self.player_xp(&caller).update(|i| {
             *i += amount * ART_DROP_XP;
         });
 
-        self.legendary_char_verdant(&caller).update(|i| {
+        self.legendary_char_solara(&caller).update(|i| {
             *i += amount;
         });
     }
@@ -77,7 +77,7 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
         self.send().esdt_nft_create(
             &self.art_mapper().get_token_id(),
             &BigUint::from(1 as u32),
-            &ManagedBuffer::new_from_bytes("Verdant".as_bytes()),
+            &ManagedBuffer::new_from_bytes("Solara".as_bytes()),
             &royalties,
             &buffer,
             &buffer,

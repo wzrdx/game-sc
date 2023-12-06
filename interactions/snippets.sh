@@ -49,7 +49,7 @@ setQuestsXp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=26000000 \
+    --gas-limit=12000000 \
     --function="setQuestsXp"
 }
 
@@ -153,7 +153,7 @@ setArtDropTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1700852400 \
+    --arguments 1702123200 \
     --function="setArtDropTimestamp"
 }
 
