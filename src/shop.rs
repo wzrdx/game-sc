@@ -8,6 +8,22 @@ use crate::{helpers, storage};
 #[multiversx_sc::module]
 pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule + storage::Storage + helpers::Helpers {
     #[only_owner]
+    #[endpoint(airdropArt)]
+    fn airdrop_art(&self, wallets: ManagedVec<ManagedAddress>) {
+        for address in wallets.into_iter() {
+            self.art_mapper().nft_add_quantity_and_send(&address, 2 as u64, BigUint::from(1 as usize));
+
+            self.player_xp(&address).update(|i| {
+                *i += ART_DROP_XP;
+            });
+
+            self.legendary_char_verdant(&address).update(|i| {
+                *i += 1;
+            });
+        }
+    }
+
+    #[only_owner]
     #[endpoint(setArtDropTimestamp)]
     fn set_art_drop_timestamp(&self, timestamp: u64) {
         self.art_drop_timestamp().set(timestamp);
@@ -32,6 +48,7 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
         self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
 
         self.art_mapper().nft_add_quantity_and_send(&caller, 2 as u64, BigUint::from(amount));
+
         self.player_xp(&caller).update(|i| {
             *i += amount * ART_DROP_XP;
         });

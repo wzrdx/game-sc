@@ -176,6 +176,19 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         is_staked
     }
 
+    #[view(getStakedWallets)]
+    fn get_staked_wallets(&self, start: usize, end: usize) -> ManagedVec<ManagedAddress> {
+        let mut wallets: ManagedVec<ManagedAddress> = ManagedVec::new();
+
+        for (i, address) in self.staked_wallets().into_iter().enumerate() {
+            if i >= start && i < end {
+                wallets.push(address);
+            }
+        }
+
+        wallets
+    }
+
     fn get_staking_token_ids(&self) -> ManagedVec<TokenIdentifier<Self::Api>> {
         let mut vec: ManagedVec<TokenIdentifier<Self::Api>> = ManagedVec::new();
         vec.push(self.travelers_mapper().get_token_id());

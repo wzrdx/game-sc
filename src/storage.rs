@@ -13,7 +13,6 @@ pub trait Storage {
     fn last_staking_timestamp(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
     // New staking system
-    #[view(getStakedWallets)]
     #[storage_mapper("stakedWallets")]
     fn staked_wallets(&self) -> UnorderedSetMapper<ManagedAddress>;
 
