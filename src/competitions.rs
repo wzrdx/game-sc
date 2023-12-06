@@ -44,8 +44,6 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
     fn draw_raffle_winners(&self, raffle_id: usize) {
         let mut rand_source = RandomnessSource::new();
 
-        let token_id = TokenIdentifier::from(&b"GSPACEAPE-08bc2b"[..]);
-
         let winner_id: u16 = self
             .raffle_vector(raffle_id)
             .get(rand_source.next_usize_in_range(1, self.raffle_vector(raffle_id).len() + 1));
@@ -53,14 +51,31 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
         let winner_address = self.raffle_id_participant(winner_id).get();
 
         // if let 1..=5 = raffle_id
-        if raffle_id == 92 {
+        if raffle_id == 96 {
             self.send().direct_egld(&winner_address, &BigUint::from(750_000_000_000_000_000 as u64));
-        } else if raffle_id == 93 {
+        } else if raffle_id == 97 {
             self.send().direct_egld(&winner_address, &BigUint::from(750_000_000_000_000_000 as u64));
-        } else if raffle_id == 94 {
-            self.send().direct_esdt(&winner_address, &token_id, 13790 as u64, &BigUint::from(1 as u32));
-        } else if raffle_id == 95 {
-            self.send().direct_esdt(&winner_address, &token_id, 3863 as u64, &BigUint::from(1 as u32));
+        } else if raffle_id == 98 {
+            self.send().direct_esdt(
+                &winner_address,
+                &TokenIdentifier::from(&b"HSWOLF-76e8bf"[..]),
+                738 as u64,
+                &BigUint::from(1 as u32),
+            );
+        } else if raffle_id == 99 {
+            self.send().direct_esdt(
+                &winner_address,
+                &TokenIdentifier::from(&b"HSWEREWOLF-a485c7"[..]),
+                2434 as u64,
+                &BigUint::from(1 as u32),
+            );
+        } else if raffle_id == 100 {
+            self.send().direct_esdt(
+                &winner_address,
+                &TokenIdentifier::from(&b"NFTIM-4586ac"[..]),
+                3317 as u64,
+                &BigUint::from(1 as u32),
+            );
         }
 
         let hash: ManagedByteArray<Self::Api, 32> = self.blockchain().get_tx_hash();

@@ -9,95 +9,6 @@ use core::iter::FromIterator;
 
 #[multiversx_sc::module]
 pub trait Staking: storage::Storage + helpers::Helpers {
-    #[only_owner]
-    #[endpoint(cleanMigratedWallets)]
-    fn clean_migrated_wallets(&self) {
-        for address in self.cleanup_addresses().into_iter() {
-            self.staked_addresses().swap_remove(&address);
-            self.staked_wallets().insert(address);
-        }
-    }
-
-    #[only_owner]
-    #[endpoint(migrateWallets)]
-    fn migrate_wallets(&self) {
-        let travelers_id = self.travelers_mapper().get_token_id();
-        let elders_id = self.elders_mapper().get_token_id();
-
-        let mut gas_left: u64;
-        let mut required_gas: u64;
-
-        for address in self.staked_addresses().into_iter() {
-            required_gas = (self.staked_traveler_nonces(&address).len() as u64 + self.staked_elder_nonces(&address).len() as u64) * 1500000;
-            gas_left = self.blockchain().get_gas_left();
-
-            if required_gas + 25000000 < gas_left {
-                for nonce in self.staked_traveler_nonces(&address).into_iter() {
-                    self.staked_nfts(&address).insert(Stake {
-                        token_id: travelers_id.clone(),
-                        nonce: nonce as u16,
-                        amount: 1,
-                        timestamp: None,
-                    });
-                }
-
-                self.staked_traveler_nonces(&address).clear();
-
-                for nonce in self.staked_elder_nonces(&address).into_iter() {
-                    self.staked_nfts(&address).insert(Stake {
-                        token_id: elders_id.clone(),
-                        nonce: nonce as u16,
-                        amount: 1,
-                        timestamp: None,
-                    });
-                }
-
-                self.staked_elder_nonces(&address).clear();
-
-                self.staked_addresses().swap_remove(&address);
-                self.staked_wallets().insert(address);
-            }
-        }
-    }
-
-    #[only_user_account]
-    #[endpoint(migrateTokens)]
-    fn migrate_tokens(&self) {
-        let caller = self.blockchain().get_caller();
-
-        let travelers_id = self.travelers_mapper().get_token_id();
-        let elders_id = self.elders_mapper().get_token_id();
-
-        if self.staked_traveler_nonces(&caller).len() > 0 {
-            for nonce in self.staked_traveler_nonces(&caller).into_iter() {
-                self.staked_nfts(&caller).insert(Stake {
-                    token_id: travelers_id.clone(),
-                    nonce: nonce as u16,
-                    amount: 1,
-                    timestamp: None,
-                });
-            }
-
-            self.staked_traveler_nonces(&caller).clear();
-        }
-
-        if self.staked_elder_nonces(&caller).len() > 0 {
-            for nonce in self.staked_elder_nonces(&caller).into_iter() {
-                self.staked_nfts(&caller).insert(Stake {
-                    token_id: elders_id.clone(),
-                    nonce: nonce as u16,
-                    amount: 1,
-                    timestamp: None,
-                });
-            }
-
-            self.staked_elder_nonces(&caller).clear();
-        }
-
-        self.staked_addresses().swap_remove(&caller);
-        self.staked_wallets().insert(caller);
-    }
-
     #[only_user_account]
     #[payable("*")]
     #[endpoint(stake)]
@@ -123,8 +34,6 @@ pub trait Staking: storage::Storage + helpers::Helpers {
             });
         }
 
-        // TODO: Deprecated
-        self.staked_addresses().insert(caller.clone());
         self.staked_wallets().insert(caller.clone());
     }
 
@@ -176,8 +85,6 @@ pub trait Staking: storage::Storage + helpers::Helpers {
 
             if self.staked_nfts(&caller).is_empty() {
                 self.last_staking_timestamp(&caller).clear();
-                // TODO: Deprecated
-                self.staked_addresses().swap_remove(&caller);
                 self.staked_wallets().swap_remove(&caller);
             }
         }
@@ -215,20 +122,9 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         self.claim_staking_rewards_for_user(&caller);
     }
 
-    // TODO: Deprecated
-    #[view(getCleanupAddressesCount)]
-    fn get_cleanup_addresses_count(&self) -> usize {
-        self.cleanup_addresses().len()
-    }
-
     #[view(getStakedNFTsCount)]
     fn get_staked_nfts_count(&self) -> usize {
         let mut count: usize = 0;
-
-        // TODO: Remove the counting from old data structures after migration
-        for address in self.staked_addresses().iter() {
-            count += self.staked_traveler_nonces(&address).len() + self.staked_elder_nonces(&address).len();
-        }
 
         for address in self.staked_wallets().iter() {
             count += self.staked_nfts(&address).iter().filter(|token| (*token).timestamp.is_none()).count();
@@ -268,38 +164,14 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         rarity_classes
     }
 
-    // TODO: Deprecated
-    #[view(getStakedAddressesLength)]
-    fn get_staked_addresses_length(&self) -> usize {
-        self.staked_addresses().len()
-    }
-
     #[view(getStakedWalletsLength)]
     fn get_staked_wallets_length(&self) -> usize {
         self.staked_wallets().len()
     }
 
-    #[view(getStakedUsers)]
-    fn get_staked_users(&self, start: usize, end: usize) -> ManagedVec<ManagedAddress> {
-        let mut users: ManagedVec<ManagedAddress> = ManagedVec::new();
-
-        for (i, address) in self.staked_addresses().into_iter().enumerate() {
-            if i >= start && i < end {
-                users.push(address);
-            }
-        }
-
-        users
-    }
-
-    #[view(getMigrationSize)]
-    fn get_migration_size(&self, user: &ManagedAddress) -> usize {
-        self.staked_traveler_nonces(user).len() + self.staked_elder_nonces(user).len()
-    }
-
     #[view(isWalletStaked)]
     fn is_wallet_staked(&self, user: &ManagedAddress) -> bool {
-        let is_staked: bool = self.staked_traveler_nonces(user).len() + self.staked_elder_nonces(user).len() + self.staked_nfts(user).len() > 0;
+        let is_staked: bool = self.staked_nfts(user).len() > 0;
 
         is_staked
     }

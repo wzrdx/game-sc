@@ -6,25 +6,11 @@ use crate::interface::{OngoingQuest, Quest, Stake};
 #[multiversx_sc::module]
 pub trait Storage {
     // Staking
-    #[storage_mapper("stakedTravelerNonces")]
-    fn staked_traveler_nonces(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
-
-    #[storage_mapper("stakedElderNonces")]
-    fn staked_elder_nonces(&self, user: &ManagedAddress) -> UnorderedSetMapper<u64>;
-
     #[storage_mapper("stakedNFTs")]
     fn staked_nfts(&self, user: &ManagedAddress) -> UnorderedSetMapper<Stake<Self::Api>>;
 
     #[storage_mapper("lastStakingTimestamp")]
     fn last_staking_timestamp(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
-
-    // TODO: Deprecated staking system
-    #[storage_mapper("stakedAddresses")]
-    fn staked_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
-
-    // TODO: Addresses contained by staked_addresses with a 0 migration size
-    #[storage_mapper("cleanupAddresses")]
-    fn cleanup_addresses(&self) -> UnorderedSetMapper<ManagedAddress>;
 
     // New staking system
     #[view(getStakedWallets)]

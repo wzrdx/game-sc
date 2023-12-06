@@ -28,14 +28,6 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
-test() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=8000000 \
-    --function="test"
-}
-
 withdrawEgld() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
@@ -93,7 +85,7 @@ setTrial() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=35000000 \
-    --arguments 14 \
+    --arguments 15 \
     --function="setTrial"
 }
 
@@ -143,7 +135,7 @@ setGamePaused() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments true \
+    --arguments false \
     --function="setGamePaused"
 }
 
@@ -152,7 +144,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1701439200 \
+    --arguments 1702832400 \
     --function="setTrialTimestamp"
 }
 
@@ -175,18 +167,6 @@ getTxHashes() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="getTxHashes"
-}
-
-getStakedAddressesCount() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getStakedAddressesCount"
-}
-
-getStakedAddresses() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getStakedAddresses"
 }
 
 getStakedNFTsCount() {
@@ -227,20 +207,6 @@ getStakingInfo() {
     --proxy=${PROXY} \
     --arguments ${OWNER} \
     --function="getStakingInfo"
-}
-
-getStakedTravelerNonces() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments ${OWNER} \
-    --function="getStakedTravelerNonces"
-}
-
-getStakedElderNonces() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments ${OWNER} \
-    --function="getStakedElderNonces"
 }
 
 getStakedNFTs() {
