@@ -49,7 +49,7 @@ setQuestsXp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=12000000 \
+    --gas-limit=32000000 \
     --function="setQuestsXp"
 }
 

@@ -19,9 +19,12 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         }
     }
 
+    // TODO: Set the xp multiplier as a parm, in order to not upgrade the contract every time
     #[only_owner]
     #[endpoint(setQuestsXp)]
     fn set_quests_xp(&self) {
+        self.quests_xp().clear();
+
         self.quests_xp().push(&XP_MULTIPLIER);
         self.quests_xp().push(&XP_MULTIPLIER);
         self.quests_xp().push(&XP_MULTIPLIER);
@@ -233,10 +236,6 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             *i += self.quests_xp().get(id as usize);
         });
 
-        // self.ecobottle_xp(&caller).update(|i| {
-        //     *i += self.quests_xp().get(id as usize);
-        // });
-
         self.ongoing_quests(&caller).swap_remove(index_to_remove);
 
         if self.ongoing_quests(&caller).len() == 0 {
@@ -309,10 +308,6 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         self.player_xp(&caller).update(|i| {
             *i += xp_gain;
         });
-
-        // self.ecobottle_xp(&caller).update(|i| {
-        //     *i += xp_gain;
-        // });
 
         // Set remaining quests
         let remaining_quests: ManagedVec<OngoingQuest> =
