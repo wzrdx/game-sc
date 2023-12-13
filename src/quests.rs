@@ -1,5 +1,3 @@
-const XP_MULTIPLIER: usize = 20;
-
 multiversx_sc::imports!();
 
 use crate::interface::*;
@@ -19,28 +17,27 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         }
     }
 
-    // TODO: Set the xp multiplier as a parm, in order to not upgrade the contract every time
     #[only_owner]
     #[endpoint(setQuestsXp)]
-    fn set_quests_xp(&self) {
+    fn set_quests_xp(&self, multiplier: usize) {
         self.quests_xp().clear();
 
-        self.quests_xp().push(&XP_MULTIPLIER);
-        self.quests_xp().push(&XP_MULTIPLIER);
-        self.quests_xp().push(&XP_MULTIPLIER);
-        self.quests_xp().push(&XP_MULTIPLIER);
-        self.quests_xp().push(&XP_MULTIPLIER);
-        self.quests_xp().push(&XP_MULTIPLIER);
-        self.quests_xp().push(&XP_MULTIPLIER);
-        self.quests_xp().push(&XP_MULTIPLIER);
-        self.quests_xp().push(&(4 * XP_MULTIPLIER));
-        self.quests_xp().push(&(4 * XP_MULTIPLIER));
-        self.quests_xp().push(&(4 * XP_MULTIPLIER));
-        self.quests_xp().push(&(4 * XP_MULTIPLIER));
-        self.quests_xp().push(&(8 * XP_MULTIPLIER));
-        self.quests_xp().push(&(8 * XP_MULTIPLIER));
-        self.quests_xp().push(&(10 * XP_MULTIPLIER));
-        self.quests_xp().push(&(20 * XP_MULTIPLIER));
+        self.quests_xp().push(&multiplier);
+        self.quests_xp().push(&multiplier);
+        self.quests_xp().push(&multiplier);
+        self.quests_xp().push(&multiplier);
+        self.quests_xp().push(&multiplier);
+        self.quests_xp().push(&multiplier);
+        self.quests_xp().push(&multiplier);
+        self.quests_xp().push(&multiplier);
+        self.quests_xp().push(&(4 * multiplier));
+        self.quests_xp().push(&(4 * multiplier));
+        self.quests_xp().push(&(4 * multiplier));
+        self.quests_xp().push(&(4 * multiplier));
+        self.quests_xp().push(&(8 * multiplier));
+        self.quests_xp().push(&(8 * multiplier));
+        self.quests_xp().push(&(10 * multiplier));
+        self.quests_xp().push(&(20 * multiplier));
     }
 
     #[only_owner]
