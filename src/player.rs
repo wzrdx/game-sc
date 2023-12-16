@@ -15,6 +15,8 @@ pub trait Player: storage::Storage + helpers::Helpers {
             aurora: self.legendary_char_aurora(user).get(),
             verdant: self.legendary_char_verdant(user).get(),
             solara: self.legendary_char_solara(user).get(),
+            emberheart: self.legendary_char_emberheart(user).get(),
+            aetheris: self.legendary_char_aetheris(user).get(),
         };
 
         page
