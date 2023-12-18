@@ -23,7 +23,7 @@ upgrade() {
     mxpy contract build && mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
     --bytecode="./output/game-sc.wasm" \
-    --gas-limit=170000000 \
+    --gas-limit=150000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
@@ -86,7 +86,7 @@ setTrial() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=35000000 \
-    --arguments 15 \
+    --arguments 16 \
     --function="setTrial"
 }
 
@@ -145,7 +145,7 @@ setTrialTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1702832400 \
+    --arguments 1703674800 \
     --function="setTrialTimestamp"
 }
 
