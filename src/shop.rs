@@ -8,22 +8,6 @@ use crate::{helpers, storage};
 #[multiversx_sc::module]
 pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule + storage::Storage + helpers::Helpers {
     #[only_owner]
-    #[endpoint(airdropArt)]
-    fn airdrop_art(&self, wallets: ManagedVec<ManagedAddress>) {
-        for address in wallets.into_iter() {
-            self.art_mapper().nft_add_quantity_and_send(&address, 2 as u64, BigUint::from(1 as usize));
-
-            self.player_xp(&address).update(|i| {
-                *i += ART_DROP_XP;
-            });
-
-            self.legendary_char_verdant(&address).update(|i| {
-                *i += 1;
-            });
-        }
-    }
-
-    #[only_owner]
     #[endpoint(setArtDropTimestamp)]
     fn set_art_drop_timestamp(&self, timestamp: u64) {
         self.art_drop_timestamp().set(timestamp);
@@ -47,13 +31,13 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
 
         self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
 
-        self.art_mapper().nft_add_quantity_and_send(&caller, 3 as u64, BigUint::from(amount));
+        self.art_mapper().nft_add_quantity_and_send(&caller, 4 as u64, BigUint::from(amount));
 
         self.player_xp(&caller).update(|i| {
             *i += amount * ART_DROP_XP;
         });
 
-        self.legendary_char_solara(&caller).update(|i| {
+        self.legendary_char_emberheart(&caller).update(|i| {
             *i += amount;
         });
     }
@@ -77,7 +61,7 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
         self.send().esdt_nft_create(
             &self.art_mapper().get_token_id(),
             &BigUint::from(1 as u32),
-            &ManagedBuffer::new_from_bytes("Solara".as_bytes()),
+            &ManagedBuffer::new_from_bytes("Emberheart".as_bytes()),
             &royalties,
             &buffer,
             &buffer,

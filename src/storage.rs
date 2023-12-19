@@ -182,4 +182,10 @@ pub trait Storage {
 
     #[storage_mapper("legendaryCharSolaraMint")]
     fn legendary_char_solara(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
+
+    #[storage_mapper("legendaryCharEmberheartMint")]
+    fn legendary_char_emberheart(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
+
+    #[storage_mapper("legendaryCharAetherisMint")]
+    fn legendary_char_aetheris(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
 }

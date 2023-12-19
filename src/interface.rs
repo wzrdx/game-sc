@@ -86,4 +86,6 @@ pub struct LegendaryArtPage {
     pub aurora: usize,
     pub verdant: usize,
     pub solara: usize,
+    pub emberheart: usize,
+    pub aetheris: usize,
 }
