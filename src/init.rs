@@ -15,7 +15,7 @@ pub trait Init: storage::Storage + helpers::Helpers {
     #[payable("EGLD")]
     #[endpoint(issueTicketsCollection)]
     fn issue_tickets_collection(&self, token_display_name: ManagedBuffer, token_ticker: ManagedBuffer) {
-        let issue_cost = self.call_value().egld_value();
+        let issue_cost = self.call_value().egld_value().clone_value();
 
         self.tickets_mapper()
             .issue_and_set_all_roles(EsdtTokenType::SemiFungible, issue_cost, token_display_name, token_ticker, 0 as usize, None);
@@ -44,7 +44,7 @@ pub trait Init: storage::Storage + helpers::Helpers {
     #[payable("EGLD")]
     #[endpoint(issueEnergyToken)]
     fn issue_energy_token(&self, token_display_name: ManagedBuffer, token_ticker: ManagedBuffer) {
-        let issue_cost = self.call_value().egld_value();
+        let issue_cost = self.call_value().egld_value().clone_value();
 
         self.energy_mapper()
             .issue_and_set_all_roles(issue_cost, token_display_name, token_ticker, 6 as usize, None);
@@ -54,7 +54,7 @@ pub trait Init: storage::Storage + helpers::Helpers {
     #[payable("EGLD")]
     #[endpoint(issueHerbsToken)]
     fn issue_herbs_token(&self, token_display_name: ManagedBuffer, token_ticker: ManagedBuffer) {
-        let issue_cost = self.call_value().egld_value();
+        let issue_cost = self.call_value().egld_value().clone_value();
 
         self.herbs_mapper()
             .issue_and_set_all_roles(issue_cost, token_display_name, token_ticker, 6 as usize, None);
@@ -64,7 +64,7 @@ pub trait Init: storage::Storage + helpers::Helpers {
     #[payable("EGLD")]
     #[endpoint(issueGemsToken)]
     fn issue_gems_token(&self, token_display_name: ManagedBuffer, token_ticker: ManagedBuffer) {
-        let issue_cost = self.call_value().egld_value();
+        let issue_cost = self.call_value().egld_value().clone_value();
 
         self.gems_mapper()
             .issue_and_set_all_roles(issue_cost, token_display_name, token_ticker, 6 as usize, None);
@@ -74,7 +74,7 @@ pub trait Init: storage::Storage + helpers::Helpers {
     #[payable("EGLD")]
     #[endpoint(issueEssenceToken)]
     fn issue_essence_token(&self, token_display_name: ManagedBuffer, token_ticker: ManagedBuffer) {
-        let issue_cost = self.call_value().egld_value();
+        let issue_cost = self.call_value().egld_value().clone_value();
 
         self.essence_mapper()
             .issue_and_set_all_roles(issue_cost, token_display_name, token_ticker, 6 as usize, None);

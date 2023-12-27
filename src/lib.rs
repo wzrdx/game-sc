@@ -32,21 +32,15 @@ pub trait GameScContract:
     #[init]
     fn init(&self) {}
 
-    #[only_owner]
-    #[endpoint(addSpecialRole)]
-    fn add_special_role(&self, sc_addr: &ManagedAddress) {
-        let token_id = TokenIdentifier::from(&b"HOMETICKET-9112c2"[..]);
-        self.send()
-            .esdt_system_sc_proxy()
-            .set_special_roles(sc_addr, &token_id, (&[EsdtLocalRole::NftAddQuantity][..]).into_iter().cloned())
-            .async_call()
-            .call_and_exit();
-    }
+    #[upgrade]
+    fn upgrade(&self) {}
 
     #[only_owner]
-    #[endpoint(transferMirageFaire)]
-    fn transfer_mirage_faire(&self, sc_addr: &ManagedAddress) {
-        self.tickets_mapper().nft_add_quantity_and_send(sc_addr, 1 as u64, BigUint::from(1 as usize));
+    #[endpoint(loadRarityClasses)]
+    fn load_rarity_classes(&self, nonces: ManagedVec<u64>, classes: ManagedVec<u8>) {
+        for (index, nonce) in nonces.into_iter().enumerate() {
+            self.rarity_class(nonce).set(classes.get(index));
+        }
     }
 
     #[only_owner]

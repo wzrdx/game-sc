@@ -46,7 +46,7 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
     #[payable("EGLD")]
     #[endpoint(issueSFTCollection)]
     fn issue_sft_collection(&self, name: ManagedBuffer, ticker: ManagedBuffer) {
-        let issue_cost = self.call_value().egld_value();
+        let issue_cost = self.call_value().egld_value().clone_value();
 
         self.art_mapper()
             .issue_and_set_all_roles(EsdtTokenType::SemiFungible, issue_cost, name, ticker, 0 as usize, None);

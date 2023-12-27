@@ -69,7 +69,7 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         require!(quest_duration + current_timestamp < trial_timestamp, "Quest duration exceeds end of Trial");
 
         // Payment checking & burning of tokens
-        let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
+        let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers().clone_value();
         let requirements = &quest.requirements;
 
         require!(
@@ -131,7 +131,7 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         }
 
         // Payment checking & burning of tokens
-        let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
+        let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers().clone_value();
         let mut total_requirements: ManagedVec<u64> = ManagedVec::new();
 
         for quest in quests.into_iter() {
