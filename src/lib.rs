@@ -44,12 +44,6 @@ pub trait GameScContract:
     }
 
     #[only_owner]
-    #[endpoint(transferMirageFaire)]
-    fn transfer_mirage_faire(&self, sc_addr: &ManagedAddress) {
-        self.tickets_mapper().nft_add_quantity_and_send(sc_addr, 1 as u64, BigUint::from(1 as usize));
-    }
-
-    #[only_owner]
     #[endpoint(withdrawEgld)]
     fn withdraw_egld(&self) {
         let caller = self.blockchain().get_caller();
