@@ -13,7 +13,7 @@ pub trait Staking: storage::Storage + helpers::Helpers {
     #[payable("*")]
     #[endpoint(stake)]
     fn stake(&self) {
-        let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers();
+        let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers().clone_value();
         require!(payments.len() > 0, "Must stake at least one NFT");
 
         let token_ids: ManagedVec<TokenIdentifier<Self::Api>> = self.get_staking_token_ids();

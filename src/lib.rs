@@ -32,16 +32,8 @@ pub trait GameScContract:
     #[init]
     fn init(&self) {}
 
-    #[only_owner]
-    #[endpoint(addSpecialRole)]
-    fn add_special_role(&self, sc_addr: &ManagedAddress) {
-        let token_id = TokenIdentifier::from(&b"HOMETICKET-9112c2"[..]);
-        self.send()
-            .esdt_system_sc_proxy()
-            .set_special_roles(sc_addr, &token_id, (&[EsdtLocalRole::NftAddQuantity][..]).into_iter().cloned())
-            .async_call()
-            .call_and_exit();
-    }
+    #[upgrade]
+    fn upgrade(&self) {}
 
     #[only_owner]
     #[endpoint(withdrawEgld)]
