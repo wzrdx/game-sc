@@ -87,6 +87,7 @@ pub trait GameScContract:
         self.trial_timestamp().set(timestamp);
     }
 
+    // TODO: Deprecated
     #[only_owner]
     #[endpoint(setTrial)]
     fn set_trial(&self, trial: u16) {
@@ -95,6 +96,16 @@ pub trait GameScContract:
 
         for nonce in 1..=60 {
             self.elders_tickets_nonces(trial).insert(nonce);
+        }
+    }
+
+    #[only_owner]
+    #[endpoint(refreshElderRewards)]
+    fn refresh_elder_rewards(&self) {
+        self.elders_rewards_nonces().clear();
+
+        for nonce in 1..=60 {
+            self.elders_rewards_nonces().insert(nonce);
         }
     }
 

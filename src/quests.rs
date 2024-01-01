@@ -19,25 +19,12 @@ pub trait Quests: storage::Storage + helpers::Helpers {
 
     #[only_owner]
     #[endpoint(setQuestsXp)]
-    fn set_quests_xp(&self, multiplier: usize) {
+    fn set_quests_xp(&self, values: ManagedVec<usize>) {
         self.quests_xp().clear();
 
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&(4 * multiplier));
-        self.quests_xp().push(&(4 * multiplier));
-        self.quests_xp().push(&(4 * multiplier));
-        self.quests_xp().push(&(4 * multiplier));
-        self.quests_xp().push(&(8 * multiplier));
-        self.quests_xp().push(&(8 * multiplier));
-        self.quests_xp().push(&(10 * multiplier));
-        self.quests_xp().push(&(20 * multiplier));
+        for value in values.iter() {
+            self.quests_xp().push(&value);
+        }
     }
 
     #[only_owner]

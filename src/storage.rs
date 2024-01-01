@@ -155,9 +155,18 @@ pub trait Storage {
     /*
      * The Elder NFT nonces which can be used to claim tickets each Trial.
      * After claiming rewards for a nonce, it is removed from the set
+     *
+     * TODO: Deprecated
      */
     #[storage_mapper("eldersTicketsNonces")]
     fn elders_tickets_nonces(&self, trial: u16) -> UnorderedSetMapper<u16>;
+
+    /*
+     * Elder NFT nonces are used to claim 2 tickets per Elder monthly.
+     * After claiming rewards for a nonce, it is removed from the set.
+     */
+    #[storage_mapper("eldersRewardsNonces")]
+    fn elders_rewards_nonces(&self) -> UnorderedSetMapper<u16>;
 
     // Stats
     #[view(getMintedTickets)]

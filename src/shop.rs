@@ -1,12 +1,14 @@
 const ART_DROP_PRICE: usize = 3;
-const ART_DROP_XP: usize = 3000;
+const ART_DROP_XP: usize = 1500;
 
 multiversx_sc::imports!();
 
 use crate::{helpers, storage};
 
 #[multiversx_sc::module]
-pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule + storage::Storage + helpers::Helpers {
+pub trait Shop:
+    multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule + storage::Storage + helpers::Helpers
+{
     #[only_owner]
     #[endpoint(setArtDropTimestamp)]
     fn set_art_drop_timestamp(&self, timestamp: u64) {
@@ -20,7 +22,10 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
         let caller = self.blockchain().get_caller();
         let current_timestamp = self.blockchain().get_block_timestamp();
 
-        require!(current_timestamp <= self.art_drop_timestamp().get(), "The art drop has ended");
+        require!(
+            current_timestamp <= self.art_drop_timestamp().get(),
+            "The art drop has ended"
+        );
 
         let payment: EsdtTokenPayment = self.call_value().single_esdt();
         self.tickets_mapper().require_same_token(&payment.token_identifier);
@@ -31,13 +36,14 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
 
         self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
 
-        self.art_mapper().nft_add_quantity_and_send(&caller, 4 as u64, BigUint::from(amount));
+        self.art_mapper()
+            .nft_add_quantity_and_send(&caller, 5 as u64, BigUint::from(amount));
 
         self.player_xp(&caller).update(|i| {
             *i += amount * ART_DROP_XP;
         });
 
-        self.legendary_char_emberheart(&caller).update(|i| {
+        self.legendary_char_aetheris(&caller).update(|i| {
             *i += amount;
         });
     }
@@ -48,8 +54,14 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
     fn issue_sft_collection(&self, name: ManagedBuffer, ticker: ManagedBuffer) {
         let issue_cost = self.call_value().egld_value().clone_value();
 
-        self.art_mapper()
-            .issue_and_set_all_roles(EsdtTokenType::SemiFungible, issue_cost, name, ticker, 0 as usize, None);
+        self.art_mapper().issue_and_set_all_roles(
+            EsdtTokenType::SemiFungible,
+            issue_cost,
+            name,
+            ticker,
+            0 as usize,
+            None,
+        );
     }
 
     #[only_owner]
@@ -61,7 +73,7 @@ pub trait Shop: multiversx_sc_modules::default_issue_callbacks::DefaultIssueCall
         self.send().esdt_nft_create(
             &self.art_mapper().get_token_id(),
             &BigUint::from(1 as u32),
-            &ManagedBuffer::new_from_bytes("Emberheart".as_bytes()),
+            &ManagedBuffer::new_from_bytes("Aetheris".as_bytes()),
             &royalties,
             &buffer,
             &buffer,

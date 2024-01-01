@@ -144,7 +144,7 @@ setGamePaused() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments true \
+    --arguments false \
     --function="setGamePaused"
 }
 
@@ -162,7 +162,7 @@ setArtDropTimestamp() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=9000000 \
-    --arguments 1703325600 \
+    --arguments 1704373200 \
     --function="setArtDropTimestamp"
 }
 
@@ -241,6 +241,12 @@ getCleanupAddressesCount() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="getCleanupAddressesCount"
+}
+
+getQuests() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getQuests"
 }
 
 getQuestsXp() {
