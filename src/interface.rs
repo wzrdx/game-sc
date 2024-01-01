@@ -89,3 +89,9 @@ pub struct LegendaryArtPage {
     pub emberheart: usize,
     pub aetheris: usize,
 }
+
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct StakingSummary {
+    pub has_elders: bool,
+    pub amount: usize,
+}

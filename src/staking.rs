@@ -122,6 +122,21 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         self.claim_staking_rewards_for_user(&caller);
     }
 
+    // Used for Discord roles
+    #[view(getStakingSummary)]
+    fn get_staking_summary(&self, wallets: ManagedVec<ManagedAddress<Self::Api>>) -> ManagedVec<StakingSummary> {
+        let mut summaries: ManagedVec<StakingSummary> = ManagedVec::new();
+
+        for address in wallets.into_iter() {
+            let has_elders: bool = self.get_staked_nonces(&address, self.elders_mapper().get_token_id()).len() > 0;
+            let amount: usize = self.get_staked_nonces(&address, self.travelers_mapper().get_token_id()).len();
+
+            summaries.push(StakingSummary { has_elders, amount });
+        }
+
+        summaries
+    }
+
     #[view(getStakedNFTsCount)]
     fn get_staked_nfts_count(&self) -> usize {
         let mut count: usize = 0;
