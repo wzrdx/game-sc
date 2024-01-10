@@ -29,26 +29,6 @@ pub struct StakingInfo<M: ManagedTypeApi> {
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
-pub struct Participant<M: ManagedTypeApi> {
-    pub address: ManagedAddress<M>,
-    pub tickets_count: usize,
-}
-
-#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
-pub struct BattleParticipant<M: ManagedTypeApi> {
-    pub address: ManagedAddress<M>,
-    pub tickets_count: usize,
-    pub quests: usize,
-}
-
-#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
-pub struct TicketStats {
-    pub earners_count: usize,
-    pub tickets_count: usize,
-    pub most_earned: usize,
-}
-
-#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct Rarity {
     pub nonce: u16,
     pub rarity_class: u8,

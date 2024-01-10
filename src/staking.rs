@@ -177,13 +177,6 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         self.staked_wallets().len()
     }
 
-    #[view(isWalletStaked)]
-    fn is_wallet_staked(&self, user: &ManagedAddress) -> bool {
-        let is_staked: bool = self.staked_nfts(user).len() > 0;
-
-        is_staked
-    }
-
     #[view(getStakedWallets)]
     fn get_staked_wallets(&self, start: usize, end: usize) -> ManagedVec<ManagedAddress> {
         let mut wallets: ManagedVec<ManagedAddress> = ManagedVec::new();
