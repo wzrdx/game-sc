@@ -12,7 +12,6 @@ pub trait Storage {
     #[storage_mapper("lastStakingTimestamp")]
     fn last_staking_timestamp(&self, user: &ManagedAddress) -> SingleValueMapper<u64>;
 
-    // New staking system
     #[storage_mapper("stakedWallets")]
     fn staked_wallets(&self) -> UnorderedSetMapper<ManagedAddress>;
 
@@ -72,26 +71,12 @@ pub trait Storage {
     #[storage_mapper("activePlayers")]
     fn active_players(&self) -> UnorderedSetMapper<ManagedAddress>;
 
-    // Participants
-    #[storage_mapper("raffleParticipantId")]
-    fn raffle_participant_id(&self, user: &ManagedAddress) -> SingleValueMapper<u16>;
-
-    #[storage_mapper("raffleIdParticipant")]
-    fn raffle_id_participant(&self, id: u16) -> SingleValueMapper<ManagedAddress>;
-
-    // Participant index
-    #[view(getRaffleIndex)]
-    #[storage_mapper("raffleIndex")]
-    fn raffle_index(&self) -> SingleValueMapper<u16>;
-
-    #[storage_mapper("raffleVector")]
-    fn raffle_vector(&self, raffle_id: usize) -> VecMapper<u16>;
+    // Raffles
+    #[storage_mapper("rafflesCount")]
+    fn raffles_count(&self) -> SingleValueMapper<usize>;
 
     #[storage_mapper("raffleVectorSize")]
     fn raffle_vector_size(&self, raffle_id: usize) -> SingleValueMapper<usize>;
-
-    #[storage_mapper("raffleParticipants")]
-    fn raffle_participants(&self, raffle_id: usize) -> UnorderedSetMapper<ManagedAddress>;
 
     #[view(getRaffleHashes)]
     #[storage_mapper("raffleHashes")]
@@ -99,10 +84,6 @@ pub trait Storage {
 
     #[storage_mapper("raffleTimestamp")]
     fn raffle_timestamp(&self, raffle_id: usize) -> SingleValueMapper<u64>;
-
-    // Raffle index
-    #[storage_mapper("rafflesCount")]
-    fn raffles_count(&self) -> SingleValueMapper<usize>;
 
     // System
     #[view(isGamePaused)]
@@ -145,4 +126,17 @@ pub trait Storage {
 
     #[storage_mapper("legendaryCharAetherisMint")]
     fn legendary_char_aetheris(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
+
+    // Quests Stats
+    #[storage_mapper("questsTypeStats")]
+    fn quests_type_stats(&self, user: &ManagedAddress, quest_type: u8) -> SingleValueMapper<usize>;
+
+    #[storage_mapper("completedQuests")]
+    fn completed_quests(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
+
+    #[storage_mapper("ticketsEarned")]
+    fn tickets_earned(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
+
+    #[storage_mapper("energyClaimed")]
+    fn energy_claimed(&self, user: &ManagedAddress) -> SingleValueMapper<BigUint<Self::Api>>;
 }

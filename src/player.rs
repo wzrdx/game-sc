@@ -59,4 +59,18 @@ pub trait Player: storage::Storage + helpers::Helpers {
 
         chunk_players
     }
+
+    #[view(getLogSummary)]
+    fn get_log_summary(&self, user: &ManagedAddress) -> LogSummary {
+        let summary = LogSummary {
+            quests_completed: self.completed_quests(user).get(),
+            type_1: self.quests_type_stats(user, 1 as u8).get(),
+            type_2: self.quests_type_stats(user, 2 as u8).get(),
+            type_3: self.quests_type_stats(user, 3 as u8).get(),
+            tickets: self.tickets_earned(user).get(),
+            energy: self.energy_claimed(user).get().to_u64().unwrap_or_default(),
+        };
+
+        summary
+    }
 }

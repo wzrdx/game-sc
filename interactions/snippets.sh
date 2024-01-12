@@ -23,7 +23,7 @@ upgrade() {
     mxpy contract build && mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
     --bytecode="./output/game-sc.wasm" \
-    --gas-limit=100000000 \
+    --gas-limit=120000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
@@ -95,4 +95,10 @@ createArtToken() {
     --gas-limit=20000000 \
     --arguments 1000 \
     --function="createArtToken"
+}
+
+getQuests() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --function="getQuests"
 }

@@ -11,11 +11,7 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
         let count = self.raffles_count().get();
 
         for index in 1..=count {
-            let tickets = if self.raffle_vector(index).is_empty() {
-                self.raffle_vector_size(index).get()
-            } else {
-                self.raffle_vector(index).len()
-            };
+            let tickets = self.raffle_vector_size(index).get();
 
             raffles.push(Competition {
                 id: index,

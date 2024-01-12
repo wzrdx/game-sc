@@ -2,9 +2,15 @@ multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
 /* For regular quests, the requirements/rewards slice contains the amount of tokens
-in the following order: [Energy, Herbs, Gems, Essence].
-For the final quest (mission), the sum of the elements in the rewards slice is equal
-to the number of rewarded tickets. E.g. [1] = 1 ticket
+ * in the following order: [Energy, Herbs, Gems, Essence].
+ * For the final quest (mission), the sum of the elements in the rewards slice is equal
+ * to the number of rewarded tickets. E.g. [1] = 1 ticket.
+ *
+ * Types:
+ * 0 - Other
+ * 1 - Herbalism
+ * 2 - Jewelcrafting
+ * 3 - Divination
 */
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct Quest<M: ManagedTypeApi> {
@@ -13,6 +19,7 @@ pub struct Quest<M: ManagedTypeApi> {
     pub is_final: bool,
     pub requirements: ManagedVec<M, u64>,
     pub rewards: ManagedVec<M, u64>,
+    pub quest_type: u8,
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
@@ -74,4 +81,14 @@ pub struct LegendaryArtPage {
 pub struct StakingSummary {
     pub has_elders: bool,
     pub amount: usize,
+}
+
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct LogSummary {
+    pub quests_completed: usize,
+    pub type_1: usize,
+    pub type_2: usize,
+    pub type_3: usize,
+    pub tickets: usize,
+    pub energy: u64,
 }

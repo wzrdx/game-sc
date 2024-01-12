@@ -206,16 +206,30 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         );
 
         // Rewards
-        let quest = self.quests().get(id as usize);
+        let quest: Quest<Self::Api> = self.quests().get(id as usize);
         let rewards = &quest.rewards;
 
         // Ticket
         if quest.is_final {
             let tickets_amount: u64 = rewards.iter().sum();
 
+            // Stats
+            self.tickets_earned(&caller).update(|n| {
+                *n += tickets_amount as usize;
+            });
+
             self.tickets_mapper()
                 .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(tickets_amount));
         } else {
+            // Stats
+            self.quests_type_stats(&caller, quest.quest_type).update(|n| {
+                *n += 1;
+            });
+
+            self.completed_quests(&caller).update(|n| {
+                *n += 1;
+            });
+
             for (i, reward) in rewards.iter().enumerate() {
                 if reward > 0 {
                     let mapper = self.get_token_mapper(i);
@@ -250,10 +264,23 @@ pub trait Quests: storage::Storage + helpers::Helpers {
 
         let completed_quests_ids: ManagedVec<u8> = ManagedVec::from_iter(completed_quests.iter().map(|q| q.id));
 
+        // Completed Quests
         let quests: ManagedVec<Quest<Self::Api>> = ManagedVec::from_iter(self.quests().iter().filter(|q| {
             let id = q.id;
             completed_quests_ids.contains(&id)
         }));
+
+        // Stats
+        self.completed_quests(&caller).update(|n| {
+            *n += completed_quests_ids.len();
+        });
+
+        for quest_type in [1u8, 2, 3].iter() {
+            let amount = quests.iter().filter(|q| q.quest_type == *quest_type).count();
+            self.quests_type_stats(&caller, *quest_type).update(|n| {
+                *n += amount;
+            });
+        }
 
         // Compute total rewards
         let mut total_rewards: ManagedVec<u64> = ManagedVec::new();
@@ -285,6 +312,11 @@ pub trait Quests: storage::Storage + helpers::Helpers {
 
         // Send rewards
         if total_tickets_amount > 0 {
+            // Stats
+            self.tickets_earned(&caller).update(|n| {
+                *n += total_tickets_amount as usize;
+            });
+
             self.tickets_mapper()
                 .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(total_tickets_amount));
         }
