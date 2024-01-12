@@ -104,35 +104,6 @@ pub trait Storage {
     #[storage_mapper("rafflesCount")]
     fn raffles_count(&self) -> SingleValueMapper<usize>;
 
-    #[storage_mapper("operatingVector")]
-    fn operating_vector(&self) -> VecMapper<u16>;
-
-    // Battles
-    #[view(getBattleSubmittedTickets)]
-    #[storage_mapper("battleSubmission")]
-    fn battle_submission(&self, battle_id: usize, user: &ManagedAddress) -> SingleValueMapper<usize>;
-
-    #[storage_mapper("battleParticipants")]
-    fn battle_participants(&self, battle_id: usize) -> UnorderedSetMapper<ManagedAddress>;
-
-    #[storage_mapper("battleTotalTickets")]
-    fn battle_total_tickets(&self, battle_id: usize) -> SingleValueMapper<usize>;
-
-    #[storage_mapper("battleTimestamp")]
-    fn battle_timestamp(&self, battle_id: usize) -> SingleValueMapper<u64>;
-
-    #[view(getBattleHashes)]
-    #[storage_mapper("battleHashes")]
-    fn battle_hashes(&self, battle_id: usize) -> UnorderedSetMapper<ManagedByteArray<Self::Api, 32>>;
-
-    // Can be used to compute total quests done since the first battle
-    #[view(getCompletedQuests)]
-    #[storage_mapper("completedQuests")]
-    fn completed_quests(&self, battle_id: usize, user: &ManagedAddress) -> SingleValueMapper<usize>;
-
-    #[storage_mapper("battlesCount")]
-    fn battles_count(&self) -> SingleValueMapper<usize>;
-
     // System
     #[view(isGamePaused)]
     #[storage_mapper("isGamePaused")]
@@ -147,31 +118,17 @@ pub trait Storage {
     #[storage_mapper("trialTimestamp")]
     fn trial_timestamp(&self) -> SingleValueMapper<u64>;
 
-    #[view(getCurrentTrial)]
-    #[storage_mapper("currentTrial")]
-    fn current_trial(&self) -> SingleValueMapper<u16>;
-
-    // Rewards
     /*
-     * The Elder NFT nonces which can be used to claim tickets each Trial.
-     * After claiming rewards for a nonce, it is removed from the set
+     * Elder NFT nonces are used to claim 2 tickets per Elder monthly.
+     * After claiming rewards for a nonce, it is removed from the set.
      */
-    #[storage_mapper("eldersTicketsNonces")]
-    fn elders_tickets_nonces(&self, trial: u16) -> UnorderedSetMapper<u16>;
-
-    // Stats
-    #[view(getMintedTickets)]
-    #[storage_mapper("u64mintedTickets")]
-    fn minted_tickets(&self) -> SingleValueMapper<u64>;
+    #[storage_mapper("eldersRewardsNonces")]
+    fn elders_rewards_nonces(&self) -> UnorderedSetMapper<u16>;
 
     // XP
     #[view(getPlayerXp)]
     #[storage_mapper("playerXp")]
     fn player_xp(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
-
-    #[view(getEcobottleXp)]
-    #[storage_mapper("ecobottleXp")]
-    fn ecobottle_xp(&self, user: &ManagedAddress) -> SingleValueMapper<usize>;
 
     // Achievements
     #[storage_mapper("legendaryCharAuroraMint")]

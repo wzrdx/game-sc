@@ -19,25 +19,12 @@ pub trait Quests: storage::Storage + helpers::Helpers {
 
     #[only_owner]
     #[endpoint(setQuestsXp)]
-    fn set_quests_xp(&self, multiplier: usize) {
+    fn set_quests_xp(&self, values: ManagedVec<usize>) {
         self.quests_xp().clear();
 
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&multiplier);
-        self.quests_xp().push(&(4 * multiplier));
-        self.quests_xp().push(&(4 * multiplier));
-        self.quests_xp().push(&(4 * multiplier));
-        self.quests_xp().push(&(4 * multiplier));
-        self.quests_xp().push(&(8 * multiplier));
-        self.quests_xp().push(&(8 * multiplier));
-        self.quests_xp().push(&(10 * multiplier));
-        self.quests_xp().push(&(20 * multiplier));
+        for value in values.iter() {
+            self.quests_xp().push(&value);
+        }
     }
 
     #[only_owner]
@@ -66,7 +53,10 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         let quest_duration = quest.duration as u64;
         let trial_timestamp = self.trial_timestamp().get();
 
-        require!(quest_duration + current_timestamp < trial_timestamp, "Quest duration exceeds end of Trial");
+        require!(
+            quest_duration + current_timestamp < trial_timestamp,
+            "Quest duration exceeds end of Trial"
+        );
 
         // Payment checking & burning of tokens
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers().clone_value();
@@ -111,10 +101,14 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         let trial_timestamp = self.trial_timestamp().get();
 
         // Ongoing quests checking
-        let ongoing_quests_ids: ManagedVec<u8> = ManagedVec::from_iter(self.ongoing_quests(&caller).iter().map(|q| q.id));
+        let ongoing_quests_ids: ManagedVec<u8> =
+            ManagedVec::from_iter(self.ongoing_quests(&caller).iter().map(|q| q.id));
 
         for id in ids.into_iter() {
-            require!(!ongoing_quests_ids.contains(&id), "Cannot start an already ongoing quest");
+            require!(
+                !ongoing_quests_ids.contains(&id),
+                "Cannot start an already ongoing quest"
+            );
         }
 
         // Quests duration checking
@@ -206,7 +200,10 @@ pub trait Quests: storage::Storage + helpers::Helpers {
 
         let current_timestamp = self.blockchain().get_block_timestamp();
 
-        require!(current_timestamp >= ongoing_quest.end_timestamp, "Quest cannot be completed yet");
+        require!(
+            current_timestamp >= ongoing_quest.end_timestamp,
+            "Quest cannot be completed yet"
+        );
 
         // Rewards
         let quest = self.quests().get(id as usize);
@@ -215,7 +212,6 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         // Ticket
         if quest.is_final {
             let tickets_amount: u64 = rewards.iter().sum();
-            self.increase_minted_tickets(tickets_amount);
 
             self.tickets_mapper()
                 .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(tickets_amount));
@@ -246,8 +242,11 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         let caller = self.blockchain().get_caller();
         let current_timestamp = self.blockchain().get_block_timestamp();
 
-        let completed_quests: ManagedVec<OngoingQuest> =
-            ManagedVec::from_iter(self.ongoing_quests(&caller).iter().filter(|q| current_timestamp >= q.end_timestamp));
+        let completed_quests: ManagedVec<OngoingQuest> = ManagedVec::from_iter(
+            self.ongoing_quests(&caller)
+                .iter()
+                .filter(|q| current_timestamp >= q.end_timestamp),
+        );
 
         let completed_quests_ids: ManagedVec<u8> = ManagedVec::from_iter(completed_quests.iter().map(|q| q.id));
 
@@ -286,8 +285,6 @@ pub trait Quests: storage::Storage + helpers::Helpers {
 
         // Send rewards
         if total_tickets_amount > 0 {
-            self.increase_minted_tickets(total_tickets_amount);
-
             self.tickets_mapper()
                 .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(total_tickets_amount));
         }
@@ -300,15 +297,21 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         }
 
         // XP
-        let xp_gain: usize = completed_quests_ids.iter().map(|id| self.quests_xp().get(id as usize)).sum();
+        let xp_gain: usize = completed_quests_ids
+            .iter()
+            .map(|id| self.quests_xp().get(id as usize))
+            .sum();
 
         self.player_xp(&caller).update(|i| {
             *i += xp_gain;
         });
 
         // Set remaining quests
-        let remaining_quests: ManagedVec<OngoingQuest> =
-            ManagedVec::from_iter(self.ongoing_quests(&caller).iter().filter(|q| current_timestamp < q.end_timestamp));
+        let remaining_quests: ManagedVec<OngoingQuest> = ManagedVec::from_iter(
+            self.ongoing_quests(&caller)
+                .iter()
+                .filter(|q| current_timestamp < q.end_timestamp),
+        );
 
         self.ongoing_quests(&caller).clear();
 
@@ -319,11 +322,5 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         if self.ongoing_quests(&caller).len() == 0 {
             self.active_players().swap_remove(&caller);
         }
-    }
-
-    fn increase_minted_tickets(&self, amount: u64) {
-        self.minted_tickets().update(|i| {
-            *i += amount;
-        });
     }
 }

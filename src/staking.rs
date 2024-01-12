@@ -76,7 +76,11 @@ pub trait Staking: storage::Storage + helpers::Helpers {
             require!(was_removed == true, "Invalid function arguments");
 
             if was_removed {
-                payments.push(EsdtTokenPayment::new(token.token_id, token.nonce as u64, BigUint::from(token.amount)))
+                payments.push(EsdtTokenPayment::new(
+                    token.token_id,
+                    token.nonce as u64,
+                    BigUint::from(token.amount),
+                ))
             }
         }
 
@@ -142,7 +146,11 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         let mut count: usize = 0;
 
         for address in self.staked_wallets().iter() {
-            count += self.staked_nfts(&address).iter().filter(|token| (*token).timestamp.is_none()).count();
+            count += self
+                .staked_nfts(&address)
+                .iter()
+                .filter(|token| (*token).timestamp.is_none())
+                .count();
         }
 
         count
@@ -182,13 +190,6 @@ pub trait Staking: storage::Storage + helpers::Helpers {
     #[view(getStakedWalletsLength)]
     fn get_staked_wallets_length(&self) -> usize {
         self.staked_wallets().len()
-    }
-
-    #[view(isWalletStaked)]
-    fn is_wallet_staked(&self, user: &ManagedAddress) -> bool {
-        let is_staked: bool = self.staked_nfts(user).len() > 0;
-
-        is_staked
     }
 
     #[view(getStakedWallets)]

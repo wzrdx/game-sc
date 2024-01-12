@@ -111,7 +111,7 @@ pub trait Helpers: storage::Storage {
     fn build_uris_vec(&self) -> ManagedVec<ManagedBuffer> {
         let mut uris = ManagedVec::new();
         uris.push(ManagedBuffer::new_from_bytes(
-            "https://ipfs.io/ipfs/QmUtxWJDtA3wy3CoDK6K17ZXBmVmvEFiePaTEDNYSkwqLy".as_bytes(),
+            "https://ipfs.io/ipfs/QmSEdXWvzxzt4Kj3wcjWbLtaCvnBpjheaNSnSfRRUZQT9N".as_bytes(),
         ));
 
         uris

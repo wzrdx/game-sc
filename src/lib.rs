@@ -5,7 +5,6 @@ multiversx_sc::derive_imports!();
 
 mod competitions;
 mod helpers;
-mod init;
 mod interface;
 mod player;
 mod quests;
@@ -27,21 +26,12 @@ pub trait GameScContract:
     + rewards::Rewards
     + shop::Shop
     + player::Player
-    + init::Init
 {
     #[init]
     fn init(&self) {}
 
     #[upgrade]
     fn upgrade(&self) {}
-
-    #[only_owner]
-    #[endpoint(loadRarityClasses)]
-    fn load_rarity_classes(&self, nonces: ManagedVec<u64>, classes: ManagedVec<u8>) {
-        for (index, nonce) in nonces.into_iter().enumerate() {
-            self.rarity_class(nonce).set(classes.get(index));
-        }
-    }
 
     #[only_owner]
     #[endpoint(withdrawEgld)]
@@ -58,7 +48,8 @@ pub trait GameScContract:
         let caller = self.blockchain().get_caller();
 
         for nonce in start..=end {
-            self.send().direct_esdt(&caller, &identifier, nonce as u64, &BigUint::from(1 as u32));
+            self.send()
+                .direct_esdt(&caller, &identifier, nonce as u64, &BigUint::from(1 as u32));
         }
     }
 
@@ -68,7 +59,6 @@ pub trait GameScContract:
         self.tickets_mapper().nft_burn(1 as u64, &BigUint::from(amount));
     }
 
-    // TODO: Create payments vector and send using multi
     #[only_owner]
     #[endpoint(airdropResources)]
     fn airdrop_resources(&self, users: ManagedVec<ManagedAddress>, alloc: ManagedVec<Airdrop<Self::Api>>) {
@@ -96,13 +86,12 @@ pub trait GameScContract:
     }
 
     #[only_owner]
-    #[endpoint(setTrial)]
-    fn set_trial(&self, trial: u16) {
-        self.current_trial().set(trial);
-        self.elders_tickets_nonces(trial - 1).clear();
+    #[endpoint(refreshElderRewards)]
+    fn refresh_elder_rewards(&self) {
+        self.elders_rewards_nonces().clear();
 
         for nonce in 1..=60 {
-            self.elders_tickets_nonces(trial).insert(nonce);
+            self.elders_rewards_nonces().insert(nonce);
         }
     }
 
