@@ -100,7 +100,7 @@ pub trait Storage {
     fn trial_timestamp(&self) -> SingleValueMapper<u64>;
 
     /*
-     * Elder NFT nonces are used to claim 2 tickets per Elder monthly.
+     * Elder NFT nonces are used to claim one ticket per Elder every 2 weeks.
      * After claiming rewards for a nonce, it is removed from the set.
      */
     #[storage_mapper("eldersRewardsNonces")]
