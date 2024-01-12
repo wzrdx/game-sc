@@ -41,7 +41,7 @@ setGamePaused() {
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
     --gas-limit=6000000 \
-    --arguments true \
+    --arguments false \
     --function="setGamePaused"
 }
 
@@ -63,12 +63,12 @@ setArtDropTimestamp() {
     --function="setArtDropTimestamp"
 }
 
-clearOngoingQuests() {
+refreshElderRewards() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=90000000 \
-    --function="clearOngoingQuests"
+    --gas-limit=30000000 \
+    --function="refreshElderRewards"
 }
 
 isGamePaused() {
