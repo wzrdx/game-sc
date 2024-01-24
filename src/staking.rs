@@ -137,9 +137,7 @@ pub trait Staking: storage::Storage + helpers::Helpers {
             let has_elders: bool = self.get_staked_nonces(&address, &elders_id).len() > 0;
             let amount: usize = self.get_staked_nonces(&address, &travelers_id).len();
 
-            if has_elders || amount > 0 {
-                summaries.push(StakingSummary { has_elders, amount });
-            }
+            summaries.push(StakingSummary { has_elders, amount });
         }
 
         summaries
