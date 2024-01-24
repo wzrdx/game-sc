@@ -130,10 +130,12 @@ pub trait Staking: storage::Storage + helpers::Helpers {
     #[view(getStakingSummary)]
     fn get_staking_summary(&self, wallets: ManagedVec<ManagedAddress<Self::Api>>) -> ManagedVec<StakingSummary> {
         let mut summaries: ManagedVec<StakingSummary> = ManagedVec::new();
+        let travelers_id = self.travelers_mapper().get_token_id();
+        let elders_id = self.elders_mapper().get_token_id();
 
         for address in wallets.into_iter() {
-            let has_elders: bool = self.get_staked_nonces(&address, self.elders_mapper().get_token_id()).len() > 0;
-            let amount: usize = self.get_staked_nonces(&address, self.travelers_mapper().get_token_id()).len();
+            let has_elders: bool = self.get_staked_nonces(&address, &elders_id).len() > 0;
+            let amount: usize = self.get_staked_nonces(&address, &travelers_id).len();
 
             summaries.push(StakingSummary { has_elders, amount });
         }
@@ -169,7 +171,7 @@ pub trait Staking: storage::Storage + helpers::Helpers {
 
     #[view(getUserTokenNonces)]
     fn get_user_token_nonces(&self, user_address: ManagedAddress, token_id: TokenIdentifier) -> ManagedVec<u64> {
-        let nonces: ManagedVec<u64> = self.get_staked_nonces(&user_address, token_id);
+        let nonces: ManagedVec<u64> = self.get_staked_nonces(&user_address, &token_id);
         nonces
     }
 

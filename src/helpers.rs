@@ -56,8 +56,9 @@ pub trait Helpers: storage::Storage {
 
         let block_diff: u64 = current_timestamp - last_timestamp;
         let travelers_rewards = BigUint::from(block_diff * self.get_travelers_yield(user));
+        let elders_id = self.elders_mapper().get_token_id();
 
-        let elder_count: u64 = self.get_staked_nonces(user, self.elders_mapper().get_token_id()).len() as u64;
+        let elder_count: u64 = self.get_staked_nonces(user, &elders_id).len() as u64;
         let elders_rewards = BigUint::from(block_diff * ELDER_ENERGY_PER_S * elder_count);
 
         travelers_rewards + elders_rewards
@@ -65,7 +66,9 @@ pub trait Helpers: storage::Storage {
 
     fn get_travelers_yield(&self, user: &ManagedAddress) -> u64 {
         let mut travelers_rewards: u64 = 0;
-        let traveler_nonces: ManagedVec<u64> = self.get_staked_nonces(user, self.travelers_mapper().get_token_id());
+        let travelers_id = self.travelers_mapper().get_token_id();
+
+        let traveler_nonces: ManagedVec<u64> = self.get_staked_nonces(user, &travelers_id);
 
         for nonce in traveler_nonces.into_iter() {
             travelers_rewards += self.get_energy_yield(self.rarity_class(nonce).get());
@@ -74,11 +77,11 @@ pub trait Helpers: storage::Storage {
         travelers_rewards
     }
 
-    fn get_staked_nonces(&self, user_address: &ManagedAddress, token_id: TokenIdentifier) -> ManagedVec<u64> {
+    fn get_staked_nonces(&self, user_address: &ManagedAddress, token_id: &TokenIdentifier) -> ManagedVec<u64> {
         let nonces: ManagedVec<u64> = ManagedVec::from_iter(
             self.staked_nfts(user_address)
                 .iter()
-                .filter(|token| (*token).token_id == token_id && (*token).timestamp.is_none())
+                .filter(|token| (*token).token_id == *token_id && (*token).timestamp.is_none())
                 .map(|token| token.nonce as u64),
         );
 
