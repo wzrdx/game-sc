@@ -50,13 +50,6 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         }
 
         let quest = self.quests().get(id as usize);
-        let quest_duration = quest.duration as u64;
-        let trial_timestamp = self.trial_timestamp().get();
-
-        require!(
-            quest_duration + current_timestamp < trial_timestamp,
-            "Quest duration exceeds end of Trial"
-        );
 
         // Payment checking & burning of tokens
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers().clone_value();
@@ -98,7 +91,6 @@ pub trait Quests: storage::Storage + helpers::Helpers {
         self.require_conditions();
         let caller = self.blockchain().get_caller();
         let current_timestamp = self.blockchain().get_block_timestamp();
-        let trial_timestamp = self.trial_timestamp().get();
 
         // Ongoing quests checking
         let ongoing_quests_ids: ManagedVec<u8> =
@@ -116,13 +108,6 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             let id = q.id;
             ids.contains(&id)
         }));
-
-        for quest in quests.into_iter() {
-            require!(
-                (quest.duration as u64) + current_timestamp < trial_timestamp,
-                "Quests durations exceed end of Trial"
-            );
-        }
 
         // Payment checking & burning of tokens
         let payments: ManagedVec<EsdtTokenPayment> = self.call_value().all_esdt_transfers().clone_value();

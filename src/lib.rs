@@ -34,6 +34,28 @@ pub trait GameScContract:
     fn upgrade(&self) {}
 
     #[only_owner]
+    #[endpoint(addSpecialRole)]
+    fn add_special_role(&self, sc_addr: &ManagedAddress) {
+        let token_id = TokenIdentifier::from(&b"HOMETICKET-9112c2"[..]);
+        self.send()
+            .esdt_system_sc_proxy()
+            .set_special_roles(
+                sc_addr,
+                &token_id,
+                (&[EsdtLocalRole::NftAddQuantity][..]).into_iter().cloned(),
+            )
+            .async_call()
+            .call_and_exit();
+    }
+
+    #[only_owner]
+    #[endpoint(transferMirageFaire)]
+    fn transfer_mirage_faire(&self, sc_addr: &ManagedAddress) {
+        self.tickets_mapper()
+            .nft_add_quantity_and_send(sc_addr, 1 as u64, BigUint::from(1 as usize));
+    }
+
+    #[only_owner]
     #[endpoint(withdrawEgld)]
     fn withdraw_egld(&self) {
         let caller = self.blockchain().get_caller();
@@ -77,12 +99,6 @@ pub trait GameScContract:
                 }
             }
         }
-    }
-
-    #[only_owner]
-    #[endpoint(setTrialTimestamp)]
-    fn set_trial_timestamp(&self, timestamp: u64) {
-        self.trial_timestamp().set(timestamp);
     }
 
     #[only_owner]

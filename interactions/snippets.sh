@@ -45,15 +45,6 @@ setGamePaused() {
     --function="setGamePaused"
 }
 
-setTrialTimestamp() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=9000000 \
-    --arguments 1709283600 \
-    --function="setTrialTimestamp"
-}
-
 setArtDropTimestamp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
