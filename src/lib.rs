@@ -34,9 +34,10 @@ pub trait GameScContract:
     fn upgrade(&self) {}
 
     #[only_owner]
-    #[endpoint(addSpecialRole)]
-    fn add_special_role(&self, sc_addr: &ManagedAddress) {
-        let token_id = TokenIdentifier::from(&b"HOMETICKET-9112c2"[..]);
+    #[endpoint(setSpecialRole)]
+    fn set_special_role(&self, sc_addr: &ManagedAddress) {
+        let token_id = self.art_mapper().get_token_id();
+
         self.send()
             .esdt_system_sc_proxy()
             .set_special_roles(
@@ -46,13 +47,6 @@ pub trait GameScContract:
             )
             .async_call()
             .call_and_exit();
-    }
-
-    #[only_owner]
-    #[endpoint(transferMirageFaire)]
-    fn transfer_mirage_faire(&self, sc_addr: &ManagedAddress) {
-        self.tickets_mapper()
-            .nft_add_quantity_and_send(sc_addr, 1 as u64, BigUint::from(1 as usize));
     }
 
     #[only_owner]
