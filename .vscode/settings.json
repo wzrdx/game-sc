@@ -1,5 +1,12 @@
 {
     "terminal.integrated.env.linux": {
-        "PATH": "${env:HOME}/multiversx-sdk:${env:HOME}/multiversx-sdk/vmtools:${env:PATH}"
-    }
+        "PATH": "${env:HOME}/multiversx-sdk/mxpy-venv/bin:${env:HOME}/multiversx-sdk/vmtools:${env:HOME}/multiversx-sdk/nodejs/latest/bin:${env:PATH}"
+    },
+    "terminal.integrated.environmentChangesIndicator": "on",
+    "terminal.integrated.inheritEnv": true,
+    "workbench.dialogs.customEnabled": true,
+    "rust-client.disableRustup": true,
+    "rust-client.autoStartRls": false,
+    "rust-analyzer.linkedProjects": ["./Cargo.toml", "./Cargo.toml", "./Cargo.toml"],
+    "rust-analyzer.showUnlinkedFileNotification": false
 }
