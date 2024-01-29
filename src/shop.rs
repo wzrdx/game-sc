@@ -1,6 +1,6 @@
 multiversx_sc::imports!();
 
-use crate::{helpers, storage};
+use crate::{helpers, storage, PageAttributes};
 
 #[multiversx_sc::module]
 pub trait Shop:
@@ -27,17 +27,23 @@ pub trait Shop:
 
     #[only_owner]
     #[endpoint(createArtToken)]
-    fn create_art_token(&self, royalties: BigUint, name: ManagedBuffer<Self::Api>, uri: ManagedBuffer<Self::Api>) {
+    fn create_art_token(
+        &self,
+        name: ManagedBuffer<Self::Api>,
+        uri: ManagedBuffer<Self::Api>,
+        edition: ManagedBuffer<Self::Api>,
+        rarity: u8,
+    ) {
         let uris = ManagedVec::from_single_item(uri);
-        let buffer: ManagedBuffer = ManagedBuffer::new();
+        let attributes = PageAttributes { edition, rarity };
 
         self.send().esdt_nft_create(
             &self.art_mapper().get_token_id(),
             &BigUint::from(1 as u32),
             &name,
-            &royalties,
+            &BigUint::from(1000 as u32),
             &ManagedBuffer::new(),
-            &buffer,
+            &attributes,
             &uris,
         );
     }

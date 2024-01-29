@@ -92,3 +92,17 @@ pub struct LogSummary {
     pub tickets: usize,
     pub energy: u64,
 }
+
+/*
+ * Rarity:
+ * 1 - Legendary
+ * 2 - Epic
+ * 3 - Rare
+ * 4 - Uncommon
+ * 5 - Common
+ */
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode)]
+pub struct PageAttributes<M: ManagedTypeApi> {
+    pub edition: ManagedBuffer<M>,
+    pub rarity: u8,
+}
