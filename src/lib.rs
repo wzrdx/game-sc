@@ -13,6 +13,10 @@ mod shop;
 mod staking;
 mod storage;
 
+mod proxies;
+
+pub use proxies::auxiliary;
+
 use crate::interface::*;
 
 #[multiversx_sc::contract]

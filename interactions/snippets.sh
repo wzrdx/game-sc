@@ -23,9 +23,18 @@ upgrade() {
     mxpy contract build && mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
     --bytecode="./output/game-sc.wasm" \
-    --gas-limit=115000000 \
+    --gas-limit=126000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+createArtToken() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=9000000 \
+    --arguments str:${NAME} str:${CID} str:${EDITION} 1 \
+    --function="createArtToken"
 }
 
 withdrawEgld() {
@@ -79,17 +88,9 @@ issueSFTCollection() {
     --function="issueSFTCollection"
 }
 
-createArtToken() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=24000000 \
-    --arguments  1 \
-    --function="createArtToken"
-}
-
-getQuests() {
+getAttributes() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
-    --function="getQuests"
+    --arguments 5 1 \
+    --function="getAttributes"
 }
