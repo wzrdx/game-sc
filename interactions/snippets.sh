@@ -5,7 +5,7 @@ PROXY="https://devnet-api.multiversx.com"
 CHAIN_ID="D"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqc8s6t5594e4en4ffl60r6hn52hajkpkkukrqww29av
 
-# OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
+AUXILIARY=erd1qqqqqqqqqqqqqpgq24hdelr3nz6vdwnkvpu24fq24e49vhm4ukrqkt4cjk
 
 ## mainnet
 # USER_PEM="~/elrond-wallet/wallet-homex.pem"
@@ -26,6 +26,23 @@ upgrade() {
     --gas-limit=126000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+access() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=12000000 \
+    --function="access"
+}
+
+setAddressAuxiliary() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=9000000 \
+    --arguments ${AUXILIARY} \
+    --function="setAddressAuxiliary"
 }
 
 createArtToken() {

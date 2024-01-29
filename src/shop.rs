@@ -1,6 +1,6 @@
 multiversx_sc::imports!();
 
-use crate::proxies;
+use crate::auxiliary::ProxyTrait as _;
 
 use crate::{helpers, storage, PageAttributes};
 
@@ -50,18 +50,12 @@ pub trait Shop:
         );
     }
 
-    #[proxy]
-    fn auxiliary_contract_proxy(&self, sc_address: ManagedAddress) -> proxies::auxiliary::Proxy<Self::Api>;
-
     #[only_owner]
     #[endpoint(access)]
     fn access(&self) {
-        let sc_addr = ManagedAddress::from("");
-
-        self.auxiliary_contract_proxy(sc_addr)
-            .add(1)
-            .with_gas_limit(3_000_000)
-            .execute_on_dest_context();
+        self.auxiliary_contract_proxy(self.sc_addr_auxiliary().get())
+            .add(7 as usize)
+            .execute_on_dest_context::<()>();
     }
 
     #[view(getAttributes)]

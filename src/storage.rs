@@ -134,4 +134,8 @@ pub trait Storage {
 
     #[storage_mapper("energyClaimed")]
     fn energy_claimed(&self, user: &ManagedAddress) -> SingleValueMapper<BigUint<Self::Api>>;
+
+    // Proxies
+    #[storage_mapper("scAddrAuxiliary")]
+    fn sc_addr_auxiliary(&self) -> SingleValueMapper<ManagedAddress>;
 }

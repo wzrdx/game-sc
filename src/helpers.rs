@@ -9,12 +9,16 @@ const IPFS_GATEWAY: &[u8] = "https://ipfs.io/ipfs/".as_bytes();
 
 multiversx_sc::imports!();
 
+use crate::auxiliary;
 use crate::storage;
 
 use core::iter::FromIterator;
 
 #[multiversx_sc::module]
 pub trait Helpers: storage::Storage {
+    #[proxy]
+    fn auxiliary_contract_proxy(&self, sc_address: ManagedAddress) -> auxiliary::Proxy<Self::Api>;
+
     fn get_token_mapper(&self, index: usize) -> FungibleTokenMapper {
         let mapper;
 

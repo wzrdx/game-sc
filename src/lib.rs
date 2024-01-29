@@ -38,6 +38,12 @@ pub trait GameScContract:
     fn upgrade(&self) {}
 
     #[only_owner]
+    #[endpoint(setAddressAuxiliary)]
+    fn set_address_auxiliary(&self, sc_addr: &ManagedAddress) {
+        self.sc_addr_auxiliary().set(sc_addr);
+    }
+
+    #[only_owner]
     #[endpoint(setSpecialRole)]
     fn set_special_role(&self, sc_addr: &ManagedAddress) {
         let token_id = self.art_mapper().get_token_id();
