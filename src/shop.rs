@@ -8,23 +8,17 @@ use crate::{helpers, storage, PageAttributes};
 pub trait Shop:
     multiversx_sc_modules::default_issue_callbacks::DefaultIssueCallbacksModule + storage::Storage + helpers::Helpers
 {
-    #[only_user_account]
-    #[payable("*")]
+    #[only_owner]
     #[endpoint(mint)]
     fn mint(&self, amount: usize, nonce: u64) {
         let caller = self.blockchain().get_caller();
 
-        let payment: EsdtTokenPayment = self.call_value().single_esdt();
-        self.tickets_mapper().require_same_token(&payment.token_identifier);
-
-        let payment_amount: u64 = payment.amount.to_u64().unwrap_or_default();
-
-        require!(payment_amount == 1 as u64, "Invalid payment");
-
-        self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
-
         self.art_mapper()
             .nft_add_quantity_and_send(&caller, nonce, BigUint::from(amount));
+
+        self.legendary_char_aetheris(&caller).update(|i| {
+            *i += amount;
+        });
     }
 
     #[only_owner]

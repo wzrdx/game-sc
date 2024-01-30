@@ -1,9 +1,7 @@
-## devnet
-# USER_PEM="~/elrond-wallet/wallet.pem"
-USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
-PROXY="https://devnet-api.multiversx.com"
-CHAIN_ID="D"
-SC_ADDRESS=erd1qqqqqqqqqqqqqpgqc8s6t5594e4en4ffl60r6hn52hajkpkkukrqww29av
+USER_PEM=$(jq -r --arg platform "$OSTYPE" '.[$platform]' "env.json")
+PROXY=$(jq -r .proxy "env.json")
+CHAIN_ID=$(jq -r .chainId "env.json")
+SC_ADDRESS=$(jq -r .address "env.json")
 
 AUXILIARY=erd1qqqqqqqqqqqqqpgq24hdelr3nz6vdwnkvpu24fq24e49vhm4ukrqkt4cjk
 
@@ -28,12 +26,13 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
-access() {
+mint() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=12000000 \
-    --function="access"
+    --arguments 23 5 \
+    --gas-limit=46000000 \
+    --function="mint"
 }
 
 setAddressAuxiliary() {
