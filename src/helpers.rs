@@ -5,8 +5,6 @@ const ROYALS_ENERGY_PER_S: u64 = 278 * 8;
 const ONEOFONE_ENERGY_PER_S: u64 = 278 * 10;
 const ELDER_ENERGY_PER_S: u64 = 278 * 9;
 
-const IPFS_GATEWAY: &[u8] = "https://ipfs.io/ipfs/".as_bytes();
-
 multiversx_sc::imports!();
 
 use crate::auxiliary;
@@ -123,13 +121,6 @@ pub trait Helpers: storage::Storage {
     fn send_nft(&self, to: &ManagedAddress, token_identifier: &TokenIdentifier, nonce: u64) {
         self.send()
             .direct_esdt(to, token_identifier, nonce, &BigUint::from(1 as u32));
-    }
-
-    fn build_ipfs_url(&self, cid: ManagedBuffer) -> ManagedBuffer {
-        let mut url = ManagedBuffer::new_from_bytes(IPFS_GATEWAY);
-        url.append(&cid);
-
-        url
     }
 
     fn build_attributes_buffer(&self) -> ManagedBuffer {

@@ -26,13 +26,30 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
-mint() {
+upgradeProperties() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --arguments 23 5 \
-    --gas-limit=46000000 \
-    --function="mint"
+    --gas-limit=100000000 \
+    --function="upgradeProperties"
+}
+
+setSpecialRoles() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --arguments ${AUXILIARY} \
+    --gas-limit=100000000 \
+    --function="setSpecialRoles"
+}
+
+transferRole() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --arguments ${AUXILIARY} \
+    --gas-limit=100000000 \
+    --function="transferRole"
 }
 
 setAddressAuxiliary() {
@@ -42,15 +59,6 @@ setAddressAuxiliary() {
     --gas-limit=9000000 \
     --arguments ${AUXILIARY} \
     --function="setAddressAuxiliary"
-}
-
-createArtToken() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=9000000 \
-    --arguments str:${NAME} str:${CID} str:${EDITION} 1 \
-    --function="createArtToken"
 }
 
 withdrawEgld() {
@@ -91,22 +99,4 @@ isGamePaused() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="isGamePaused"
-}
-
-# Art Drop
-issueSFTCollection() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=200000000 \
-    --value 50000000000000000 \
-    --arguments str:${ART_COLLECTION_NAME} str:${ART_TICKER} \
-    --function="issueSFTCollection"
-}
-
-getAttributes() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --arguments 5 1 \
-    --function="getAttributes"
 }
