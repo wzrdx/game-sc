@@ -171,7 +171,7 @@ pub trait Staking: storage::Storage + helpers::Helpers {
 
     // Used by auxiliary
     #[view(isWalletStaked)]
-    fn is_wallet_staked(&self, address: ManagedAddress) -> bool {
+    fn is_wallet_staked(&self, address: &ManagedAddress) -> bool {
         let result = self.staked_nfts(&address).len();
         result > 0
     }
