@@ -1,31 +1,63 @@
-## devnet
-# USER_PEM="~/elrond-wallet/wallet.pem"
-# USER_PEM="~/Crypto/wallets/wallet-kzcpl.pem"
-# PROXY="https://devnet-api.multiversx.com"
-# CHAIN_ID="D"
-# SC_ADDRESS=erd1qqqqqqqqqqqqqpgqc8s6t5594e4en4ffl60r6hn52hajkpkkukrqww29av
+# USER_PEM=$(jq -r --arg platform "$OSTYPE" '.[$platform]' "env.json")
+# PROXY=$(jq -r .proxy "env.json")
+# CHAIN_ID=$(jq -r .chainId "env.json")
+# SC_ADDRESS=$(jq -r .address "env.json")
 
-# OWNER=erd1za7d0lzgnee39p9sytre0mss76tnht70fem0pcv0zn4undcfukrqqkzcpl
-# PLAYER=
-
-## mainnet
-USER_PEM="~/wallets/wallet-homex.pem"
-# USER_PEM="~/Crypto/wallets/wallet-homex.pem"
+USER_PEM="~/Crypto/wallets/wallet-homex.pem"
 PROXY="https://api.multiversx.com"
 CHAIN_ID="1"
 SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
 
-ART_COLLECTION_NAME="ArtOfMenhir"
-ART_TICKER="AOM"
+# AUXILIARY=
+
+NAME="Celestials Custodian"
+CID="QmXnQtWEkjRCPQey8BNZ8BMk9JC8ZKA4FAiz4iNWC1yTf7"
+EDITION="celestials"
+RARITY=1
 
 
 upgrade() {
     mxpy contract build && mxpy --verbose contract upgrade ${SC_ADDRESS} --metadata-payable --metadata-payable-by-sc \
     --recall-nonce --pem=${USER_PEM} \
     --bytecode="./output/game-sc.wasm" \
-    --gas-limit=115000000 \
+    --gas-limit=126000000 \
     --send --outfile="upgrade.interaction.json" \
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
+}
+
+upgradeProperties() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=100000000 \
+    --function="upgradeProperties"
+}
+
+setSpecialRoles() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --arguments ${AUXILIARY} \
+    --gas-limit=100000000 \
+    --function="setSpecialRoles"
+}
+
+transferRole() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --arguments ${AUXILIARY} \
+    --gas-limit=100000000 \
+    --function="transferRole"
+}
+
+setAddressAuxiliary() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=9000000 \
+    --arguments ${AUXILIARY} \
+    --function="setAddressAuxiliary"
 }
 
 withdrawEgld() {
@@ -43,15 +75,6 @@ setGamePaused() {
     --gas-limit=6000000 \
     --arguments false \
     --function="setGamePaused"
-}
-
-setTrialTimestamp() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=9000000 \
-    --arguments 1709283600 \
-    --function="setTrialTimestamp"
 }
 
 setArtDropTimestamp() {
@@ -75,30 +98,4 @@ isGamePaused() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="isGamePaused"
-}
-
-# Art Drop
-issueSFTCollection() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=200000000 \
-    --value 50000000000000000 \
-    --arguments str:${ART_COLLECTION_NAME} str:${ART_TICKER} \
-    --function="issueSFTCollection"
-}
-
-createArtToken() {
-    mxpy --verbose contract call ${SC_ADDRESS} \
-    --proxy=${PROXY} --chain=${CHAIN_ID} \
-    --send --recall-nonce --pem=${USER_PEM} \
-    --gas-limit=20000000 \
-    --arguments 1000 \
-    --function="createArtToken"
-}
-
-getQuests() {
-    mxpy --verbose contract query ${SC_ADDRESS} \
-    --proxy=${PROXY} \
-    --function="getQuests"
 }

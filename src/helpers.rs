@@ -7,12 +7,16 @@ const ELDER_ENERGY_PER_S: u64 = 278 * 9;
 
 multiversx_sc::imports!();
 
+use crate::auxiliary;
 use crate::storage;
 
 use core::iter::FromIterator;
 
 #[multiversx_sc::module]
 pub trait Helpers: storage::Storage {
+    #[proxy]
+    fn auxiliary_contract_proxy(&self, sc_address: ManagedAddress) -> auxiliary::Proxy<Self::Api>;
+
     fn get_token_mapper(&self, index: usize) -> FungibleTokenMapper {
         let mapper;
 
@@ -117,15 +121,6 @@ pub trait Helpers: storage::Storage {
     fn send_nft(&self, to: &ManagedAddress, token_identifier: &TokenIdentifier, nonce: u64) {
         self.send()
             .direct_esdt(to, token_identifier, nonce, &BigUint::from(1 as u32));
-    }
-
-    fn build_uris_vec(&self) -> ManagedVec<ManagedBuffer> {
-        let mut uris = ManagedVec::new();
-        uris.push(ManagedBuffer::new_from_bytes(
-            "https://ipfs.io/ipfs/QmSEdXWvzxzt4Kj3wcjWbLtaCvnBpjheaNSnSfRRUZQT9N".as_bytes(),
-        ));
-
-        uris
     }
 
     fn build_attributes_buffer(&self) -> ManagedBuffer {

@@ -94,11 +94,6 @@ pub trait Storage {
     #[storage_mapper("artDropTimestamp")]
     fn art_drop_timestamp(&self) -> SingleValueMapper<u64>;
 
-    // Trial
-    #[view(getTrialTimestamp)]
-    #[storage_mapper("trialTimestamp")]
-    fn trial_timestamp(&self) -> SingleValueMapper<u64>;
-
     /*
      * Elder NFT nonces are used to claim one ticket per Elder every 2 weeks.
      * After claiming rewards for a nonce, it is removed from the set.
@@ -139,4 +134,8 @@ pub trait Storage {
 
     #[storage_mapper("energyClaimed")]
     fn energy_claimed(&self, user: &ManagedAddress) -> SingleValueMapper<BigUint<Self::Api>>;
+
+    // Proxies
+    #[storage_mapper("scAddrAuxiliary")]
+    fn sc_addr_auxiliary(&self) -> SingleValueMapper<ManagedAddress>;
 }

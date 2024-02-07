@@ -66,6 +66,7 @@ pub struct Stake<M: ManagedTypeApi> {
 pub struct PlayerXp<M: ManagedTypeApi> {
     pub address: ManagedAddress<M>,
     pub xp: usize,
+    pub pages_minted: usize,
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]

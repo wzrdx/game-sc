@@ -2,6 +2,7 @@ const XP_THRESHOLD: usize = 14000;
 
 multiversx_sc::imports!();
 
+use crate::auxiliary::ProxyTrait as _;
 use core::iter::FromIterator;
 
 use crate::interface::*;
@@ -24,16 +25,13 @@ pub trait Player: storage::Storage + helpers::Helpers {
 
     #[view(getXpLeaderboardSize)]
     fn get_xp_leaderboard_size(&self) -> usize {
-        let mut players: ManagedVec<PlayerXp<Self::Api>> = ManagedVec::new();
+        let mut xp_values: ManagedVec<usize> = ManagedVec::new();
 
         for address in self.staked_wallets().into_iter() {
-            players.push(PlayerXp {
-                address: address.clone(),
-                xp: self.player_xp(&address).get(),
-            });
+            xp_values.push(self.player_xp(&address).get());
         }
 
-        players.iter().filter(|player| player.xp > XP_THRESHOLD).count()
+        xp_values.iter().filter(|xp| *xp > XP_THRESHOLD).count()
     }
 
     #[view(getXpLeaderboard)]
@@ -41,9 +39,15 @@ pub trait Player: storage::Storage + helpers::Helpers {
         let mut players: ManagedVec<PlayerXp<Self::Api>> = ManagedVec::new();
 
         for address in self.staked_wallets().into_iter() {
+            let pages_minted: usize = self
+                .auxiliary_contract_proxy(self.sc_addr_auxiliary().get())
+                .get_pages_minted(&address)
+                .execute_on_dest_context::<usize>();
+
             players.push(PlayerXp {
                 address: address.clone(),
                 xp: self.player_xp(&address).get(),
+                pages_minted,
             });
         }
 

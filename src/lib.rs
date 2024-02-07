@@ -13,6 +13,9 @@ mod shop;
 mod staking;
 mod storage;
 
+mod proxies;
+pub use proxies::auxiliary;
+
 use crate::interface::*;
 
 #[multiversx_sc::contract]
@@ -32,6 +35,65 @@ pub trait GameScContract:
 
     #[upgrade]
     fn upgrade(&self) {}
+
+    #[only_owner]
+    #[endpoint(setAddressAuxiliary)]
+    fn set_address_auxiliary(&self, sc_addr: &ManagedAddress) {
+        self.sc_addr_auxiliary().set(sc_addr);
+    }
+
+    #[only_owner]
+    #[endpoint(upgradeProperties)]
+    fn upgrade_properties(&self) {
+        let token_id = self.art_mapper().get_token_id();
+        let properties: TokenPropertyArguments = TokenPropertyArguments {
+            can_freeze: None,
+            can_wipe: None,
+            can_pause: None,
+            can_transfer_create_role: Some(true),
+            can_mint: None,
+            can_burn: None,
+            can_change_owner: None,
+            can_upgrade: None,
+            can_add_special_roles: None,
+        };
+
+        self.send()
+            .esdt_system_sc_proxy()
+            .control_changes(&token_id, &properties)
+            .async_call()
+            .call_and_exit();
+    }
+
+    #[only_owner]
+    #[endpoint(setSpecialRoles)]
+    fn set_special_roles(&self, sc_addr: &ManagedAddress) {
+        let token_id = self.art_mapper().get_token_id();
+
+        self.send()
+            .esdt_system_sc_proxy()
+            .set_special_roles(
+                sc_addr,
+                &token_id,
+                (&[EsdtLocalRole::NftAddQuantity, EsdtLocalRole::NftBurn][..])
+                    .into_iter()
+                    .cloned(),
+            )
+            .async_call()
+            .call_and_exit();
+    }
+
+    #[only_owner]
+    #[endpoint(transferRole)]
+    fn transfer_role(&self, sc_addr: &ManagedAddress) {
+        let token_id = self.art_mapper().get_token_id();
+
+        self.send()
+            .esdt_system_sc_proxy()
+            .transfer_nft_create_role(&token_id, &self.blockchain().get_sc_address(), sc_addr)
+            .async_call()
+            .call_and_exit();
+    }
 
     #[only_owner]
     #[endpoint(withdrawEgld)]
@@ -77,12 +139,6 @@ pub trait GameScContract:
                 }
             }
         }
-    }
-
-    #[only_owner]
-    #[endpoint(setTrialTimestamp)]
-    fn set_trial_timestamp(&self, timestamp: u64) {
-        self.trial_timestamp().set(timestamp);
     }
 
     #[only_owner]

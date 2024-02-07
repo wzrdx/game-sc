@@ -169,10 +169,11 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         }
     }
 
-    #[view(getUserTokenNonces)]
-    fn get_user_token_nonces(&self, user_address: ManagedAddress, token_id: TokenIdentifier) -> ManagedVec<u64> {
-        let nonces: ManagedVec<u64> = self.get_staked_nonces(&user_address, &token_id);
-        nonces
+    // Used by auxiliary
+    #[view(isWalletStaked)]
+    fn is_wallet_staked(&self, address: &ManagedAddress) -> bool {
+        let result = self.staked_nfts(&address).len();
+        result > 0
     }
 
     #[view(getRarityClasses)]
