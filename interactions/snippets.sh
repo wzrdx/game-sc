@@ -1,12 +1,7 @@
-# USER_PEM=$(jq -r --arg platform "$OSTYPE" '.[$platform]' "env.json")
-# PROXY=$(jq -r .proxy "env.json")
-# CHAIN_ID=$(jq -r .chainId "env.json")
-# SC_ADDRESS=$(jq -r .address "env.json")
-
-USER_PEM="~/Crypto/wallets/wallet-homex.pem"
-PROXY="https://api.multiversx.com"
-CHAIN_ID="1"
-SC_ADDRESS=erd1qqqqqqqqqqqqqpgqpt68cy4cde6ff2wzcfsfncjv6gxjxda8dn7q9ekje9
+USER_PEM=$(jq -r --arg platform "$OSTYPE" '.[$platform]' "env.json")
+PROXY=$(jq -r .proxy "env.json")
+CHAIN_ID=$(jq -r .chainId "env.json")
+SC_ADDRESS=$(jq -r .address "env.json")
 
 
 upgrade() {
