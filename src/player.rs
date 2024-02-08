@@ -34,9 +34,10 @@ pub trait Player: storage::Storage + helpers::Helpers {
         xp_values.iter().filter(|xp| *xp > XP_THRESHOLD).count()
     }
 
+    // TODO: Energy
     #[view(getXpLeaderboard)]
-    fn get_xp_leaderboard(&self, start: usize, end: usize) -> ManagedVec<PlayerXp<Self::Api>> {
-        let mut players: ManagedVec<PlayerXp<Self::Api>> = ManagedVec::new();
+    fn get_xp_leaderboard(&self, start: usize, end: usize) -> ManagedVec<PlayerInfo<Self::Api>> {
+        let mut players: ManagedVec<PlayerInfo<Self::Api>> = ManagedVec::new();
 
         for address in self.staked_wallets().into_iter() {
             let pages_minted: usize = self
@@ -44,16 +45,17 @@ pub trait Player: storage::Storage + helpers::Helpers {
                 .get_pages_minted(&address)
                 .execute_on_dest_context::<usize>();
 
-            players.push(PlayerXp {
+            players.push(PlayerInfo {
                 address: address.clone(),
                 xp: self.player_xp(&address).get(),
                 pages_minted,
+                energy_claimed: self.energy_claimed(&address).get(),
             });
         }
 
-        let filtered_players: ManagedVec<PlayerXp<Self::Api>> =
+        let filtered_players: ManagedVec<PlayerInfo<Self::Api>> =
             ManagedVec::from_iter(players.iter().filter(|player| player.xp > XP_THRESHOLD));
-        let mut chunk_players: ManagedVec<PlayerXp<Self::Api>> = ManagedVec::new();
+        let mut chunk_players: ManagedVec<PlayerInfo<Self::Api>> = ManagedVec::new();
 
         for (i, player) in filtered_players.into_iter().enumerate() {
             if i >= start && i < end {
