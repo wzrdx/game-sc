@@ -34,7 +34,6 @@ pub trait Player: storage::Storage + helpers::Helpers {
         xp_values.iter().filter(|xp| *xp > XP_THRESHOLD).count()
     }
 
-    // TODO: Energy
     #[view(getXpLeaderboard)]
     fn get_xp_leaderboard(&self, start: usize, end: usize) -> ManagedVec<PlayerInfo<Self::Api>> {
         let mut players: ManagedVec<PlayerInfo<Self::Api>> = ManagedVec::new();

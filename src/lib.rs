@@ -36,6 +36,20 @@ pub trait GameScContract:
     #[upgrade]
     fn upgrade(&self) {}
 
+    // TODO: Remove
+    #[only_owner]
+    #[endpoint(debug)]
+    fn debug(&self) {
+        let caller = self.blockchain().get_caller();
+
+        self.quests_type_stats(&caller, 1 as u8).set(100);
+        self.quests_type_stats(&caller, 2 as u8).set(100);
+        self.quests_type_stats(&caller, 3 as u8).set(75);
+        self.completed_quests(&caller).set(250);
+        self.tickets_earned(&caller).set(64);
+        self.energy_claimed(&caller).set(BigUint::from(100000 as u32));
+    }
+
     #[only_owner]
     #[endpoint(withdrawEgld)]
     fn withdraw_egld(&self) {
