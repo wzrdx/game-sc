@@ -75,13 +75,11 @@ pub trait Staking: storage::Storage + helpers::Helpers {
             let was_removed = self.staked_nfts(&caller).swap_remove(&token);
             require!(was_removed == true, "Invalid function arguments");
 
-            if was_removed {
-                payments.push(EsdtTokenPayment::new(
-                    token.token_id,
-                    token.nonce as u64,
-                    BigUint::from(token.amount),
-                ))
-            }
+            payments.push(EsdtTokenPayment::new(
+                token.token_id,
+                token.nonce as u64,
+                BigUint::from(token.amount),
+            ))
         }
 
         if payments.len() > 0 {
@@ -104,7 +102,8 @@ pub trait Staking: storage::Storage + helpers::Helpers {
         for token in tokens.iter() {
             require!(token.timestamp.is_some(), "One or more tokens are still staked");
 
-            self.staked_nfts(&caller).swap_remove(&token);
+            let was_removed = self.staked_nfts(&caller).swap_remove(&token);
+            require!(was_removed == true, "Invalid function arguments");
 
             let mut updated_token = token;
             updated_token.timestamp = None;
