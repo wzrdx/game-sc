@@ -37,6 +37,15 @@ pub trait GameScContract:
     fn upgrade(&self) {}
 
     #[only_owner]
+    #[endpoint(mintTickets)]
+    fn mint_tickets(&self, amount: usize) {
+        let caller = self.blockchain().get_caller();
+
+        self.tickets_mapper()
+            .nft_add_quantity_and_send(&caller, 1 as u64, BigUint::from(amount));
+    }
+
+    #[only_owner]
     #[endpoint(withdrawEgld)]
     fn withdraw_egld(&self) {
         let caller = self.blockchain().get_caller();
