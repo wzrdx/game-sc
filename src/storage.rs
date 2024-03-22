@@ -63,6 +63,10 @@ pub trait Storage {
     #[storage_mapper("questsXp")]
     fn quests_xp(&self) -> VecMapper<usize>;
 
+    #[view(getDoubleXpTimestamp)]
+    #[storage_mapper("doubleXpTimestamp")]
+    fn double_xp_timestamp(&self) -> SingleValueMapper<u64>;
+
     #[view(getOngoingQuests)]
     #[storage_mapper("ongoingQuests")]
     fn ongoing_quests(&self, user: &ManagedAddress) -> VecMapper<OngoingQuest>;
