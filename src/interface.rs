@@ -68,6 +68,7 @@ pub struct PlayerInfo<M: ManagedTypeApi> {
     pub xp: usize,
     pub pages_minted: usize,
     pub energy_claimed: BigUint<M>,
+    pub maze_balance: BigUint<M>,
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
