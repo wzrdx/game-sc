@@ -2,9 +2,6 @@ multiversx_sc::imports!();
 
 #[multiversx_sc::proxy]
 pub trait AuxiliaryContract {
-    #[view(getPagesMinted)]
-    fn get_pages_minted(&self, user: &ManagedAddress) -> usize;
-
-    #[view(getMazeBalance)]
-    fn maze_balance(&self, user: &ManagedAddress) -> SingleValueMapper<BigUint<Self::Api>>;
+    #[view(getPlayerInfo)]
+    fn get_player_info(&self, user: &ManagedAddress) -> (usize, BigUint<Self::Api>);
 }
