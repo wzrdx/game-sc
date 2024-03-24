@@ -34,7 +34,6 @@ pub trait Player: storage::Storage + helpers::Helpers {
         xp_values.iter().filter(|xp| *xp > XP_THRESHOLD).count()
     }
 
-    // TODO: Energy
     #[view(getXpLeaderboard)]
     fn get_xp_leaderboard(&self, start: usize, end: usize) -> ManagedVec<PlayerInfo<Self::Api>> {
         let mut players: ManagedVec<PlayerInfo<Self::Api>> = ManagedVec::new();
@@ -45,11 +44,17 @@ pub trait Player: storage::Storage + helpers::Helpers {
                 .get_pages_minted(&address)
                 .execute_on_dest_context::<usize>();
 
+            let maze_balance: BigUint<Self::Api> = self
+                .auxiliary_contract_proxy(self.sc_addr_auxiliary().get())
+                .maze_balance(&address)
+                .execute_on_dest_context::<BigUint<Self::Api>>();
+
             players.push(PlayerInfo {
                 address: address.clone(),
                 xp: self.player_xp(&address).get(),
                 pages_minted,
                 energy_claimed: self.energy_claimed(&address).get(),
+                maze_balance,
             });
         }
 

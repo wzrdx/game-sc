@@ -13,13 +13,14 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
-mintTickets() {
+# 29.03 10:00 GMT
+setDoubleXpTimestamp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \
     --send --recall-nonce --pem=${USER_PEM} \
-    --arguments 90 \
-    --gas-limit=6000000 \
-    --function="mintTickets"
+    --gas-limit=8000000 \
+    --arguments 1711706400 \
+    --function="setDoubleXpTimestamp"
 }
 
 withdrawEgld() {
@@ -51,4 +52,11 @@ isGamePaused() {
     mxpy --verbose contract query ${SC_ADDRESS} \
     --proxy=${PROXY} \
     --function="isGamePaused"
+}
+
+query() {
+    mxpy --verbose contract query ${SC_ADDRESS} \
+    --proxy=${PROXY} \
+    --arguments 2 \
+    --function="query"
 }

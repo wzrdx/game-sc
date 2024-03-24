@@ -28,6 +28,12 @@ pub trait Quests: storage::Storage + helpers::Helpers {
     }
 
     #[only_owner]
+    #[endpoint(setDoubleXpTimestamp)]
+    fn set_double_xp_timestamp(&self, date: u64) {
+        self.double_xp_timestamp().set(date);
+    }
+
+    #[only_owner]
     #[endpoint(clearOngoingQuests)]
     fn clear_ongoing_quests(&self) {
         for address in self.active_players().iter() {
@@ -223,9 +229,15 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             }
         }
 
+        let xp_multiplier: usize = if current_timestamp <= self.double_xp_timestamp().get() {
+            2
+        } else {
+            1
+        };
+
         // XP
         self.player_xp(&caller).update(|i| {
-            *i += self.quests_xp().get(id as usize);
+            *i += xp_multiplier * self.quests_xp().get(id as usize);
         });
 
         self.ongoing_quests(&caller).swap_remove(index_to_remove);
@@ -313,10 +325,16 @@ pub trait Quests: storage::Storage + helpers::Helpers {
             }
         }
 
+        let xp_multiplier: usize = if current_timestamp <= self.double_xp_timestamp().get() {
+            2
+        } else {
+            1
+        };
+
         // XP
         let xp_gain: usize = completed_quests_ids
             .iter()
-            .map(|id| self.quests_xp().get(id as usize))
+            .map(|id| xp_multiplier * self.quests_xp().get(id as usize))
             .sum();
 
         self.player_xp(&caller).update(|i| {
