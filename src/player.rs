@@ -1,4 +1,4 @@
-const XP_THRESHOLD: usize = 14000;
+const XP_THRESHOLD: usize = 37224;
 
 multiversx_sc::imports!();
 
@@ -31,44 +31,38 @@ pub trait Player: storage::Storage + helpers::Helpers {
             xp_values.push(self.player_xp(&address).get());
         }
 
-        xp_values.iter().filter(|xp| *xp > XP_THRESHOLD).count()
+        xp_values.iter().filter(|xp| *xp >= XP_THRESHOLD).count()
     }
 
     #[view(getXpLeaderboard)]
     fn get_xp_leaderboard(&self, start: usize, end: usize) -> ManagedVec<PlayerInfo<Self::Api>> {
         let mut players: ManagedVec<PlayerInfo<Self::Api>> = ManagedVec::new();
+        let staked_wallets = self.staked_wallets();
 
-        for address in self.staked_wallets().into_iter() {
-            let pages_minted: usize = self
-                .auxiliary_contract_proxy(self.sc_addr_auxiliary().get())
-                .get_pages_minted(&address)
-                .execute_on_dest_context::<usize>();
+        let filtered_wallets: ManagedVec<ManagedAddress<Self::Api>> = ManagedVec::from_iter(
+            staked_wallets
+                .into_iter()
+                .filter(|wallet| self.player_xp(wallet).get() >= XP_THRESHOLD),
+        );
 
-            let maze_balance: BigUint<Self::Api> = self
-                .auxiliary_contract_proxy(self.sc_addr_auxiliary().get())
-                .maze_balance(&address)
-                .execute_on_dest_context::<BigUint<Self::Api>>();
-
-            players.push(PlayerInfo {
-                address: address.clone(),
-                xp: self.player_xp(&address).get(),
-                pages_minted,
-                energy_claimed: self.energy_claimed(&address).get(),
-                maze_balance,
-            });
-        }
-
-        let filtered_players: ManagedVec<PlayerInfo<Self::Api>> =
-            ManagedVec::from_iter(players.iter().filter(|player| player.xp > XP_THRESHOLD));
-        let mut chunk_players: ManagedVec<PlayerInfo<Self::Api>> = ManagedVec::new();
-
-        for (i, player) in filtered_players.into_iter().enumerate() {
+        for (i, address) in filtered_wallets.into_iter().enumerate() {
             if i >= start && i < end {
-                chunk_players.push(player);
+                let (pages_minted, maze_balance): (usize, BigUint<Self::Api>) = self
+                    .auxiliary_contract_proxy(self.sc_addr_auxiliary().get())
+                    .get_player_info(&address)
+                    .execute_on_dest_context::<(usize, BigUint<Self::Api>)>();
+
+                players.push(PlayerInfo {
+                    address: address.clone(),
+                    xp: self.player_xp(&address).get(),
+                    pages_minted,
+                    energy_claimed: self.energy_claimed(&address).get(),
+                    maze_balance,
+                });
             }
         }
 
-        chunk_players
+        players
     }
 
     #[view(getLogSummary)]
