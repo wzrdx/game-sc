@@ -75,12 +75,30 @@ pub trait Storage {
     #[storage_mapper("activePlayers")]
     fn active_players(&self) -> UnorderedSetMapper<ManagedAddress>;
 
+    // Participants
+    #[storage_mapper("raffleParticipantId")]
+    fn raffle_participant_id(&self, user: &ManagedAddress) -> SingleValueMapper<u16>;
+
+    #[storage_mapper("raffleIdParticipant")]
+    fn raffle_id_participant(&self, id: u16) -> SingleValueMapper<ManagedAddress>;
+
+    // Participant index
+    #[view(getRaffleIndex)]
+    #[storage_mapper("raffleIndex")]
+    fn raffle_index(&self) -> SingleValueMapper<u16>;
+
     // Raffles
     #[storage_mapper("rafflesCount")]
     fn raffles_count(&self) -> SingleValueMapper<usize>;
 
+    #[storage_mapper("raffleVector")]
+    fn raffle_vector(&self, raffle_id: usize) -> VecMapper<u16>;
+
     #[storage_mapper("raffleVectorSize")]
     fn raffle_vector_size(&self, raffle_id: usize) -> SingleValueMapper<usize>;
+
+    #[storage_mapper("raffleParticipants")]
+    fn raffle_participants(&self, raffle_id: usize) -> UnorderedSetMapper<ManagedAddress>;
 
     #[view(getRaffleHashes)]
     #[storage_mapper("raffleHashes")]

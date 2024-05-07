@@ -49,6 +49,12 @@ pub struct Competition {
 }
 
 #[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
+pub struct Participant<M: ManagedTypeApi> {
+    pub address: ManagedAddress<M>,
+    pub tickets_count: usize,
+}
+
+#[derive(TypeAbi, TopEncode, TopDecode, NestedEncode, NestedDecode, ManagedVecItem)]
 pub struct Airdrop<M: ManagedTypeApi> {
     pub tickets: usize,
     pub tokens: ManagedVec<M, u64>,

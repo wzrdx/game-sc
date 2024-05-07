@@ -13,7 +13,24 @@ upgrade() {
     --proxy=${PROXY} --chain=${CHAIN_ID} || return
 }
 
-# 29.03 10:00 GMT
+addRaffle() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=6000000 \
+    --arguments 1715880600 \
+    --function="addRaffle"
+}
+
+drawRaffleWinners() {
+    mxpy --verbose contract call ${SC_ADDRESS} \
+    --proxy=${PROXY} --chain=${CHAIN_ID} \
+    --send --recall-nonce --pem=${USER_PEM} \
+    --gas-limit=20000000 \
+    --arguments 2 \
+    --function="drawRaffleWinners"
+}
+
 setDoubleXpTimestamp() {
     mxpy --verbose contract call ${SC_ADDRESS} \
     --proxy=${PROXY} --chain=${CHAIN_ID} \

@@ -77,7 +77,6 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
         }
 
         self.raffle_participants(raffle_id).insert(caller);
-
         self.tickets_mapper().nft_burn(1 as u64, &payment.amount);
     }
 
@@ -126,7 +125,7 @@ pub trait Competitions: storage::Storage + helpers::Helpers {
         let count = self.raffles_count().get();
 
         for index in 1..=count {
-            let tickets = self.raffle_vector_size(index).get();
+            let tickets: usize = self.raffle_vector_size(index).get() + self.raffle_vector(index).len();
 
             raffles.push(Competition {
                 id: index,
